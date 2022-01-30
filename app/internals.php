@@ -18,10 +18,6 @@ class Internals extends Controller {
 			PHP_SAPI,
 			'SAPI: '.PHP_SAPI
 		);
-		$test->expect(
-			!@strpos(),
-			'Intentional error'
-		);
 		$f3->foo='bar';
 		$test->expect(
 			$f3===\Base::instance() && @\Base::instance()->foo=='bar',
@@ -75,7 +71,7 @@ class Internals extends Controller {
 		$found=FALSE;
 		for ($i=0;$i<10000;$i++)
 			if (is_int(array_search(
-				$f3->hash(str_shuffle(uniqid(NULL,TRUE))),$hash))) {
+				$f3->hash(str_shuffle(uniqid("",TRUE))),$hash))) {
 				$found=TRUE;
 				break;
 			}
@@ -137,6 +133,46 @@ class Internals extends Controller {
 			$f3->constants('ISO','CC_')==\ISO::instance()->countries(),
 			'Fetch constants from a class (string)'
 		);
+		$locales = ['en-US','de-DE','fr-FR'];
+//		$f3->TZ = 'Europe/Berlin';
+		foreach ($locales as $locale) {
+			$f3->set('LANGUAGE', $locale);
+			$language=$f3->get('LANGUAGE');
+			$test->expect(
+				strpos($language,$locale) !== FALSE,
+				'['.$locale.']: Language set: '.$language
+			);
+			$date=$f3->format('{0,date}', time());
+			$test->expect(
+				$date,
+				'['.$locale.']: Format date default (short): '.$date
+			);
+			$date=$f3->format('{0,date,medium}', time());
+			$test->expect(
+				$date,
+				'['.$locale.']: Format date medium: '.$date
+			);
+			$date=$f3->format('{0,date,full}', time());
+			$test->expect(
+				$date,
+				'['.$locale.']: Format date full: '.$date
+			);
+			$date=$f3->format('{0,time}', time());
+			$test->expect(
+				$date,
+				'['.$locale.']: Format time default (short): '.$date
+			);
+			$date=$f3->format('{0,time,medium}', time());
+			$test->expect(
+				$date,
+				'['.$locale.']: Format time medium: '.$date
+			);
+			$date=$f3->format('{0,time,full}', time());
+			$test->expect(
+				$date,
+				'['.$locale.']: Format time full: '.$date
+			);
+		}
 		$f3->set('results',$test->results());
 	}
 
