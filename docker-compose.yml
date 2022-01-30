@@ -1,0 +1,150 @@
+x-php-template: &php
+  restart: 'always'
+  links:
+    - database
+  networks:
+    internal:
+  volumes:
+    - ${DOCUMENT_ROOT}:/var/www/html:rw
+    - ./docker/config/php/php.ini:/usr/local/etc/php/php.ini
+    - ./docker/config/php/docker-php-ext-xdebug3.ini:/usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+  environment: &php_env
+    XDEBUG_MODE: debug
+    XDEBUG_CONFIG: client_host=host.docker.internal
+    XDEBUG_SESSION: PHPSTORM
+networks:
+  internal:
+services:
+  traefik:
+    image: "traefik:v2.5"
+    container_name: "${COMPOSE_PROJECT_NAME}-traefik"
+    command:
+      - "--log.level=DEBUG"
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--providers.docker.network=internal"
+    networks:
+      - internal
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    ports:
+      - "${HOST_PORT_HTTP}:80"
+      - "${HOST_PORT_TRAEFIK}:8080"
+  apache24:
+    image: httpd:2.4
+    container_name: '${COMPOSE_PROJECT_NAME}-apache'
+    volumes:
+      - ${DOCUMENT_ROOT}:/var/www/html
+      - ${VHOSTS_DIR-./docker/config/apache/vhosts}:/usr/local/apache2/sites-enabled
+      - ./docker/config/apache/httpd.conf:/usr/local/apache2/conf/httpd.conf
+      - ./docker/data/logs/apache2:/var/log/apache2
+    networks:
+      - internal
+    labels:
+      - traefik.enable=true
+#     php 8.1
+      - traefik.http.routers.php81.rule=Host(`f3.php81.localhost`)
+      - traefik.http.routers.php81.service=php81
+      - traefik.http.services.php81.loadbalancer.server.port=8081
+#     php 8.0
+      - traefik.http.routers.php80.rule=Host(`f3.php80.localhost`)
+      - traefik.http.routers.php80.service=php80
+      - traefik.http.services.php80.loadbalancer.server.port=8080
+#     php 7.4
+      - traefik.http.routers.php74.rule=Host(`f3.php74.localhost`)
+      - traefik.http.routers.php74.service=php74
+      - traefik.http.services.php74.loadbalancer.server.port=8074
+#     php 7.3
+      - traefik.http.routers.php73.rule=Host(`f3.php73.localhost`)
+      - traefik.http.routers.php73.service=php73
+      - traefik.http.services.php73.loadbalancer.server.port=8073
+#     php 7.2
+      - traefik.http.routers.php72.rule=Host(`f3.php72.localhost`)
+      - traefik.http.routers.php72.service=php72
+      - traefik.http.services.php72.loadbalancer.server.port=8072
+#     php 5.6
+      - traefik.http.routers.php56.rule=Host(`f3.php56.localhost`)
+      - traefik.http.routers.php56.service=php56
+      - traefik.http.services.php56.loadbalancer.server.port=8056
+  php81:
+    <<: *php
+    build:
+      context: ./docker/bin/php81
+    container_name: '${COMPOSE_PROJECT_NAME}-php81'
+    environment:
+      <<: *php_env
+      PHP_IDE_CONFIG: serverName=f3.php81.localhost
+  php80:
+    <<: *php
+    build:
+      context: ./docker/bin/php80
+    container_name: '${COMPOSE_PROJECT_NAME}-php80'
+    environment:
+      <<: *php_env
+      PHP_IDE_CONFIG: serverName=f3.php80.localhost
+  php74:
+    <<: *php
+    build:
+      context: ./docker/bin/php74
+    container_name: '${COMPOSE_PROJECT_NAME}-php74'
+    environment:
+      <<: *php_env
+      PHP_IDE_CONFIG: serverName=f3.php74.localhost
+  php73:
+    <<: *php
+    build:
+      context: ./docker/bin/php73
+    container_name: '${COMPOSE_PROJECT_NAME}-php73'
+    environment:
+      <<: *php_env
+      PHP_IDE_CONFIG: serverName=f3.php73.localhost
+  php72:
+    <<: *php
+    build:
+      context: ./docker/bin/php72
+    container_name: '${COMPOSE_PROJECT_NAME}-php72'
+    environment:
+      <<: *php_env
+      PHP_IDE_CONFIG: serverName=f3.php72.localhost
+  php56:
+    <<: *php
+    build:
+      context: ./docker/bin/php56
+    environment:
+      <<: *php_env
+      PHP_IDE_CONFIG: serverName=f3.php56.localhost
+    container_name: '${COMPOSE_PROJECT_NAME}-php56'
+    volumes:
+      - ${DOCUMENT_ROOT}:/var/www/html:rw
+      - ./docker/config/php/php.ini:/usr/local/etc/php/php.ini
+      - ./docker/config/php/docker-php-ext-xdebug2.ini:/usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+  database:
+    image: mysql:5.7
+    container_name: '${COMPOSE_PROJECT_NAME}-database'
+    restart: 'always'
+    ports:
+      - "${HOST_PORT_MYSQL}:${MYSQL_PORT}"
+    volumes:
+      - ./docker/data/mysql:/var/lib/mysql
+      - ./docker/data/logs/mysql:/var/log/mysql
+    networks:
+      internal:
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+  redis:
+    container_name: '${COMPOSE_PROJECT_NAME}-redis'
+    image: redis:latest
+    networks:
+      internal:
+    ports:
+      - "${HOST_PORT_REDIS}:6379"
+  memcached:
+    container_name: '${COMPOSE_PROJECT_NAME}-memcached'
+    image: memcached:latest
+    networks:
+      internal:
