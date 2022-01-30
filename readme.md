@@ -24,7 +24,7 @@ Also included is ready to use **XDebug**.
 
 ## Usage
 
-1. First finally [docker](https://www.docker.com/products/docker-desktop).
+1. First install [docker](https://www.docker.com/products/docker-desktop).
 2. Copy `sample.env` to `.env` and adjust the ports to your local machine, if you already have something running at the default ports.
 3. Run `docker-compose build` to build the containers. This might take a round 20min, depending on your hardware.
 4. Run `docker-compose up -d` to start the dev bench
