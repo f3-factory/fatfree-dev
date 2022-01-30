@@ -1,5 +1,8 @@
 <?php
 
+ini_set('display_errors', 1);
+error_reporting(-1);
+
 $f3=require('lib/base.php');
 
 if (extension_loaded('mongodb') && is_file($file='lib/MongoDB/functions.php'))
@@ -10,7 +13,8 @@ $f3->set('UI','ui/');
 
 $f3->set('menu',
 	[
-		'/'=>'Globals',
+		'/'=>'Env',
+		'/globals'=>'Globals',
 		'/internals'=>'Internals',
 		'/hive'=>'Hive',
 		'/lexicon'=>'Lexicon',
@@ -41,7 +45,7 @@ $f3->set('menu',
 	]
 );
 
-$f3->map('/','App\Globals');
+$f3->map('/','App\Env');
 $f3->map('/@controller','App\@controller');
 
 $f3->run();

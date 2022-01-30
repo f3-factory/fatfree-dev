@@ -210,10 +210,22 @@ class Cache extends Controller {
 			);
 			$backend=$f3->get('CACHE');
 			$f3->clear('CACHE');
+			if (!preg_match('/folder=/',$backend) &&
+				!preg_match('/memcached=/',$backend) &&
+				!preg_match('/redis=/',$backend)) {
+				$f3->set('CACHE','folder=tmp/cache/');
+				if (preg_match('/folder=/',$backend=$f3->get('CACHE'))) {
+					$test->expect(
+						$backend,
+						'Cache backend '.$f3->stringify($backend).' specified'
+					);
+					continue;
+				}
+			}
 			if (extension_loaded('memcached') &&
 				!preg_match('/memcached=/',$backend) &&
 				!preg_match('/redis=/',$backend)) {
-				$f3->set('CACHE','memcached=localhost');
+				$f3->set('CACHE','memcached=f3-memcached');
 				if (preg_match('/memcached=/',$backend=$f3->get('CACHE'))) {
 					$test->expect(
 						$backend,
@@ -224,7 +236,7 @@ class Cache extends Controller {
 			}
 			if (extension_loaded('redis') &&
 				!preg_match('/redis=/',$backend)) {
-				$f3->set('CACHE','redis=localhost');
+				$f3->set('CACHE','redis=f3-redis');
 				if (preg_match('/redis=/',$backend=$f3->get('CACHE'))) {
 					$test->expect(
 						$backend,

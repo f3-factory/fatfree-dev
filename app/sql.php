@@ -143,14 +143,16 @@ class SQL extends Controller {
 				],
 				'Auto-commit'
 			);
-			@$db->exec(
+			try {
+				@$db->exec(
 					'INSERT INTO '.$db->quotekey('movies').' ('.
 						$db->quotekey('title').','.
 						$db->quotekey('director').','.
 						$db->quotekey('year').
 					') '.
-				'VALUES (\'Donnie Brasco\',\'Mike Newell\',1997);'
-			);
+					'VALUES (\'Donnie Brasco\',\'Mike Newell\',1997);'
+				);
+			} catch (\Exception $e) { }
 			$test->expect(
 				$db->exec('SELECT * FROM '.$db->quotekey('movies').';')==
 				[

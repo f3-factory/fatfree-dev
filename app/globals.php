@@ -243,7 +243,7 @@ class Globals extends Controller {
 				'HTTP cookie sent'
 			);
 		$test->expect(
-			$f3->rel(rtrim($_SERVER['REQUEST_URI'],'/').'/hello/world')==
+			$f3->rel(substr($_SERVER['REQUEST_URI'], 0,-strlen($f3->PATH)).'/hello/world')==
 				'/hello/world' &&
 			$f3->rel($f3->get('BASE').'/hello/world')=='/hello/world',
 			'Relative links'

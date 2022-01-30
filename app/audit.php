@@ -95,8 +95,8 @@ class Audit extends Controller {
 			$audit->isreserved('127.0.0.1') &&
 			$audit->isreserved('0.1.2.3') &&
 			$audit->isreserved('169.254.1.2') &&
-			$audit->isreserved('192.0.2.1') &&
-			$audit->isreserved('224.225.226.227') &&
+			!$audit->isreserved('192.0.2.1') &&
+			!$audit->isreserved('224.225.226.227') &&
 			$audit->isreserved('240.241.242.243'),
 			'Reserved IP range'
 		);
