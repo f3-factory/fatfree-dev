@@ -12,7 +12,8 @@ class SQL extends Controller {
 		);
 		$dbs = [
 			'sqlite' => 'pdo_sqlite',
-			'mysql' => 'pdo_mysql'
+			'mysql' => 'pdo_mysql',
+			'pgsql' => 'pdo_pgsql',
 		];
 
 		if (!is_dir('tmp/'))
@@ -37,7 +38,10 @@ class SQL extends Controller {
 						);
 						break;
 					case 'mysql':
-						$db=new \DB\SQL('mysql:host=f3-database', 'root', 'f3root');
+						$db=new \DB\SQL('mysql:host=f3-mysql', 'root', 'f3root');
+						break;
+					case 'pgsql':
+						$db=new \DB\SQL('pgsql:host=f3-pgsql;dbname=fatfree', 'fatfree', 'fatfree');
 						break;
 				}
 				$engine=$db->driver();
@@ -58,10 +62,11 @@ class SQL extends Controller {
 						]
 					);
 					unset($db);
-					$db=new \DB\SQL('mysql:host=f3-database;dbname=test','root','f3root');
+					$db=new \DB\SQL('mysql:host=f3-mysql;dbname=test','root','f3root');
 				}
 				$db->exec(
 					[
+						'DROP TABLE IF EXISTS '.$db->quotekey('tickets').';',
 						'DROP TABLE IF EXISTS '.$db->quotekey('movies').';',
 						'CREATE TABLE '.$db->quotekey('movies').' ('.
 							$db->quotekey('title').

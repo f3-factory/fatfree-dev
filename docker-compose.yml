@@ -120,9 +120,9 @@ services:
       - ${DOCUMENT_ROOT}:/var/www/html:rw
       - ./docker/config/php/php.ini:/usr/local/etc/php/php.ini
       - ./docker/config/php/docker-php-ext-xdebug2.ini:/usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
-  database:
+  mysql:
     image: mysql:5.7
-    container_name: '${COMPOSE_PROJECT_NAME}-database'
+    container_name: '${COMPOSE_PROJECT_NAME}-mysql'
     restart: 'always'
     ports:
       - "${HOST_PORT_MYSQL}:${MYSQL_PORT}"
@@ -136,6 +136,18 @@ services:
       MYSQL_DATABASE: ${MYSQL_DATABASE}
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+  pgsql:
+    image: postgres:latest
+    container_name: '${COMPOSE_PROJECT_NAME}-pgsql'
+    restart: 'always'
+    ports:
+      - "${HOST_PORT_PGSQL}:${PGSQL_PORT}"
+    networks:
+      internal:
+    environment:
+      POSTGRES_DB: ${PGSQL_DATABASE}
+      POSTGRES_USER: ${PGSQL_USER}
+      POSTGRES_PASSWORD: ${PGSQL_PASSWORD}
   redis:
     container_name: '${COMPOSE_PROJECT_NAME}-redis'
     image: redis:latest
