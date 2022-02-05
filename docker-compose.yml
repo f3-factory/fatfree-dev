@@ -1,7 +1,5 @@
 x-php-template: &php
   restart: 'always'
-  links:
-    - database
   networks:
     internal:
   volumes:

@@ -12,6 +12,7 @@ Currently included:
 - Memcached
 - Redis
 - MySQL 5.7
+- PostgreSQL
 - PHP-FPM 5.6
 - PHP-FPM 7.2
 - PHP-FPM 7.3
