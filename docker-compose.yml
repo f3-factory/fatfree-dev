@@ -34,8 +34,8 @@ services:
     image: httpd:2.4
     container_name: '${COMPOSE_PROJECT_NAME}-apache'
     volumes:
-      - ${DOCUMENT_ROOT}:/var/www/html
-      - ${VHOSTS_DIR-./docker/config/apache/vhosts}:/usr/local/apache2/sites-enabled
+      - ${DOCUMENT_ROOT}:/var/www/html:rw
+      - ./docker/config/apache/vhosts:/usr/local/apache2/sites-enabled
       - ./docker/config/apache/httpd.conf:/usr/local/apache2/conf/httpd.conf
       - ./docker/data/logs/apache2:/var/log/apache2
     networks:
@@ -66,6 +66,30 @@ services:
       - traefik.http.routers.php56.rule=Host(`f3.php56.localhost`)
       - traefik.http.routers.php56.service=php56
       - traefik.http.services.php56.loadbalancer.server.port=8056
+  nginx:
+    image: nginx:latest
+    container_name: '${COMPOSE_PROJECT_NAME}-nginx'
+    volumes:
+      - ${DOCUMENT_ROOT}:/usr/share/nginx/html:rw
+      - ./docker/config/nginx/vhosts/default.conf:/etc/nginx/conf.d/default.conf
+      - ./docker/config/nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./docker/data/logs/nginx:/var/log/nginx
+    networks:
+      - internal
+    labels:
+      - traefik.enable=true
+#     php 8.1
+      - traefik.http.routers.ngx-php81.rule=Host(`f3.nginx.php81.localhost`)
+      - traefik.http.routers.ngx-php81.service=php81
+      - traefik.http.services.ngx-php81.loadbalancer.server.port=8081
+#     php 8.0
+      - traefik.http.routers.ngx-php80.rule=Host(`f3.nginx.php80.localhost`)
+      - traefik.http.routers.ngx-php80.service=php80
+      - traefik.http.services.ngx-php80.loadbalancer.server.port=8080
+#     php 7.4
+      - traefik.http.routers.ngx-php74.rule=Host(`f3.nginx.php74.localhost`)
+      - traefik.http.routers.ngx-php74.service=php74
+      - traefik.http.services.ngx-php74.loadbalancer.server.port=8074
   php81:
     <<: *php
     build:

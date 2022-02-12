@@ -9,6 +9,7 @@ It uses Docker to spin up multiple containers, so the framework can be used usin
 Currently included:
 
 - Apache 2.4
+- Nginx
 - Memcached
 - Redis
 - MySQL 5.7
@@ -30,17 +31,21 @@ Also included is ready to use **XDebug**.
 3. Run `docker-compose build` to build the containers. This might take a round 20min, depending on your hardware.
 4. Run `docker-compose up -d` to start the dev bench
 5. Open your browser with the desired version to run:
-   - http://f3.php81.localhost
-   - http://f3.php80.localhost
-   - http://f3.php74.localhost
-   - http://f3.php73.localhost
-   - http://f3.php72.localhost
-   - http://f3.php56.localhost
+   - Apache Webserver
+     - http://f3.php81.localhost
+     - http://f3.php80.localhost
+     - http://f3.php74.localhost
+     - http://f3.php73.localhost
+     - http://f3.php72.localhost
+     - http://f3.php56.localhost
+   - Nginx
+      - http://f3.nginx.php81.localhost
+      - http://f3.nginx.php80.localhost
+      - http://f3.nginx.php74.localhost
 
 
 ## TODO
 
-- add nginx configuration to reuse existing php-fpm servers
 - add mailhog for smtp testing
 
 ---
