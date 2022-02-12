@@ -151,6 +151,7 @@ services:
     volumes:
       - ./docker/data/mysql:/var/lib/mysql
       - ./docker/data/logs/mysql:/var/log/mysql
+    command: mysqld --general-log=1 --general-log-file=/var/log/mysql/general-log.log
     networks:
       internal:
     environment:
