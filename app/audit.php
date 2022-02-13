@@ -17,6 +17,11 @@ class Audit extends Controller {
 			'URL'
 		);
 		$test->expect(
+			!$audit->url('javascript://comment%0Aalert(1)') &&
+			!$audit->url('php://foo/bar'),
+			'URL XSS-check'
+		);
+		$test->expect(
 			!$audit->email('Abc.google.com',FALSE) &&
 			!$audit->email('Abc.@google.com',FALSE) &&
 			!$audit->email('Abc..123@google.com',FALSE) &&
