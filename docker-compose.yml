@@ -21,14 +21,14 @@ services:
       - "--api.insecure=true"
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
-      - "--entrypoints.web.address=:80"
+      - "--entrypoints.web.address=:${HOST_PORT_HTTP}"
       - "--providers.docker.network=internal"
     networks:
       - internal
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
     ports:
-      - "${HOST_PORT_HTTP}:80"
+      - "${HOST_PORT_HTTP}:${HOST_PORT_HTTP}"
       - "${HOST_PORT_TRAEFIK}:8080"
   apache24:
     image: httpd:2.4

@@ -1,3 +1,4 @@
 tmp/
 /.idea/
 /docker/data/*
+/data/
