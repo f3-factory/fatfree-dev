@@ -14,6 +14,7 @@ class SQL extends Controller {
 			'sqlite' => 'pdo_sqlite',
 			'mysql' => 'pdo_mysql',
 			'pgsql' => 'pdo_pgsql',
+			'sqlsrv' => 'pdo_sqlsrv',
 		];
 
 		if (!is_dir('tmp/'))
@@ -43,6 +44,9 @@ class SQL extends Controller {
 					case 'pgsql':
 						$db=new \DB\SQL('pgsql:host=f3-pgsql;dbname=fatfree', 'fatfree', 'fatfree');
 						break;
+					case 'sqlsrv':
+                        $db = new \DB\SQL('sqlsrv:SERVER=f3-mssql','sa','fatfree-root');
+                        break;
 				}
 				$engine=$db->driver();
 				$test->expect(
@@ -56,13 +60,20 @@ class SQL extends Controller {
 				if ($engine=='mysql') {
 					$db->exec(
 						[
-							'DROP DATABASE IF EXISTS '.$db->quotekey('test').';',
-							'CREATE DATABASE '.$db->quotekey('test').
+							'DROP DATABASE IF EXISTS '.$db->quotekey('fatfree').';',
+							'CREATE DATABASE '.$db->quotekey('fatfree').
 								' DEFAULT CHARSET=utf8;'
 						]
 					);
 					unset($db);
-					$db=new \DB\SQL('mysql:host=f3-mysql;dbname=test','root','f3root');
+					$db=new \DB\SQL('mysql:host=f3-mysql;dbname=fatfree','root','f3root');
+				}
+				if ($engine=='sqlsrv') {
+                    $db->exec('DROP DATABASE IF EXISTS '.$db->quotekey('fatfree').';');
+                    $db->exec('CREATE DATABASE '.$db->quotekey('fatfree'));
+//                    $db->exec('CREATE DATABASE '.$db->quotekey('fatfree').' collate Latin1_General_100_CI_AI_SC_UTF8');
+					unset($db);
+                    $db = new \DB\SQL('sqlsrv:SERVER=f3-mssql;Database=fatfree','sa','fatfree-root');
 				}
 				$db->exec(
 					[
@@ -70,7 +81,7 @@ class SQL extends Controller {
 						'DROP TABLE IF EXISTS '.$db->quotekey('movies').';',
 						'CREATE TABLE '.$db->quotekey('movies').' ('.
 							$db->quotekey('title').
-								' VARCHAR(255) NOT NULL PRIMARY KEY,'.
+								' VARCHAR(128) NOT NULL PRIMARY KEY,'.
 							$db->quotekey('director').' VARCHAR(255),'.
 							$db->quotekey('year').' INTEGER'.
 						');'
@@ -438,6 +449,9 @@ class SQL extends Controller {
 					case 'pgsql':
 						$inc='SERIAL PRIMARY KEY';
 						break;
+                    case 'sqlsrv':
+                        $inc='INT IDENTITY NOT NULL PRIMARY KEY';
+                        break;
 					default:
 						$inc='INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT';
 						break;

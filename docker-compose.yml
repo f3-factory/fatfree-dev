@@ -171,6 +171,18 @@ services:
       POSTGRES_DB: ${PGSQL_DATABASE}
       POSTGRES_USER: ${PGSQL_USER}
       POSTGRES_PASSWORD: ${PGSQL_PASSWORD}
+  mssql:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    container_name: '${COMPOSE_PROJECT_NAME}-mssql'
+    restart: 'always'
+    networks:
+      internal:
+    ports:
+      - "${HOST_PORT_MSSQL}:1433"
+    environment:
+      ACCEPT_EULA: Y
+      SA_PASSWORD: fatfree-root
+      MSSQL_PID: Developer
   redis:
     container_name: '${COMPOSE_PROJECT_NAME}-redis'
     image: redis:latest
