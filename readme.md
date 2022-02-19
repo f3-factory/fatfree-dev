@@ -4,7 +4,7 @@
 
 This is a dockerized environment for testing and developing things on the [fatfree-core](https://github.com/bcosca/fatfree-core). 
 
-It uses Docker to spin up multiple containers, so the framework can be used using multiple services and different versions of them at the same time.
+It's utilizing Docker to spin up multiple containers, so the framework can be tested with multiple services and different versions of them at the same time.
 
 Currently included:
 
@@ -14,6 +14,7 @@ Currently included:
 - Redis
 - MySQL 5.7
 - PostgreSQL
+- SQL Server
 - PHP-FPM 5.6
 - PHP-FPM 7.2
 - PHP-FPM 7.3
