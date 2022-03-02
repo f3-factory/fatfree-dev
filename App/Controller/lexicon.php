@@ -89,6 +89,14 @@ class Lexicon extends Controller {
 			$f3->get('foo',9)=='There are 9 books on the table.',
 			'Pluralization - other'
 		);
+
+		$format = '{0, plural, zero {},one {1 result}, other {# results}}';
+		$test->expect(
+			$f3->format($format, 0) === '' &&
+			$f3->format($format, 1) === '1 result' &&
+			$f3->format($format, 5) === '5 results',
+			'Pluralization - partly'
+		);
 		$f3->set('results',$test->results());
 	}
 

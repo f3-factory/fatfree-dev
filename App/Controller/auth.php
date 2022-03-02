@@ -67,7 +67,7 @@ class Auth extends Controller {
 					'PRIMARY KEY(user_id)'.
 				');'
 			);
-			$user=new \DB\SQL\Mapper($db,'users');
+			$user=new \DB\SQL\Mapper($db,'users',null, 0);
 			$user->set('user_id','admin');
 			$user->set('password','secret');
 			$user->save();

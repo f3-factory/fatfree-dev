@@ -17,6 +17,11 @@ class Audit extends Controller {
 			'URL'
 		);
 		$test->expect(
+			!$audit->url('javascript://comment%0Aalert(1)') &&
+			!$audit->url('php://foo/bar'),
+			'URL XSS-check'
+		);
+		$test->expect(
 			!$audit->email('Abc.google.com',FALSE) &&
 			!$audit->email('Abc.@google.com',FALSE) &&
 			!$audit->email('Abc..123@google.com',FALSE) &&
@@ -95,8 +100,8 @@ class Audit extends Controller {
 			$audit->isreserved('127.0.0.1') &&
 			$audit->isreserved('0.1.2.3') &&
 			$audit->isreserved('169.254.1.2') &&
-			$audit->isreserved('192.0.2.1') &&
-			$audit->isreserved('224.225.226.227') &&
+			!$audit->isreserved('192.0.2.1') &&
+			!$audit->isreserved('224.225.226.227') &&
 			$audit->isreserved('240.241.242.243'),
 			'Reserved IP range'
 		);

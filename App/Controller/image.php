@@ -204,8 +204,11 @@ class Image extends Controller {
 				'<img src="'.$src.'" '.
 					'title="'.$img->width().'x'.$img->height().'" />'
 			);
+			$php8 = version_compare(PHP_VERSION, '8.0.0') >= 0;
+			$res = $img->data();
+			$is_resouce = $php8 ? $res instanceof \GdImage : is_resource($res);
 			$test->expect(
-				is_resource($img->data()) && imagesx($img->data())===$img->width(),
+				$is_resouce && imagesx($img->data())===$img->width(),
 				'Get image resource'
 			);
 			unset($img);
