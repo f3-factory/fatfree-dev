@@ -1,8 +1,8 @@
 <?php
 
-namespace App;
+namespace App\Controller;
 
-class Controller {
+abstract class BaseController {
 
 	function beforeroute($f3) {
 		$base=$f3->get('BASE');
@@ -15,17 +15,7 @@ class Controller {
 	}
 
 	function afterroute() {
-		echo \Preview::instance()->render('layout.htm');
-	}
-
-}
-
-class Map {
-
-	function get() {
-	}
-
-	function post() {
+		echo \F3\Preview::instance()->render('layout.htm');
 	}
 
 }

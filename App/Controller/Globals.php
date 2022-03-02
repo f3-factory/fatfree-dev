@@ -1,11 +1,13 @@
 <?php
 
-namespace App;
+namespace App\Controller;
 
-class Globals extends Controller {
+use F3\Base;
 
-	function get($f3) {
-		$test=new \Test;
+class Globals extends BaseController {
+
+	function get(Base $f3) {
+		$test=new \F3\Test;
 		$test->expect(
 			is_null($f3->get('ERROR')),
 			'No errors expected at this point'
