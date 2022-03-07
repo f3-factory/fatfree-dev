@@ -50,4 +50,5 @@ RUN install-php-extensions \
     pdo_sqlsrv \
     redis \
     sockets \
+    xmlrpc \
     zip

@@ -1,12 +1,12 @@
 <?php
 
-namespace App;
+namespace App\Controller;
 
-class WS extends Controller {
+class WS extends BaseController {
 
 	function get($f3) {
-		$test=new \Test;
-		$f3->set('JS',\Preview::instance()->render('ws.htm'));
+		$test=new \F3\Test;
+		$f3->set('JS',\F3\Preview::instance()->render('ws.htm'));
 		$f3->set('results',$test->results());
 	}
 

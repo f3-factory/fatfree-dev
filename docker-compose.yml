@@ -43,29 +43,13 @@ services:
     labels:
       - traefik.enable=true
 #     php 8.1
-      - traefik.http.routers.php81.rule=Host(`f3.php81.localhost`)
+      - traefik.http.routers.php81.rule=Host(`${COMPOSE_PROJECT_NAME}.php81.localhost`)
       - traefik.http.routers.php81.service=php81
       - traefik.http.services.php81.loadbalancer.server.port=8081
 #     php 8.0
-      - traefik.http.routers.php80.rule=Host(`f3.php80.localhost`)
+      - traefik.http.routers.php80.rule=Host(`${COMPOSE_PROJECT_NAME}.php80.localhost`)
       - traefik.http.routers.php80.service=php80
       - traefik.http.services.php80.loadbalancer.server.port=8080
-#     php 7.4
-      - traefik.http.routers.php74.rule=Host(`f3.php74.localhost`)
-      - traefik.http.routers.php74.service=php74
-      - traefik.http.services.php74.loadbalancer.server.port=8074
-#     php 7.3
-      - traefik.http.routers.php73.rule=Host(`f3.php73.localhost`)
-      - traefik.http.routers.php73.service=php73
-      - traefik.http.services.php73.loadbalancer.server.port=8073
-#     php 7.2
-      - traefik.http.routers.php72.rule=Host(`f3.php72.localhost`)
-      - traefik.http.routers.php72.service=php72
-      - traefik.http.services.php72.loadbalancer.server.port=8072
-#     php 5.6
-      - traefik.http.routers.php56.rule=Host(`f3.php56.localhost`)
-      - traefik.http.routers.php56.service=php56
-      - traefik.http.services.php56.loadbalancer.server.port=8056
   nginx:
     image: nginx:latest
     container_name: '${COMPOSE_PROJECT_NAME}-nginx'
@@ -79,72 +63,35 @@ services:
     labels:
       - traefik.enable=true
 #     php 8.1
-      - traefik.http.routers.ngx-php81.rule=Host(`f3.nginx.php81.localhost`)
+      - traefik.http.routers.ngx-php81.rule=Host(`${COMPOSE_PROJECT_NAME}.nginx.php81.localhost`)
       - traefik.http.routers.ngx-php81.service=php81
       - traefik.http.services.ngx-php81.loadbalancer.server.port=8081
 #     php 8.0
-      - traefik.http.routers.ngx-php80.rule=Host(`f3.nginx.php80.localhost`)
+      - traefik.http.routers.ngx-php80.rule=Host(`${COMPOSE_PROJECT_NAME}.nginx.php80.localhost`)
       - traefik.http.routers.ngx-php80.service=php80
       - traefik.http.services.ngx-php80.loadbalancer.server.port=8080
-#     php 7.4
-      - traefik.http.routers.ngx-php74.rule=Host(`f3.nginx.php74.localhost`)
-      - traefik.http.routers.ngx-php74.service=php74
-      - traefik.http.services.ngx-php74.loadbalancer.server.port=8074
   php81:
     <<: *php
     build:
       context: ./docker/bin/php81
     container_name: '${COMPOSE_PROJECT_NAME}-php81'
+    hostname: f3-php81
     environment:
       <<: *php_env
-      PHP_IDE_CONFIG: serverName=f3.php81.localhost
+      PHP_IDE_CONFIG: serverName=${COMPOSE_PROJECT_NAME}.php81.localhost
   php80:
     <<: *php
     build:
       context: ./docker/bin/php80
     container_name: '${COMPOSE_PROJECT_NAME}-php80'
+    hostname: f3-php80
     environment:
       <<: *php_env
-      PHP_IDE_CONFIG: serverName=f3.php80.localhost
-  php74:
-    <<: *php
-    build:
-      context: ./docker/bin/php74
-    container_name: '${COMPOSE_PROJECT_NAME}-php74'
-    environment:
-      <<: *php_env
-      PHP_IDE_CONFIG: serverName=f3.php74.localhost
-  php73:
-    <<: *php
-    build:
-      context: ./docker/bin/php73
-    container_name: '${COMPOSE_PROJECT_NAME}-php73'
-    environment:
-      <<: *php_env
-      PHP_IDE_CONFIG: serverName=f3.php73.localhost
-  php72:
-    <<: *php
-    build:
-      context: ./docker/bin/php72
-    container_name: '${COMPOSE_PROJECT_NAME}-php72'
-    environment:
-      <<: *php_env
-      PHP_IDE_CONFIG: serverName=f3.php72.localhost
-  php56:
-    <<: *php
-    build:
-      context: ./docker/bin/php56
-    environment:
-      <<: *php_env
-      PHP_IDE_CONFIG: serverName=f3.php56.localhost
-    container_name: '${COMPOSE_PROJECT_NAME}-php56'
-    volumes:
-      - ${DOCUMENT_ROOT}:/var/www/html:rw
-      - ./docker/config/php/php.ini:/usr/local/etc/php/php.ini
-      - ./docker/config/php/docker-php-ext-xdebug2.ini:/usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+      PHP_IDE_CONFIG: serverName=${COMPOSE_PROJECT_NAME}.php80.localhost
   mysql:
     image: mysql:5.7
     container_name: '${COMPOSE_PROJECT_NAME}-mysql'
+    hostname: f3-mysql
     restart: 'always'
     ports:
       - "${HOST_PORT_MYSQL}:${MYSQL_PORT}"
@@ -162,6 +109,7 @@ services:
   pgsql:
     image: postgres:latest
     container_name: '${COMPOSE_PROJECT_NAME}-pgsql'
+    hostname: f3-pgsql
     restart: 'always'
     ports:
       - "${HOST_PORT_PGSQL}:${PGSQL_PORT}"
@@ -174,6 +122,7 @@ services:
   mssql:
     image: mcr.microsoft.com/mssql/server:2019-latest
     container_name: '${COMPOSE_PROJECT_NAME}-mssql'
+    hostname: f3-mssql
     restart: 'always'
     networks:
       internal:
@@ -181,10 +130,11 @@ services:
       - "${HOST_PORT_MSSQL}:1433"
     environment:
       ACCEPT_EULA: Y
-      SA_PASSWORD: fatfree-root
-      MSSQL_PID: Developer
+      SA_PASSWORD: 'fatfree-root'
+      MSSQL_PID: 'Developer'
   redis:
     container_name: '${COMPOSE_PROJECT_NAME}-redis'
+    hostname: f3-redis
     image: redis:latest
     networks:
       internal:
@@ -192,6 +142,7 @@ services:
       - "${HOST_PORT_REDIS}:6379"
   memcached:
     container_name: '${COMPOSE_PROJECT_NAME}-memcached'
+    hostname: f3-memcached
     image: memcached:latest
     networks:
       internal:

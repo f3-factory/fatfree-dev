@@ -3,11 +3,13 @@
 ini_set('display_errors', 1);
 error_reporting(-1);
 
-$f3=require('lib/base.php');
+require_once('lib/F3/Base.php');
+$f3=\F3\Base::instance();
 
-if (extension_loaded('mongodb') && is_file($file='lib/MongoDB/functions.php'))
-	require($file);
+//if (extension_loaded('mongodb') && is_file($file='lib/MongoDB/functions.php'))
+//	require($file);
 
+//$f3->AUTOLOAD = 'lib/,./';
 $f3->set('DEBUG',2);
 $f3->set('UI','ui/');
 
@@ -45,7 +47,7 @@ $f3->set('menu',
 	]
 );
 
-$f3->map('/','App\Env');
-$f3->map('/@controller','App\@controller');
+$f3->map('/','App\Controller\Env');
+$f3->map('/@controller','App\Controller\@controller');
 
 $f3->run();

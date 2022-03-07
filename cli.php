@@ -1,6 +1,7 @@
 <?php
 
-$f3=require('lib/base.php');
+require_once('lib/F3/Base.php');
+$f3 = \F3\Base::instance();
 
 $f3->route('GET /',function($f3){
 	echo 'Home';

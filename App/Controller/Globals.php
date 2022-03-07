@@ -151,7 +151,7 @@ class Globals extends BaseController {
 		$test->expect(
 			$ok,
 			'PHP globals same as hive globals'.
-				($list?(': '.$list):'')
+			($list?(': '.$list):'')
 		);
 		$ok=TRUE;
 		$list='';
@@ -165,7 +165,7 @@ class Globals extends BaseController {
 		$test->expect(
 			$ok,
 			'Altering hive globals affects PHP globals'.
-				($list?(': '.$list):'')
+			($list?(': '.$list):'')
 		);
 		$ok=TRUE;
 		$list='';
@@ -179,7 +179,7 @@ class Globals extends BaseController {
 		$test->expect(
 			$ok,
 			'Altering PHP globals affects hive globals'.
-				($list?(': '.$list):'')
+			($list?(': '.$list):'')
 		);
 		foreach (explode('|',$f3::GLOBALS) as $global)
 			unset($GLOBALS['_'.$global]['foo'],$GLOBALS['_'.$global]['bar']);
@@ -199,6 +199,118 @@ class Globals extends BaseController {
 			!$f3->exists('REQUEST["bar"]') && empty($_REQUEST['bar']),
 			'PHP global variables cleared'
 		);
+
+		$f3->set('GET.a','a');
+		$_GET['b'] = 'b';
+		$f3->GET['c'] = 'c';
+		$test->expect(
+			$_GET['a'] === 'a' &&
+			$f3->GET['b'] === 'b' &&
+			$f3->get('GET.c') === 'c',
+			'sync GLOBALS #1'
+		);
+
+		$_GET['a'] = 'b';
+		$test->expect(
+			$f3->get('GET.a') === 'b',
+			'sync GLOBALS #2'
+		);
+
+		$f3->desync('GET');
+		$test->expect(
+			$f3->get('GET.a') === 'b' &&
+			$_GET['b'] === 'b',
+			'GLOBALS exists after desync'
+		);
+
+		$f3->set('GET.c','cc');
+		$_GET['c'] = 'c';
+		$test->expect(
+			$f3->get('GET.c') === 'cc' &&
+			$_GET['c'] === 'c',
+			'desync GLOBALS test'
+		);
+
+		$f3->sync('GET');
+		$test->expect(
+			$f3->get('GET.c') === 'cc' &&
+			$_GET['c'] === 'cc',
+			're-sync HIVE to globals'
+		);
+		$f3->set('foo', 'foo');
+		$test->expect(
+			$f3->get('foo') === 'foo',
+			'simple key-value storage'
+		);
+
+		$f3->data = 'reserved word';
+		$test->expect(
+			$f3->get('data') === 'reserved word',
+			'reserved key handling'
+		);
+
+		$_GET['foo'] = 'foo';
+		$f3->state('state1');
+		$f3->foo = 'bar';
+		$test->expect(
+			$f3->foo === 'bar',
+			'New Hive state'
+		);
+
+		$_GET['foo'] = 'bar';
+		$test->expect(
+			$f3->get('GET.foo') === 'bar' &&
+			$_GET['foo'] === 'bar',
+			'SYNC works after new state'
+		);
+
+		$f3->restore('state1');
+
+		$test->expect(
+			$f3->get('foo') === 'foo',
+			'Hive state rollback'
+		);
+
+		$test->expect(
+			$f3->get('GET.foo') === 'foo' &&
+			$_GET['foo'] === 'foo',
+			'Hive state rollback GLOBALS'
+		);
+
+		$_GET['foo'] = 'baz';
+		$f3->set('GET.bar','foo');
+
+		$test->expect(
+			$_GET['foo'] === 'baz' &&
+			$f3->get('GET.foo') === 'baz' &&
+			$_GET['bar'] === 'foo',
+			'SYNC works after rollback'
+		);
+
+		$f3->state('state2');
+
+		$test->expect(
+			$f3->GET['foo'] === 'baz' &&
+			$_GET['foo'] === 'baz' &&
+			$f3->get('GET.foo') === 'baz' &&
+			$f3->get('GET.bar') === 'foo',
+			'SYNC works after new state'
+		);
+
+		$f3->clear('GET');
+		$test->expect(
+			empty($f3->GET) &&
+			empty($_GET),
+			'clear global'
+		);
+		$f3->set('GET[baz]','baz');
+		$f3->restore('state1');
+		$test->expect(
+			!empty($f3->GET) &&
+			!empty($_GET),
+			'restore global'
+		);
+
 		$ok=TRUE;
 		foreach ($f3->get('HEADERS') as $hdr=>$val)
 			if (isset($_SERVER['HTTP_'.strtoupper(str_replace('-','_',$hdr))]) &&

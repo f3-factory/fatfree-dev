@@ -2,7 +2,11 @@
 
 namespace NS;
 
-class C extends \Prefab {
+use F3\Prefab;
+
+class C {
+
+	use Prefab;
 
 	// Emulate HTTP method so we can test map()
 	function __call($name,$args) {
