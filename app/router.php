@@ -116,6 +116,18 @@ class Router extends Controller {
 			&& $f3->get('PARAMS.*.1')=='fourty/seven',
 			'Wildcard routing pattern [multiple]'
 		);
+		$f3->route('GET @wildPage:/a/*/b/@c/*',
+			function($f3) {
+			}
+		);
+		$f3->mock('GET /a/foo%25bar/x/b/2/bäz');
+		$test->expect(
+			$f3->alias('wildPage')=='/a/foo%25bar/x/b/2/b%C3%A4z'
+			&& $f3->get('PARAMS.*.0') === 'foo%bar/x'
+			&& $f3->get('PARAMS.c') == 2
+			&& $f3->get('PARAMS.*.1') === 'bäz',
+			'Alias generated with encoded default PARAMS'
+		);
 		$f3->set('type','none');
 		$f3->route('GET|POST / [ajax]',
 			function($f3) {
