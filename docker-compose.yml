@@ -42,6 +42,10 @@ services:
       - internal
     labels:
       - traefik.enable=true
+#     php 8.2
+      - traefik.http.routers.php82.rule=Host(`f3.php82.localhost`)
+      - traefik.http.routers.php82.service=php82
+      - traefik.http.services.php82.loadbalancer.server.port=8082
 #     php 8.1
       - traefik.http.routers.php81.rule=Host(`f3.php81.localhost`)
       - traefik.http.routers.php81.service=php81
@@ -78,6 +82,10 @@ services:
       - internal
     labels:
       - traefik.enable=true
+#     php 8.2
+      - traefik.http.routers.ngx-php82.rule=Host(`f3.nginx.php82.localhost`)
+      - traefik.http.routers.ngx-php82.service=php82
+      - traefik.http.services.ngx-php82.loadbalancer.server.port=8082
 #     php 8.1
       - traefik.http.routers.ngx-php81.rule=Host(`f3.nginx.php81.localhost`)
       - traefik.http.routers.ngx-php81.service=php81
@@ -90,6 +98,14 @@ services:
       - traefik.http.routers.ngx-php74.rule=Host(`f3.nginx.php74.localhost`)
       - traefik.http.routers.ngx-php74.service=php74
       - traefik.http.services.ngx-php74.loadbalancer.server.port=8074
+  php82:
+    <<: *php
+    build:
+      context: ./docker/bin/php82
+    container_name: '${COMPOSE_PROJECT_NAME}-php82'
+    environment:
+      <<: *php_env
+      PHP_IDE_CONFIG: serverName=f3.php82.localhost
   php81:
     <<: *php
     build:
