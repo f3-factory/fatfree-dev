@@ -21,18 +21,21 @@ Currently included:
 - PHP-FPM 7.4
 - PHP-FPM 8.0
 - PHP-FPM 8.1
+- PHP-FPM 8.2-rc2
 
-The services are bind to your local machine network using [Traefik](https://doc.traefik.io/traefik/). That way you'll have nice domain names for each php version with zero further configuration.
+The services are bind to your local machine network using [Traefik](https://doc.traefik.io/traefik/). That way you'll have nice domain names for each php version with zero further configuration. 
+Open localhost:8080 for reviewing the current traefik configuration.
 Also included is ready to use **XDebug**.
 
 ## Usage
 
 1. First install [docker](https://www.docker.com/products/docker-desktop).
-2. Copy `sample.env` to `.env` and adjust the ports to your local machine, if you already have something running at the default ports.
+2. Copy `sample.env` to `.env` and if needed, adjust the ports to your local machine in case you already have something running at the default ports.
 3. Run `docker-compose build` to build the containers. This might take a round 20min, depending on your hardware.
 4. Run `docker-compose up -d` to start the dev bench
 5. Open your browser with the desired version to run:
    - Apache Webserver
+     - http://f3.php82.localhost
      - http://f3.php81.localhost
      - http://f3.php80.localhost
      - http://f3.php74.localhost
@@ -40,6 +43,7 @@ Also included is ready to use **XDebug**.
      - http://f3.php72.localhost
      - http://f3.php56.localhost
    - Nginx
+      - http://f3.nginx.php82.localhost
       - http://f3.nginx.php81.localhost
       - http://f3.nginx.php80.localhost
       - http://f3.nginx.php74.localhost
