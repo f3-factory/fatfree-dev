@@ -42,6 +42,10 @@ services:
       - internal
     labels:
       - traefik.enable=true
+#     php 8.2
+      - traefik.http.routers.php82.rule=Host(`${COMPOSE_PROJECT_NAME}.php82.localhost`)
+      - traefik.http.routers.php82.service=php82
+      - traefik.http.services.php82.loadbalancer.server.port=8082
 #     php 8.1
       - traefik.http.routers.php81.rule=Host(`${COMPOSE_PROJECT_NAME}.php81.localhost`)
       - traefik.http.routers.php81.service=php81
@@ -62,6 +66,10 @@ services:
       - internal
     labels:
       - traefik.enable=true
+#     php 8.2
+      - traefik.http.routers.ngx-php82.rule=Host(`${COMPOSE_PROJECT_NAME}.nginx.php82.localhost`)
+      - traefik.http.routers.ngx-php82.service=php82
+      - traefik.http.services.ngx-php82.loadbalancer.server.port=8082
 #     php 8.1
       - traefik.http.routers.ngx-php81.rule=Host(`${COMPOSE_PROJECT_NAME}.nginx.php81.localhost`)
       - traefik.http.routers.ngx-php81.service=php81
@@ -70,6 +78,15 @@ services:
       - traefik.http.routers.ngx-php80.rule=Host(`${COMPOSE_PROJECT_NAME}.nginx.php80.localhost`)
       - traefik.http.routers.ngx-php80.service=php80
       - traefik.http.services.ngx-php80.loadbalancer.server.port=8080
+  php82:
+    <<: *php
+    build:
+      context: ./docker/bin/php82
+    container_name: '${COMPOSE_PROJECT_NAME}-php82'
+    hostname: f3-php82
+    environment:
+      <<: *php_env
+      PHP_IDE_CONFIG: serverName=f3.php82.localhost
   php81:
     <<: *php
     build:
@@ -130,8 +147,8 @@ services:
       - "${HOST_PORT_MSSQL}:1433"
     environment:
       ACCEPT_EULA: Y
-      SA_PASSWORD: 'fatfree-root'
-      MSSQL_PID: 'Developer'
+      SA_PASSWORD: fatfree-root
+      MSSQL_PID: Developer
   redis:
     container_name: '${COMPOSE_PROJECT_NAME}-redis'
     hostname: f3-redis

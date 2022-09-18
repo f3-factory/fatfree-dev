@@ -31,10 +31,9 @@ COPY --from=mlocati/php-extension-installer /usr/bin/install-php-extensions /usr
 RUN install-php-extensions \
     calendar \
     gd \
-    xdebug-^3 \
+    xdebug-^3.1 \
     apcu \
     exif \
-    gd \
     igbinary \
     imagick \
     intl \
