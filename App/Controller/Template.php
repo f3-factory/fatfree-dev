@@ -248,6 +248,12 @@ class Template extends BaseController {
 		);
 		$f3->clear('cond1');
 		$f3->clear('cond2');
+		$f3->set('cond1', TRUE);
+		$test->expect(
+			trim($tpl->render('templates/test5.2.htm')) === '10',
+			'<check> nullable return'
+		);
+		$f3->clear('cond1');
 		$f3->set('test',['string'=>'thin','int'=>123,'bool'=>FALSE]);
 		$test->expect(
 			preg_replace('/\s/','',$tpl->render('templates/test11.htm'))==
