@@ -222,6 +222,40 @@ class Hive extends BaseController {
 			$x===123 && $f3->get('x')===123 && $f3['x']===123 && $f3->x===123,
 			'Indirect assignment'
 		);
+
+		$array = ['foo'=>['bar'=>456]];
+		$bar = $f3->ref('foo.bar', false, $array);
+		$bar2 = $f3->ref('foo->bar', false, $array);
+		$test->expect(
+			$bar===456 && $bar2===null,
+			'Reference to custom array'
+		);
+		$baz = &$f3->ref('foo.baz', true, $array);
+		$baz = 'test';
+		$test->expect(
+			is_array($array) && array_key_exists('foo', $array)
+			&& is_array($array['foo']) && array_key_exists('baz', $array['foo'])
+			&& $array['foo']['baz'] === 'test',
+			'Indirect assignment on custom array'
+		);
+		unset($baz);
+
+		$obj = (object) ['foo'=> (object) ['bar'=>456] ];
+		$bar = $f3->ref('foo->bar', false, $obj);
+		$bar2 = $f3->ref('foo.bar', false, $obj);
+		$test->expect(
+			$bar===456 && $bar2===null,
+			'Reference to custom object'
+		);
+		$baz = &$f3->ref('foo->baz', true, $obj);
+		$baz = 'test';
+		$test->expect(
+			is_object($obj) && property_exists($obj,'foo')
+			&& is_object($obj->foo) && property_exists($obj->foo,'baz')
+			&& $obj->foo->baz === 'test',
+			'Indirect assignment on custom object'
+		);
+
 		$f3->set('LOCALES','dict/');
 		$test->expect(
 			$f3->exists('tqbf') && isset($f3->tqbf),
