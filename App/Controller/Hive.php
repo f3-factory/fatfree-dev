@@ -285,6 +285,25 @@ class Hive extends BaseController {
 			$customer->obj->foo === 'bar',
 			'Custom Hive sets properties'
 		);
+
+		$customer->clear('first_name');
+		unset($customer->last_name);
+		$customer->clear('email');
+		$customer->clear('meta.foo');
+		$customer->clear('obj->foo');
+		$customer->clear('obj->foo.bar');
+		$test->expect(
+			$customer->first_name === '' &&
+			$customer->last_name === null &&
+			$customer->exists('email') === FALSE &&
+			isset($customer->last_name) === FALSE &&
+			$customer->devoid('email') === TRUE &&
+			$customer->meta === [] &&
+			is_object($customer->obj) &&
+			!isset($customer->obj->foo),
+			'Custom Hive clears properties to initial values'
+		);
+
 		$f3->set('LOCALES','dict/');
 		$test->expect(
 			$f3->exists('tqbf') && isset($f3->tqbf),
