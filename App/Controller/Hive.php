@@ -2,6 +2,8 @@
 
 namespace App\Controller;
 
+use App\Hive\Customer;
+
 class Hive extends BaseController {
 
 	function get($f3) {
@@ -256,6 +258,33 @@ class Hive extends BaseController {
 			'Indirect assignment on custom object'
 		);
 
+		$customer = new Customer();
+		$customer->toArray();
+		$test->expect(
+			$customer->toArray() === [
+				'first_name' => '',
+				'phone' => null,
+			],
+			'Custom Hive toArray fetches initialized props'
+		);
+		$customer->first_name = 'John';
+		$customer->last_name = 'Doe';
+		$customer->email = 'john.doe@domain.com';
+		$customer->phone = '0123456789';
+		$customer->set('meta.foo', 'bar');
+		$customer->set('obj->foo', 'bar');
+		$test->expect(
+			$customer->first_name === 'John' &&
+			$customer->get('first_name') === 'John' &&
+			$customer->last_name === 'Doe' &&
+			$customer->get('last_name') === 'Doe' &&
+			$customer->email === 'john.doe@domain.com' &&
+			$customer->phone === '0123456789' &&
+			$customer->get('meta.foo') === 'bar' &&
+			$customer->meta['foo'] === 'bar' &&
+			$customer->obj->foo === 'bar',
+			'Custom Hive sets properties'
+		);
 		$f3->set('LOCALES','dict/');
 		$test->expect(
 			$f3->exists('tqbf') && isset($f3->tqbf),
