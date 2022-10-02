@@ -8,7 +8,7 @@
 		<title>{{ @VERSION }}: {{ @active }}</title>
 		<link rel="stylesheet" type="text/css" href="css/theme.css" />
 		<style>
-			{~ if (@ERROR): ~}
+			{~ if (isset(@ERROR)): ~}
 				{{ file_get_contents('lib/code.css') }}
 			{~ endif ~}
 		</style>

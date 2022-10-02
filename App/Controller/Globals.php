@@ -312,6 +312,7 @@ class Globals extends BaseController {
 		);
 
 		$ok=TRUE;
+		$initHeader = $f3->HEADERS['Accept-Encoding'];
 		foreach ($f3->get('HEADERS') as $hdr=>$val)
 			if (isset($_SERVER['HTTP_'.strtoupper(str_replace('-','_',$hdr))]) &&
 				$_SERVER['HTTP_'.strtoupper(str_replace('-','_',$hdr))]!=
@@ -322,11 +323,9 @@ class Globals extends BaseController {
 			'HTTP headers match HEADERS variable'
 		);
 		$ok=TRUE;
-		$hdrs=[];
 		foreach (array_keys($f3->get('HEADERS')) as $hdr) {
 			$f3->set('HEADERS["'.$hdr.'"]','foo');
 			$hdr=strtoupper(str_replace('-','_',$hdr));
-			$hdrs[]=$hdr;
 			if (isset($_SERVER['HTTP_'.$hdr]) && $_SERVER['HTTP_'.$hdr]!='foo')
 				$ok=FALSE;
 		}
@@ -347,6 +346,12 @@ class Globals extends BaseController {
 			$ok,
 			'Altering HTTP headers affects HEADERS variable'
 		);
+		$f3->restore('state1');
+		$test->expect($initHeader === $f3->HEADERS['Accept-Encoding'], 'Initial Headers restored');
+		$f3->HEADERS['Accept-Encoding'] = 'foo';
+		$test->expect($f3->HEADERS['Accept-Encoding'] === $_SERVER['HTTP_ACCEPT_ENCODING'],
+			'Synced Headers still work');
+
 		if ($f3->exists('COOKIE.baz')) {
 			$test->message('HTTP cookie retrieved');
 			$f3->clear('COOKIE.baz');

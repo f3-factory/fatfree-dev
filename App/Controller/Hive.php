@@ -273,6 +273,7 @@ class Hive extends BaseController {
 		$customer->phone = '0123456789';
 		$customer->set('meta.foo', 'bar');
 		$customer->set('obj->foo', 'bar');
+		$customer->foo = ['bar' => 123];
 		$test->expect(
 			$customer->first_name === 'John' &&
 			$customer->get('first_name') === 'John' &&
@@ -282,9 +283,11 @@ class Hive extends BaseController {
 			$customer->phone === '0123456789' &&
 			$customer->get('meta.foo') === 'bar' &&
 			$customer->meta['foo'] === 'bar' &&
-			$customer->obj->foo === 'bar',
+			$customer->obj->foo === 'bar' &&
+			isset($customer->foo) && $customer->get('foo.bar') === 123,
 			'Custom Hive sets properties'
 		);
+		$customer->state('one');
 
 		$customer->clear('first_name');
 		unset($customer->last_name);
@@ -292,6 +295,7 @@ class Hive extends BaseController {
 		$customer->clear('meta.foo');
 		$customer->clear('obj->foo');
 		$customer->clear('obj->foo.bar');
+		$customer->clear('foo');
 		$test->expect(
 			$customer->first_name === '' &&
 			$customer->last_name === null &&
@@ -300,8 +304,23 @@ class Hive extends BaseController {
 			$customer->devoid('email') === TRUE &&
 			$customer->meta === [] &&
 			is_object($customer->obj) &&
-			!isset($customer->obj->foo),
+			!isset($customer->obj->foo) &&
+			!isset($customer->foo),
 			'Custom Hive clears properties to initial values'
+		);
+		$customer->restore('one');
+		$test->expect(
+			$customer->first_name === 'John' &&
+			$customer->get('first_name') === 'John' &&
+			$customer->last_name === 'Doe' &&
+			$customer->get('last_name') === 'Doe' &&
+			$customer->email === 'john.doe@domain.com' &&
+			$customer->phone === '0123456789' &&
+			$customer->get('meta.foo') === 'bar' &&
+			$customer->meta['foo'] === 'bar' &&
+			$customer->obj->foo === 'bar' &&
+			$customer->get('foo.bar') === 123,
+			'Custom Hive restored'
 		);
 
 		$f3->set('LOCALES','dict/');
