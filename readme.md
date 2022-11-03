@@ -15,13 +15,8 @@ Currently included:
 - MySQL 5.7
 - PostgreSQL
 - SQL Server
-- PHP-FPM 5.6
-- PHP-FPM 7.2
-- PHP-FPM 7.3
-- PHP-FPM 7.4
-- PHP-FPM 8.0
 - PHP-FPM 8.1
-- PHP-FPM 8.2-rc2
+- PHP-FPM 8.2-rc5
 
 The services are bind to your local machine network using [Traefik](https://doc.traefik.io/traefik/). That way you'll have nice domain names for each php version with zero further configuration. 
 Open localhost:8080 for reviewing the current traefik configuration.
@@ -37,16 +32,9 @@ Also included is ready to use **XDebug**.
    - Apache Webserver
      - http://f3.php82.localhost
      - http://f3.php81.localhost
-     - http://f3.php80.localhost
-     - http://f3.php74.localhost
-     - http://f3.php73.localhost
-     - http://f3.php72.localhost
-     - http://f3.php56.localhost
    - Nginx
       - http://f3.nginx.php82.localhost
       - http://f3.nginx.php81.localhost
-      - http://f3.nginx.php80.localhost
-      - http://f3.nginx.php74.localhost
 
 
 ## TODO

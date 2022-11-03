@@ -22,13 +22,16 @@ services:
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
       - "--entrypoints.web.address=:${HOST_PORT_HTTP}"
+      - "--entrypoints.websecure.address=:${HOST_PORT_HTTPS}"
       - "--providers.docker.network=internal"
+      - "--serversTransport.insecureSkipVerify=true"
     networks:
       - internal
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
     ports:
-      - "${HOST_PORT_HTTP}:${HOST_PORT_HTTP}"
+      - "${HOST_PORT_HTTP}:80"
+      - "${HOST_PORT_HTTPS}:443"
       - "${HOST_PORT_TRAEFIK}:8080"
   apache24:
     image: httpd:2.4
@@ -37,6 +40,8 @@ services:
       - ${DOCUMENT_ROOT}:/var/www/html:rw
       - ./docker/config/apache/vhosts:/usr/local/apache2/sites-enabled
       - ./docker/config/apache/httpd.conf:/usr/local/apache2/conf/httpd.conf
+      - ./docker/config/apache/selfsigned.crt:/usr/local/apache2/conf/selfsigned.crt
+      - ./docker/config/apache/selfsigned.key:/usr/local/apache2/conf/selfsigned.key
       - ./docker/data/logs/apache2:/var/log/apache2
     networks:
       - internal
@@ -46,14 +51,16 @@ services:
       - traefik.http.routers.php82.rule=Host(`${COMPOSE_PROJECT_NAME}.php82.localhost`)
       - traefik.http.routers.php82.service=php82
       - traefik.http.services.php82.loadbalancer.server.port=8082
+#     php 8.2
+      - traefik.http.routers.php82ssl.rule=Host(`${COMPOSE_PROJECT_NAME}.php82.localhost`)
+      - traefik.http.routers.php82ssl.service=php82
+      - traefik.http.routers.php82ssl.entrypoints=websecure
+      - traefik.http.routers.php82ssl.tls=true
+      - traefik.http.services.php82ssl.loadbalancer.server.port=5082
 #     php 8.1
       - traefik.http.routers.php81.rule=Host(`${COMPOSE_PROJECT_NAME}.php81.localhost`)
       - traefik.http.routers.php81.service=php81
       - traefik.http.services.php81.loadbalancer.server.port=8081
-#     php 8.0
-      - traefik.http.routers.php80.rule=Host(`${COMPOSE_PROJECT_NAME}.php80.localhost`)
-      - traefik.http.routers.php80.service=php80
-      - traefik.http.services.php80.loadbalancer.server.port=8080
   nginx:
     image: nginx:latest
     container_name: '${COMPOSE_PROJECT_NAME}-nginx'
@@ -61,6 +68,8 @@ services:
       - ${DOCUMENT_ROOT}:/usr/share/nginx/html:rw
       - ./docker/config/nginx/vhosts/default.conf:/etc/nginx/conf.d/default.conf
       - ./docker/config/nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./docker/config/nginx/selfsigned.crt:/etc/nginx/selfsigned.crt
+      - ./docker/config/nginx/selfsigned.key:/etc/nginx/selfsigned.key
       - ./docker/data/logs/nginx:/var/log/nginx
     networks:
       - internal
@@ -70,14 +79,16 @@ services:
       - traefik.http.routers.ngx-php82.rule=Host(`${COMPOSE_PROJECT_NAME}.nginx.php82.localhost`)
       - traefik.http.routers.ngx-php82.service=php82
       - traefik.http.services.ngx-php82.loadbalancer.server.port=8082
+#     php 8.2 + ssl
+      - traefik.http.routers.ngx-php82ssl.rule=Host(`${COMPOSE_PROJECT_NAME}.nginx.php82.localhost`)
+      - traefik.http.routers.ngx-php82ssl.service=php82
+      - traefik.http.routers.ngx-php82ssl.entrypoints=websecure
+      - traefik.http.routers.ngx-php82ssl.tls=true
+      - traefik.http.services.ngx-php82ssl.loadbalancer.server.port=5082
 #     php 8.1
       - traefik.http.routers.ngx-php81.rule=Host(`${COMPOSE_PROJECT_NAME}.nginx.php81.localhost`)
       - traefik.http.routers.ngx-php81.service=php81
       - traefik.http.services.ngx-php81.loadbalancer.server.port=8081
-#     php 8.0
-      - traefik.http.routers.ngx-php80.rule=Host(`${COMPOSE_PROJECT_NAME}.nginx.php80.localhost`)
-      - traefik.http.routers.ngx-php80.service=php80
-      - traefik.http.services.ngx-php80.loadbalancer.server.port=8080
   php82:
     <<: *php
     build:
@@ -86,7 +97,7 @@ services:
     hostname: f3-php82
     environment:
       <<: *php_env
-      PHP_IDE_CONFIG: serverName=f3.php82.localhost
+      PHP_IDE_CONFIG: serverName=${COMPOSE_PROJECT_NAME}.php82.localhost
   php81:
     <<: *php
     build:
@@ -96,15 +107,6 @@ services:
     environment:
       <<: *php_env
       PHP_IDE_CONFIG: serverName=${COMPOSE_PROJECT_NAME}.php81.localhost
-  php80:
-    <<: *php
-    build:
-      context: ./docker/bin/php80
-    container_name: '${COMPOSE_PROJECT_NAME}-php80'
-    hostname: f3-php80
-    environment:
-      <<: *php_env
-      PHP_IDE_CONFIG: serverName=${COMPOSE_PROJECT_NAME}.php80.localhost
   mysql:
     image: mysql:5.7
     container_name: '${COMPOSE_PROJECT_NAME}-mysql'

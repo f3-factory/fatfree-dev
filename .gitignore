@@ -4,3 +4,4 @@ tmp/
 /data/
 /.env
 /vendor/
+*.DS_Store
