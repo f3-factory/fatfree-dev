@@ -1,8 +1,6 @@
 <?php
 
-
 namespace App\Hive;
-
 
 use \F3\Hive;
 

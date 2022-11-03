@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Hive\Customer;
 use F3\Base;
 use F3\Test;
 
@@ -48,6 +49,15 @@ class Service extends BaseController {
         $test->expect($nbar1 instanceof BazService && $nbar1->getX() === 2048, 'Named service instance');
         $nbar2 = $f3->CONTAINER->get('$bar');
         $test->expect($nbar1 === $nbar2, 'Named service cached');
+
+        /** @var Customer $customer */
+        $customer = $f3->CONTAINER->get(Customer::class);
+        $customer->first_name = 'John';
+        $customer->last_name = 'Wick';
+
+        $f3->route('GET /page/container-test', 'App\Controller\ContainerControllerTest->index');
+        $response = $f3->mock('GET /page/container-test');
+        $test->expect($response === 'John Wick' && $customer->email === 'john@wick.com', 'Service injected to route handler');
 
         $bar4 = $f3->make(BarService::class);
         $test->expect($bar4 instanceof BarService, 'make() alias usage');
@@ -104,4 +114,15 @@ trait Xyz {
 }
 class Mailer2 extends Mailer {
     use Xyz;
+}
+
+class ContainerControllerTest {
+    public function __construct(
+        protected Customer $app,
+        protected Base $f3
+    ) {}
+    public function index(Base $f3) {
+        $this->app->email = 'john@wick.com';
+        return $this->app->first_name.' '.$this->app->last_name;
+    }
 }
