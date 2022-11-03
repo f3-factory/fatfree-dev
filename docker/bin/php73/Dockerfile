@@ -30,7 +30,7 @@ ENV LANG=en_US.UTF-8 \
 COPY --from=mlocati/php-extension-installer /usr/bin/install-php-extensions /usr/local/bin/
 RUN install-php-extensions \
     calendar \
-    xdebug-^3 \
+    xdebug-^3.1 \
     apcu \
     exif \
     gd \

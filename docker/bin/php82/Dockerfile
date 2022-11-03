@@ -49,4 +49,5 @@ RUN install-php-extensions \
     redis \
     sockets \
     xmlrpc \
+    xdebug \
     zip

@@ -98,6 +98,10 @@ services:
       - traefik.http.routers.ngx-php74.rule=Host(`f3.nginx.php74.localhost`)
       - traefik.http.routers.ngx-php74.service=php74
       - traefik.http.services.ngx-php74.loadbalancer.server.port=8074
+#     php 7.2
+      - traefik.http.routers.ngx-php72.rule=Host(`f3.nginx.php72.localhost`)
+      - traefik.http.routers.ngx-php72.service=php72
+      - traefik.http.services.ngx-php72.loadbalancer.server.port=8072
   php82:
     <<: *php
     build:
