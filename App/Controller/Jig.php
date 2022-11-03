@@ -10,7 +10,7 @@ class Jig extends BaseController {
 			is_null($f3->get('ERROR')),
 			'No errors expected at this point'
 		);
-		$db=new \F3\DB\Jig;
+		$db=new \F3\DB\Jig();
 		$db->drop();
 		$test->expect(
 			is_object($db),

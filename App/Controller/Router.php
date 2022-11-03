@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use F3\Base;
+use F3\Http\Verb;
 use F3\Test;
 
 class Router extends BaseController {
@@ -166,10 +167,10 @@ class Router extends BaseController {
 		$f3->map('/dummy','NS\C');
 		$ok=TRUE;
 		$list='';
-		foreach (explode('|',Base::VERBS) as $verb) {
+		foreach (Verb::names() as $verb) {
 			$f3->mock($verb.' /dummy',['a'=>'hello']);
 			if ($f3->get('route')!=$verb ||
-				preg_match('/GET|HEAD/',strtoupper($verb)) &&
+				preg_match('/GET|HEAD/',$verb) &&
 				$f3->get('body') && !parse_url($f3->get('URI'),PHP_URL_QUERY))
 				$ok=FALSE;
 			else
@@ -188,7 +189,7 @@ class Router extends BaseController {
 		$f3->mock('OPTIONS /dummy');
 		$test->expect(
 			preg_grep('/Allow: '.
-				str_replace('|',',',Base::VERBS.'/'),headers_list()),
+                (implode(',',Verb::names()).'/'),headers_list()),
 			'HTTP OPTIONS request returns allowed methods'
 		);
 		$f3->clear('ERROR');
