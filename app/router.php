@@ -8,7 +8,7 @@ class Router extends Controller {
 		\Base::instance()->set('called',TRUE);
 	}
 
-	function get($f3) {
+	function get(\Base $f3) {
 		$test=new \Test;
 		$test->expect(
 			is_null($f3->get('ERROR')),
@@ -375,6 +375,54 @@ class Router extends Controller {
 			$f3->relay('App\a,App\b,App\c',1)==8,
 			'Callback relay()'
 		);
+		$f3->ONERROR = function() {};
+		$f3->HALT = false;
+		$f3->route('GET|POST /cors-test', function($f3) {
+			return 'cors';
+		});
+		$f3->set('CORS.origin', '*');
+		$f3->set('CORS.credentials', true);
+		$f3->set('CORS.expose', ['X-Version', 'Foo']);
+		$f3->set('CORS.ttl', 60);
+		$headers = [
+			'Access-Control-Request-Method' => 'GET',
+			'Origin' => 'localhost',
+		];
+
+		$f3->mset($headers, 'HEADERS.');
+		$f3->mock('OPTIONS /cors-test', null, $headers);
+		$headerlist = headers_list();
+		$test->expect(in_array('Access-Control-Allow-Origin: *', $headerlist), 'CORS Preflight Origin test');
+		$test->expect(in_array('Access-Control-Allow-Methods: OPTIONS,GET,POST', $headerlist), 'CORS Preflight Methods');
+		$test->expect(in_array('Access-Control-Allow-Credentials: true', $headerlist), 'CORS Preflight Credentials');
+		$test->expect(in_array('Access-Control-Max-Age: 60', $headerlist), 'CORS Preflight Max Age');
+		header_remove();
+
+		$f3->route('GET|POST /cors-test-ajax [ajax]', function($f3) {
+			return 'cors';
+		});
+		$f3->mock('OPTIONS /cors-test-ajax [ajax]', null, $headers);
+		$headerlist = headers_list();
+		header_remove();
+
+		$headers = [
+			'Origin' => 'localhost',
+		];
+		$f3->clear('HEADERS.Access-Control-Request-Method');
+
+		$out = $f3->mock('GET /cors-test-ajax [ajax]', null, $headers);
+		$test->expect($out === 'cors' && in_array('Access-Control-Allow-Origin: *', $headerlist), 'CORS Ajax Route test');
+		header_remove();
+
+		$out = $f3->mock('GET /cors-test', null, $headers);
+		$headerlist = headers_list();
+		$test->expect($out === 'cors' && in_array('Access-Control-Allow-Origin: *', $headerlist), 'CORS Request');
+		$test->expect(in_array('Access-Control-Expose-Headers: X-Version,Foo', $headerlist), 'CORS Request Expose Headers');
+		header_remove();
+
+		$f3->ONERROR = null;
+		$f3->HALT = true;
+
 		$f3->set('results',$test->results());
 	}
 
