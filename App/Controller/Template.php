@@ -253,6 +253,10 @@ class Template extends BaseController {
 			trim($tpl->render('templates/test5.2.htm')) === '10',
 			'<check> nullable return'
 		);
+		$test->expect(
+			trim($tpl->render('templates/test5.3.htm')) === '10',
+			'test unmatching tag cases'
+		);
 		$f3->clear('cond1');
 		$f3->set('test',['string'=>'thin','int'=>123,'bool'=>FALSE]);
 		$test->expect(
