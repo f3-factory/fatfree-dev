@@ -57,7 +57,17 @@ class Service extends BaseController {
 
         $f3->route('GET /page/container-test', 'App\Controller\ContainerControllerTest->index');
         $response = $f3->mock('GET /page/container-test');
-        $test->expect($response === 'John Wick' && $customer->email === 'john@wick.com', 'Service injected to route handler');
+        $test->expect($response === 'John Wick' && $customer->email === 'john@wick.com', 'Service injected to class constructor');
+
+        $f3->route('POST /page/container-test-2', 'App\Controller\ContainerControllerTest->post');
+        $response = $f3->mock('POST /page/container-test-2');
+        $test->expect($response === Mailer::class, 'Service injected to route handler');
+
+        $f3->route('POST /page/container-test-3', function(Base $f3, Customer $customer) use($test) {
+            $test->expect($f3->PATH === '/page/container-test-3'
+                && $customer->email === 'john@wick.com', 'Service injected to route closure');
+        });
+        $f3->mock('POST /page/container-test-3');
 
         $bar4 = $f3->make(BarService::class);
         $test->expect($bar4 instanceof BarService, 'make() alias usage');
@@ -121,8 +131,11 @@ class ContainerControllerTest {
         protected Customer $app,
         protected Base $f3
     ) {}
-    public function index(Base $f3) {
+    public function index(Base $f3, $params) {
         $this->app->email = 'john@wick.com';
         return $this->app->first_name.' '.$this->app->last_name;
+    }
+    public function post(MailerInterface $mailer) {
+        return get_class($mailer);
     }
 }

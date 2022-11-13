@@ -12,7 +12,7 @@ class Router extends BaseController {
         Base::instance()->set('called',TRUE);
     }
 
-    function get($f3) {
+    function get(Base $f3) {
         $test=new Test;
         $test->expect(
             is_null($f3->get('ERROR')),
@@ -372,11 +372,11 @@ class Router extends BaseController {
             'Call lambda function'
         );
         $test->expect(
-            $f3->chain('App\Controller\a,App\Controller\b,App\Controller\c',1)==[1,2,4],
+            $f3->chain('App\Controller\a,App\Controller\b,App\Controller\c',[1])==[1,2,4],
             'Callback chain()'
         );
         $test->expect(
-            $f3->relay('App\Controller\a,App\Controller\b,App\Controller\c',1)==8,
+            $f3->relay('App\Controller\a,App\Controller\b,App\Controller\c',[1])==8,
             'Callback relay()'
         );
 
