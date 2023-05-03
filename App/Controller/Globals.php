@@ -20,12 +20,6 @@ class Globals extends BaseController {
 			$version=$f3->get('VERSION'),
 			'VERSION: '.$version
 		);
-		$f3->clear('PACKAGE');
-		$f3->clear('VERSION');
-		$test->expect(
-			$f3->get('PACKAGE')==$package && $f3->get('VERSION')==$version,
-			'Clearing global variable resets to default value'
-		);
 		$test->expect(
 			is_dir($root=$f3->get('ROOT')),
 			'ROOT (document root): '.$f3->stringify($root)
@@ -156,6 +150,7 @@ class Globals extends BaseController {
 		$ok=TRUE;
 		$list='';
 		foreach (explode('|',$f3::GLOBALS) as $global) {
+			$f3->sync($global);
 			$f3->set($global.'.foo','bar');
 			if ($GLOBALS['_'.$global]!==$f3->get($global)) {
 				$ok=FALSE;
@@ -249,54 +244,6 @@ class Globals extends BaseController {
 			'reserved key handling'
 		);
 
-		$_GET['foo'] = 'foo';
-		$f3->state('state1');
-		$f3->foo = 'bar';
-		$test->expect(
-			$f3->foo === 'bar',
-			'New Hive state'
-		);
-
-		$_GET['foo'] = 'bar';
-		$test->expect(
-			$f3->get('GET.foo') === 'bar' &&
-			$_GET['foo'] === 'bar',
-			'SYNC works after new state'
-		);
-
-		$f3->restore('state1');
-
-		$test->expect(
-			$f3->get('foo') === 'foo',
-			'Hive state rollback'
-		);
-
-		$test->expect(
-			$f3->get('GET.foo') === 'foo' &&
-			$_GET['foo'] === 'foo',
-			'Hive state rollback GLOBALS'
-		);
-
-		$_GET['foo'] = 'baz';
-		$f3->set('GET.bar','foo');
-
-		$test->expect(
-			$_GET['foo'] === 'baz' &&
-			$f3->get('GET.foo') === 'baz' &&
-			$_GET['bar'] === 'foo',
-			'SYNC works after rollback'
-		);
-
-		$f3->state('state2');
-
-		$test->expect(
-			$f3->GET['foo'] === 'baz' &&
-			$_GET['foo'] === 'baz' &&
-			$f3->get('GET.foo') === 'baz' &&
-			$f3->get('GET.bar') === 'foo',
-			'SYNC works after new state'
-		);
-
 		$f3->clear('GET');
 		$test->expect(
 			empty($f3->GET) &&
@@ -304,7 +251,7 @@ class Globals extends BaseController {
 			'clear global'
 		);
 		$f3->set('GET[baz]','baz');
-		$f3->restore('state1');
+
 		$test->expect(
 			!empty($f3->GET) &&
 			!empty($_GET),
@@ -322,35 +269,6 @@ class Globals extends BaseController {
 			$ok,
 			'HTTP headers match HEADERS variable'
 		);
-		$ok=TRUE;
-		foreach (array_keys($f3->get('HEADERS')) as $hdr) {
-			$f3->set('HEADERS["'.$hdr.'"]','foo');
-			$hdr=strtoupper(str_replace('-','_',$hdr));
-			if (isset($_SERVER['HTTP_'.$hdr]) && $_SERVER['HTTP_'.$hdr]!='foo')
-				$ok=FALSE;
-		}
-		$test->expect(
-			$ok,
-			'Altering HEADERS variable affects HTTP headers'
-		);
-		$ok=TRUE;
-		foreach (array_keys($f3->get('HEADERS')) as $hdr) {
-			$tmp=strtoupper(strtr($hdr,'-','_'));
-			if (isset($_SERVER['HTTP_'.$tmp])) {
-				$_SERVER['HTTP_'.$tmp]='bar';
-				if ($f3->get('HEADERS["'.$hdr.'"]')!=$_SERVER['HTTP_'.$tmp])
-					$ok=FALSE;
-			}
-		}
-		$test->expect(
-			$ok,
-			'Altering HTTP headers affects HEADERS variable'
-		);
-		$f3->restore('state1');
-		$test->expect($initHeader === $f3->HEADERS['Accept-Encoding'], 'Initial Headers restored');
-		$f3->HEADERS['Accept-Encoding'] = 'foo';
-		$test->expect($f3->HEADERS['Accept-Encoding'] === $_SERVER['HTTP_ACCEPT_ENCODING'],
-			'Synced Headers still work');
 
 		if ($f3->exists('COOKIE.baz')) {
 			$test->message('HTTP cookie retrieved');

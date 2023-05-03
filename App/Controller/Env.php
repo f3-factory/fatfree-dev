@@ -10,6 +10,7 @@ class Env extends BaseController
             'Base' =>
                 [
                     'hash',
+                    'intl',
                     'json',
                     'session',
                     'mbstring'

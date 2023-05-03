@@ -84,22 +84,22 @@ class Internals extends BaseController {
 			!$found,
 			'No hash() collisions'
 		);
-		$_GET=['foo'=>'ok<h1>foo</h1><p>bar<span>baz</span></p>'];
-		$f3->scrub($_GET);
+		$data=['foo'=>'ok<h1>foo</h1><p>bar<span>baz</span></p>'];
+		$f3->scrub($data);
 		$test->expect(
-			$f3->get('GET["foo"]')=='okfoobarbaz',
+            $data['foo']=='okfoobarbaz',
 			'Scrub all HTML tags'
 		);
-		$_GET=['foo'=>'ok<h1>foo</h1><p>bar<span>baz</span></p>'];
-		$f3->scrub($_GET,'p,span');
+        $data=['foo'=>'ok<h1>foo</h1><p>bar<span>baz</span></p>'];
+		$f3->scrub($data,'p,span');
 		$test->expect(
-			$f3->get('GET["foo"]')=='okfoo<p>bar<span>baz</span></p>',
+            $data['foo']=='okfoo<p>bar<span>baz</span></p>',
 			'Scrub specific HTML tags'
 		);
-		$_GET=['foo'=>'ok<h1>foo</h1><p>bar<span>baz</span></p>'];
-		$f3->scrub($_GET,'*');
+        $data=['foo'=>'ok<h1>foo</h1><p>bar<span>baz</span></p>'];
+		$f3->scrub($data,'*');
 		$test->expect(
-			$f3->get('GET["foo"]')=='ok<h1>foo</h1><p>bar<span>baz</span></p>',
+            $data['foo']=='ok<h1>foo</h1><p>bar<span>baz</span></p>',
 			'Pass-thru HTML tags'
 		);
 		$var='"hello world", a'.chr(8).

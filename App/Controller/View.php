@@ -63,7 +63,7 @@ class View extends BaseController {
 			'Variables $fw, $hive, $implicit and $mime are available'
 		);
 		$test->expect(
-			$f3->CACHE===false,
+			$f3->CACHE===null,
 			'Enable caching'
 		);
 		$cachedir=sprintf('tmp/cache/view_%s/',microtime(TRUE));

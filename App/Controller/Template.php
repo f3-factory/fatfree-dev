@@ -406,7 +406,7 @@ class Template extends BaseController {
 			'NULL','FALSE','TRUE',
 			'$HOST',$f3->HOST,'HOST',
 			TRUE,FALSE,NULL,
-			$f3->HOST,PHP_VERSION,PHP_OS,
+			$f3->HOST,PHP_VERSION_ID,PHP_OS,
 		];
 		$res=[];
 		$f3->set('ex',function($val) use(&$res) { $res[] = $val; });
@@ -522,7 +522,7 @@ class Template extends BaseController {
 				round(1e3*(microtime(TRUE)-$now),2).' msecs'
 		);
 		$test->expect(
-			$f3->CACHE===FALSE,
+			$f3->CACHE===NULL,
 			'Enable caching'
 		);
 		$cachedir=sprintf('tmp/cache/template_%s/',microtime(TRUE));

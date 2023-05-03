@@ -12,5 +12,9 @@ class Customer extends Hive {
 	public ?string $phone = NULL;
 	public ?array $meta;
 	public ?object $obj;
+	public array $arr1;
+	public ?array $arr2;
+	public ?array $arr3 = null;
+	public ?array $arr4 = [];
 
 }

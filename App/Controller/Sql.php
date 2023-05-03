@@ -400,15 +400,15 @@ class SQL extends BaseController {
 					$movie->get('year')==2007,
 					'Record erased'
 				);
-				$movie->copyto('GET');
+				$movie->copyto('movie');
 				$test->expect(
-					$_GET['title']=='Zodiac' &&
-					$_GET['director']=='David Fincher' &&
-					$_GET['year']==2007,
+					$f3->movie['title']=='Zodiac' &&
+                    $f3->movie['director']=='David Fincher' &&
+                    $f3->movie['year']==2007,
 					'Copy fields to hive key'
 				);
-				$_GET['year']=2008;
-				$movie->copyfrom('GET');
+                $f3->movie['year']=2008;
+				$movie->copyfrom('movie');
 				$test->expect(
 					$movie->get('title')=='Zodiac' &&
 					$movie->get('director')=='David Fincher' &&

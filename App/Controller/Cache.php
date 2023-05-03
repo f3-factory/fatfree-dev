@@ -104,14 +104,10 @@ class Cache extends BaseController {
 			);
 			$mark=microtime(TRUE);
 			$cache->reset();
-			/*
-			$cache->clear('a');
-			$cache->clear('b');
-			$cache->clear('c');
-			$cache->clear('d');
-			$cache->clear('e');
-			$cache->clear('foo');
-			*/
+            if (preg_match('/memcached=/',$f3->CACHE)) {
+                // waiting for memcached async deletion
+                sleep(1);
+            }
 			$test->expect(
 				!$cache->exists('a') &&
 				!$cache->exists('b') &&
@@ -155,7 +151,7 @@ class Cache extends BaseController {
 					sprintf('%.1f',(microtime(TRUE)-$mark)*1e3).'ms'
 			);
 			$test->expect(
-				!$f3->exists('foo',$val) && !$val,
+				!$f3->exists('foo',$val2) && !$val2,
 				'Hive key expired: '.
 					sprintf('%.1f',(microtime(TRUE)-$mark)*1e3).'ms'
 			);
