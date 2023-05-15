@@ -57,10 +57,6 @@ services:
       - traefik.http.routers.php82ssl.entrypoints=websecure
       - traefik.http.routers.php82ssl.tls=true
       - traefik.http.services.php82ssl.loadbalancer.server.port=5082
-#     php 8.1
-      - traefik.http.routers.php81.rule=Host(`${COMPOSE_PROJECT_NAME}.php81.localhost`)
-      - traefik.http.routers.php81.service=php81
-      - traefik.http.services.php81.loadbalancer.server.port=8081
   nginx:
     image: nginx:latest
     container_name: '${COMPOSE_PROJECT_NAME}-nginx'
@@ -85,10 +81,6 @@ services:
       - traefik.http.routers.ngx-php82ssl.entrypoints=websecure
       - traefik.http.routers.ngx-php82ssl.tls=true
       - traefik.http.services.ngx-php82ssl.loadbalancer.server.port=5082
-#     php 8.1
-      - traefik.http.routers.ngx-php81.rule=Host(`${COMPOSE_PROJECT_NAME}.nginx.php81.localhost`)
-      - traefik.http.routers.ngx-php81.service=php81
-      - traefik.http.services.ngx-php81.loadbalancer.server.port=8081
   php82:
     <<: *php
     build:
@@ -98,15 +90,6 @@ services:
     environment:
       <<: *php_env
       PHP_IDE_CONFIG: serverName=${COMPOSE_PROJECT_NAME}.php82.localhost
-  php81:
-    <<: *php
-    build:
-      context: ./docker/bin/php81
-    container_name: '${COMPOSE_PROJECT_NAME}-php81'
-    hostname: f3-php81
-    environment:
-      <<: *php_env
-      PHP_IDE_CONFIG: serverName=${COMPOSE_PROJECT_NAME}.php81.localhost
   mysql:
     image: mysql:5.7
     container_name: '${COMPOSE_PROJECT_NAME}-mysql'
