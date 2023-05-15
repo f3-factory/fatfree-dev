@@ -2,12 +2,13 @@
 
 namespace App\Controller;
 
+use F3\Base;
 use F3\Template;
 use F3\Test;
 
 class Lexicon extends BaseController {
 
-	function get($f3) {
+	function get(Base $f3) {
 		$f3->set('CACHE',TRUE);
 		$test=new Test;
 		$test->expect(

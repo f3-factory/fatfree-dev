@@ -2,11 +2,12 @@
 
 namespace App\Controller;
 
+use F3\Base;
 use F3\Test;
 
 class View extends BaseController {
 
-	function get($f3) {
+	function get(Base $f3) {
 		$test=new Test;
 		$test->expect(
 			is_null($f3->get('ERROR')),
@@ -63,7 +64,7 @@ class View extends BaseController {
 			'Variables $fw, $hive, $implicit and $mime are available'
 		);
 		$test->expect(
-			$f3->CACHE===null,
+			$f3->CACHE===FALSE,
 			'Enable caching'
 		);
 		$cachedir=sprintf('tmp/cache/view_%s/',microtime(TRUE));

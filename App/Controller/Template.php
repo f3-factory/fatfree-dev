@@ -522,7 +522,7 @@ class Template extends BaseController {
 				round(1e3*(microtime(TRUE)-$now),2).' msecs'
 		);
 		$test->expect(
-			$f3->CACHE===NULL,
+			$f3->CACHE===FALSE,
 			'Enable caching'
 		);
 		$cachedir=sprintf('tmp/cache/template_%s/',microtime(TRUE));

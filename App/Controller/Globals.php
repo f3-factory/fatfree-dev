@@ -176,9 +176,12 @@ class Globals extends BaseController {
 			'Altering PHP globals affects hive globals'.
 			($list?(': '.$list):'')
 		);
-		foreach (explode('|',$f3::GLOBALS) as $global)
+		foreach (explode('|',$f3::GLOBALS) as $global) {
 			unset($GLOBALS['_'.$global]['foo'],$GLOBALS['_'.$global]['bar']);
+            $f3->sync($global);
+        }
 		$f3->clear('SESSION');
+
 		$f3->set('GET["bar"]','foo');
 		$f3->set('POST.baz','qux');
 		$test->expect(
