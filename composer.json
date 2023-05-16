@@ -1,0 +1,17 @@
+{
+    "name": "f3-factory/fatfree-dev",
+    "minimum-stability": "dev",
+    "require": {
+        "php": ">=8.2",
+        "f3-factory/fatfree-psr7": "^1.0",
+        "f3-factory/fatfree-psr7-factory": "dev-main",
+        "bcosca/fatfree-core": "*"
+    },
+    "repositories": [
+        {
+            "type": "path",
+            "url": "./lib",
+            "canonical": false
+        }
+    ]
+}
