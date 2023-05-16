@@ -3,6 +3,8 @@
 namespace App\Controller;
 
 use F3\Base;
+use F3\Http\Response;
+use F3\Http\ServerRequest;
 use F3\Http\Verb;
 use F3\Test;
 
@@ -240,12 +242,12 @@ class Router extends BaseController {
         $test->expect(
             $f3->get('PARAMS.id')=='macademia-nuts' &&
             is_numeric($qty=$f3->get('PARAMS.quantity')) && $qty==253 &&
-            $_GET==['a'=>1,'b'=>3,'c'=>5],
+            $f3->GET==['a'=>1,'b'=>3,'c'=>5],
             'Query string mocked'
         );
         $f3->mock('GET /food/chicken/999?d=246&e=357',['f'=>468]);
         $test->expect(
-            $_GET==['d'=>246,'e'=>357,'f'=>468],
+            $f3->GET==['d'=>246,'e'=>357,'f'=>468],
             'Query string and mock arguments merged'
         );
         $test->expect(
@@ -254,17 +256,17 @@ class Router extends BaseController {
         );
         $f3->mock('POST /food/sushki/134?a=1',['b'=>2]);
         $test->expect(
-            $_GET==['a'=>1] && $_POST==['b'=>2] && $_REQUEST==['a'=>1,'b'=>2] && $f3->get('BODY')=='b=2',
-            'Request body and superglobals $_GET, $_POST, $_REQUEST correctly set on mocked POST'
+            $f3->GET==['a'=>1] && $f3->POST==['b'=>2] && $f3->REQUEST==['a'=>1,'b'=>2] && $f3->get('BODY')=='b=2',
+            'Request body and GET, POST, REQUEST globals correctly set on mocked POST'
         );
         $f3->mock('PUT /food/sushki/134?a=1',['b'=>2]);
         $test->expect(
-            $_GET==['a'=>1] && $_POST==[] && $_REQUEST==['a'=>1] && $f3->get('BODY')=='b=2',
-            'Request body and superglobals $_GET, $_POST, $_REQUEST correctly set on mocked PUT'
+            $f3->GET==['a'=>1] && $f3->POST==[] && $f3->REQUEST==['a'=>1] && $f3->get('BODY')=='b=2',
+            'Request body and GET, POST, REQUEST globals correctly set on mocked PUT'
         );
         $f3->mock('POST /food/sushki/134?a=1',['b'=>2],NULL,'c=3');
         $test->expect(
-            $_GET==['a'=>1] && $_POST==['b'=>2] && $_REQUEST==['a'=>1,'b'=>2] && $f3->get('BODY')=='c=3',
+            $f3->GET==['a'=>1] && $f3->POST==['b'=>2] && $f3->REQUEST==['a'=>1,'b'=>2] && $f3->get('BODY')=='c=3',
             'Mocked request body precedence over arguments'
         );
         $f3->mock('GET @grub(@id=%C3%B6%C3%A4%C3%BC,@quantity=123)');
@@ -428,9 +430,83 @@ class Router extends BaseController {
         $f3->ONERROR = null;
         $f3->HALT = true;
 
+        // load fatfree-psr7 plugins
+        require_once 'vendor/autoload.php';
+
+        $f3->CONTAINER = \F3\Service::instance();
+        $psrAdapter = $f3->make(\F3\Http\MessageFactory::class);
+        $psrAdapter->register(
+            requestFactory: \F3\Http\Factory\Psr17Factory::class,
+            responseFactory: \F3\Http\Factory\Psr17Factory::class,
+            serverRequestFactory: \F3\Http\Factory\Psr17Factory::class,
+            uploadedFileFactory: \F3\Http\Factory\Psr17Factory::class,
+            uriFactory: \F3\Http\Factory\Psr17Factory::class,
+            streamFactory: \F3\Http\Factory\Psr17Factory::class,
+        );
+        $psrAdapter->registerRequest(\F3\Http\Request::class);
+        $psrAdapter->registerResponse(\F3\Http\Response::class);
+        $psrAdapter->registerServerRequest(\F3\Http\ServerRequest::class);
+
+        $f3->route('GET /psr7-test/@foo', [\App\Controller\RouterTest::class,'v4']);
+        $f3->mock('GET /psr7-test/bar');
+
+        $args = $f3->get('args');
+        $f3->clear('args');
+        $test->expect(
+            $args[0] instanceof Base
+            && is_array($args[1]) && $args[1]['foo'] === 'bar'
+            && is_array($args[2]) && $args[2] === [RouterTest::class, 'v4']
+            , 'PSR-7: Route call with Container'
+        );
+
+        $f3->route('GET /psr7-test/@foo', [\App\Controller\RouterTest::class,'v3']);
+        $f3->mock('GET /psr7-test/baz');
+
+        $args = $f3->get('args');
+        $f3->clear('args');
+        $test->expect(
+            $args[0] instanceof Base
+            && is_array($args[1]) && $args[1]['foo'] === 'baz'
+            && is_array($args[2]) && $args[2] === [RouterTest::class, 'v3']
+            , 'PSR-7: Route call with Container, no types'
+        );
+
+        $f3->route('GET /psr7-test/@foo', [\App\Controller\RouterTest::class,'injectTest']);
+        $f3->mock('GET /psr7-test/baz', null, ['X-Test' => 'testing']);
+
+        $args = $f3->get('args');
+        $f3->clear('args');
+        $test->expect(
+            $args[0] instanceof ServerRequest
+            && $args[0]->getMethod() === 'GET'
+            && $args[0]->getHeaderLine('X-Test') === 'testing'
+            && $args[1] instanceof Response
+            && is_array($args[2]) && isset($args[2]['foo']) && $args[2]['foo'] === 'baz'
+            && is_array($args[3]) && $args[3] === [RouterTest::class, 'injectTest']
+            , 'PSR-7: Request & Response created injected'
+        );
+
         $f3->set('results',$test->results());
     }
 
+}
+
+class RouterTest {
+
+    function v3($f3, $params, $handler)
+    {
+        \F3\Base::instance()->set('args', func_get_args());
+    }
+
+    function v4(\F3\Base $f3, array $params, array $handler)
+    {
+        \F3\Base::instance()->set('args', func_get_args());
+    }
+
+    function injectTest(ServerRequest $request, Response $response, array $params, array $handler)
+    {
+        \F3\Base::instance()->set('args', func_get_args());
+    }
 }
 
 function callee() {
@@ -448,3 +524,4 @@ function b($y) {
 function c($z) {
     return $z*4;
 }
+

@@ -51,3 +51,7 @@ RUN install-php-extensions \
     sockets \
     xmlrpc \
     zip
+
+# install package plugins
+COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
+RUN composer install --optimize-autoloader --no-dev --quiet

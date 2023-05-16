@@ -44,7 +44,7 @@ class Service extends BaseController {
         $f3->CONTAINER->set('$bar', function() use($f3) {
             return $f3->CONTAINER->make(BazService::class, ['x' => 2048]);
         });
-        /** @var Mailer $mailer3 */
+        /** @var BazService $nbar1 */
         $nbar1 = $f3->CONTAINER->get('$bar');
         $test->expect($nbar1 instanceof BazService && $nbar1->getX() === 2048, 'Named service instance');
         $nbar2 = $f3->CONTAINER->get('$bar');
