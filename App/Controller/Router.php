@@ -47,21 +47,76 @@ class Router extends BaseController {
         $test_headers = [];
         $orig_headers = $f3->HEADERS;
         $exp_headers = ['X-Foo' => 'Bar'];
+        $os_uri=$_SERVER['REQUEST_URI'];
+        $oh_uri=$f3->URI;
+        $th_uri='';
+        $ts_uri='';
         $f3->route('GET|POST /mock',
-            function(Base $f3) use (&$mocked, &$test_headers) {
+            function(Base $f3) use (&$mocked, &$test_headers, &$th_uri, &$ts_uri) {
                 $mocked = true;
                 $f3->mocked = true;
                 $test_headers = $f3->HEADERS;
+                $th_uri = $f3->URI;
+                $ts_uri = $f3->SERVER['REQUEST_URI'];
             }
         );
         $f3->mock('GET /mock', headers: $exp_headers);
-        $test->expect($mocked===TRUE && $f3->mocked === true && $test_headers === $exp_headers && $f3->HEADERS === $exp_headers, 'Route mock test');
+        $test->expect($mocked===TRUE
+            && $f3->mocked === true
+            && $test_headers === $exp_headers
+            && $f3->HEADERS === $exp_headers
+            && $f3->URI === '/mock'
+            && $th_uri === '/mock'
+            && $ts_uri === '/mock'
+            , 'Route mock test');
         // reset
         $mocked = FALSE;
         $f3->mocked = false;
         $f3->HEADERS = $orig_headers;
+        $f3->SERVER['REQUEST_URI'] = $os_uri;
+        $f3->URI = $oh_uri;
+        $th_uri='';
+        $ts_uri='';
         $f3->mock('GET /mock', headers: $exp_headers, sandbox: true);
-        $test->expect($mocked===TRUE && $f3->mocked === false && $test_headers === $exp_headers && $f3->HEADERS === $orig_headers, 'Route mock test in sandbox');
+        $test->expect($mocked===TRUE
+            && $f3->mocked === false
+            && $test_headers === $exp_headers
+            && $f3->HEADERS === $orig_headers
+            && $f3->URI === $oh_uri
+            && $th_uri === '/mock'
+            && $ts_uri === '/mock'
+            && $f3->SERVER['REQUEST_URI'] === $os_uri
+            , 'Route mock test in sandbox');
+        // reset
+        $mocked = FALSE;
+        $f3->mocked = false;
+        $f3->HEADERS = $orig_headers;
+        $f3->SERVER['REQUEST_URI'] = $os_uri;
+        $f3->URI = $oh_uri;
+        $th_uri='';
+        $ts_uri='';
+
+        $f3->route('GET|POST /mock',
+            function() use (&$mocked, &$test_headers, &$th_uri, &$ts_uri) {
+                $f3 = Base::instance();
+                $mocked = true;
+                $f3->mocked = true;
+                $test_headers = $f3->HEADERS;
+                $th_uri = $f3->URI;
+                $ts_uri = $f3->SERVER['REQUEST_URI'];
+            }
+        );
+        $f3->mock('GET /mock', headers: $exp_headers, sandbox: true);
+
+        $test->expect($mocked===TRUE
+            && $f3->mocked === false
+            && $test_headers === $exp_headers
+            && $f3->HEADERS === $orig_headers
+            && $f3->URI === $oh_uri
+            && $th_uri === '/mock'
+            && $ts_uri === '/mock'
+            && $f3->SERVER['REQUEST_URI'] === $os_uri
+            , 'Route mock test in sandbox, instance clone');
 
         $f3->mock('GET @hello');
         $test->expect(

@@ -144,7 +144,7 @@ class Cache extends BaseController {
 				'Cached route expired: '.
 					sprintf('%.1f',(microtime(TRUE)-$mark)*1e3).'ms'
 			);
-			$f3->mock('GET /dummy');
+			$f3->mock('GET /dummy', sandbox: true);
 			$test->expect(
 				$cache->exists($hash),
 				'Cache refreshed: '.
