@@ -11,7 +11,8 @@
         {
             "type": "path",
             "url": "./lib",
-            "canonical": false
+            "canonical": false,
+            "no-api": true
         }
     ]
 }

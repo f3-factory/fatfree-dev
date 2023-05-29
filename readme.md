@@ -12,11 +12,10 @@ Currently included:
 - Nginx
 - Memcached
 - Redis
-- MySQL 5.7
+- MySQL 8.0
 - PostgreSQL
 - SQL Server
-- PHP-FPM 8.1
-- PHP-FPM 8.2-rc5
+- PHP-FPM 8.2
 
 The services are bind to your local machine network using [Traefik](https://doc.traefik.io/traefik/). That way you'll have nice domain names for each php version with zero further configuration. 
 Open localhost:8080 for reviewing the current traefik configuration.
@@ -26,16 +25,14 @@ Also included is ready to use **XDebug**.
 
 1. First install [docker](https://www.docker.com/products/docker-desktop).
 2. Copy `sample.env` to `.env` and if needed, adjust the ports to your local machine in case you already have something running at the default ports.
-3. Run `docker-compose build` to build the containers. This might take a round 20min, depending on your hardware.
+3. Run `docker-compose build` to build the containers. This might take a while, depending on your hardware.
 4. Run `docker-compose up -d` to start the dev bench
 5. Open your browser with the desired version to run:
    - Apache Webserver
      - http://f3.php82.localhost
-     - http://f3.php81.localhost
    - Nginx
       - http://f3.nginx.php82.localhost
-      - http://f3.nginx.php81.localhost
-
+6. Some framework tests require additional composer packages. To install these, run `docker-compose exec php82 composer install`.
 
 ## TODO
 
@@ -47,4 +44,4 @@ Also included is ready to use **XDebug**.
 
 This development environment belongs to the f3-factory community and is not meant for usage on a production system. No warranty for any security issues in case you put this on your public root.
 
-**Copyright (c) 2022 F3::Factory**
+**Copyright (c) 2023 F3::Factory**

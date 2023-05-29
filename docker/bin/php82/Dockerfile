@@ -5,7 +5,7 @@ ARG DEBIAN_FRONTEND=noninteractive
 # Update
 RUN apt-get -y update --fix-missing && \
     apt-get upgrade -y && \
-    apt-get --no-install-recommends install -y apt-utils && \
+    apt-get --no-install-recommends install -y apt-utils zip && \
     rm -rf /var/lib/apt/lists/*
 
 # Install and set up system locales
@@ -54,4 +54,4 @@ RUN install-php-extensions \
 
 # install package plugins
 COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
-RUN composer install --optimize-autoloader --no-dev --quiet
+ENV COMPOSER_ALLOW_SUPERUSER=1

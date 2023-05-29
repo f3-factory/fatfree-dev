@@ -91,7 +91,7 @@ services:
       <<: *php_env
       PHP_IDE_CONFIG: serverName=${COMPOSE_PROJECT_NAME}.php82.localhost
   mysql:
-    image: mysql:5.7
+    image: mysql:8.0-debian
     container_name: '${COMPOSE_PROJECT_NAME}-mysql'
     hostname: f3-mysql
     restart: 'always'
