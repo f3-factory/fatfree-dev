@@ -128,7 +128,7 @@ class Cache extends BaseController {
 				$ttl
 			);
 			$hash=$f3->hash('GET '.$f3->get('BASE').'/dummy').'.url';
-			$f3->mock('GET /dummy');
+			$f3->mock('GET /dummy', sandbox: TRUE);
 			$test->expect(
 				$cache->exists($hash),
 				'Route cached (duration: '.($ttl*1e3).'ms)'

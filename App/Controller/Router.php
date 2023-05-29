@@ -43,6 +43,26 @@ class Router extends BaseController {
                 $f3->set('bar','foo');
             }
         );
+        $mocked = FALSE;
+        $test_headers = [];
+        $orig_headers = $f3->HEADERS;
+        $exp_headers = ['X-Foo' => 'Bar'];
+        $f3->route('GET|POST /mock',
+            function(Base $f3) use (&$mocked, &$test_headers) {
+                $mocked = true;
+                $f3->mocked = true;
+                $test_headers = $f3->HEADERS;
+            }
+        );
+        $f3->mock('GET /mock', headers: $exp_headers);
+        $test->expect($mocked===TRUE && $f3->mocked === true && $test_headers === $exp_headers && $f3->HEADERS === $exp_headers, 'Route mock test');
+        // reset
+        $mocked = FALSE;
+        $f3->mocked = false;
+        $f3->HEADERS = $orig_headers;
+        $f3->mock('GET /mock', headers: $exp_headers, sandbox: true);
+        $test->expect($mocked===TRUE && $f3->mocked === false && $test_headers === $exp_headers && $f3->HEADERS === $orig_headers, 'Route mock test in sandbox');
+
         $f3->mock('GET @hello');
         $test->expect(
             $f3->get('bar')=='foo',
@@ -391,13 +411,13 @@ class Router extends BaseController {
         $f3->set('CORS.credentials', true);
         $f3->set('CORS.expose', ['X-Version', 'Foo']);
         $f3->set('CORS.ttl', 60);
-        $headers = [
+        $test_headers = [
             'Access-Control-Request-Method' => 'GET',
             'Origin' => 'localhost',
         ];
 
-        $f3->mset($headers, 'HEADERS.');
-        $f3->mock('OPTIONS /cors-test', null, $headers);
+        $f3->mset($test_headers, 'HEADERS.');
+        $f3->mock('OPTIONS /cors-test', null, $test_headers);
         $headerlist = headers_list();
         $test->expect(in_array('Access-Control-Allow-Origin: *', $headerlist), 'CORS Preflight Origin test');
         $test->expect(in_array('Access-Control-Allow-Methods: OPTIONS,GET,POST', $headerlist), 'CORS Preflight Methods');
@@ -408,20 +428,20 @@ class Router extends BaseController {
         $f3->route('GET|POST /cors-test-ajax [ajax]', function($f3) {
             return 'cors';
         });
-        $f3->mock('OPTIONS /cors-test-ajax [ajax]', null, $headers);
+        $f3->mock('OPTIONS /cors-test-ajax [ajax]', null, $test_headers);
         $headerlist = headers_list();
         header_remove();
 
-        $headers = [
+        $test_headers = [
             'Origin' => 'localhost',
         ];
         $f3->clear('HEADERS.Access-Control-Request-Method');
 
-        $out = $f3->mock('GET /cors-test-ajax [ajax]', null, $headers);
+        $out = $f3->mock('GET /cors-test-ajax [ajax]', null, $test_headers);
         $test->expect($out === 'cors' && in_array('Access-Control-Allow-Origin: *', $headerlist), 'CORS Ajax Route test');
         header_remove();
 
-        $out = $f3->mock('GET /cors-test', null, $headers);
+        $out = $f3->mock('GET /cors-test', null, $test_headers);
         $headerlist = headers_list();
         $test->expect($out === 'cors' && in_array('Access-Control-Allow-Origin: *', $headerlist), 'CORS Request');
         $test->expect(in_array('Access-Control-Expose-Headers: X-Version,Foo', $headerlist), 'CORS Request Expose Headers');
