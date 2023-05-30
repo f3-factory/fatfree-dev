@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Hive\Customer;
 use F3\Base;
+use F3\Prefab;
 use F3\Test;
 
 class Service extends BaseController {
@@ -18,7 +19,12 @@ class Service extends BaseController {
         $test->expect($bar instanceof BarService, 'Service injected');
 
         $bar2 = $f3->CONTAINER->get(BarService::class);
-        $test->expect($bar === $bar2, 'Service cached');
+        $test->expect($bar !== $bar2, 'Service not cached');
+
+        $f3->CONTAINER->singleton(BarService::class);
+        $obj1 = $f3->CONTAINER->get(BarService::class);
+        $obj2 = $f3->CONTAINER->get(BarService::class);
+        $test->expect($obj1 === $obj2, 'Singleton Service cached');
 
         $bar3 = $f3->CONTAINER->make(BarService::class);
         $test->expect($bar !== $bar3, 'New service created');
@@ -33,22 +39,34 @@ class Service extends BaseController {
         $mailer = $f3->CONTAINER->get(MailerInterface::class);
         $test->expect($mailer instanceof Mailer, 'Interface resolved');
 
-        $executed = false;
+        $executed = 0;
         $f3->CONTAINER->set(Mailer::class, function() use(&$executed) {
-            $executed = TRUE;
+            $executed++;
             return new Mailer();
         });
-        $mailer2 = $f3->CONTAINER->make(MailerInterface::class);
-        $test->expect($mailer2 instanceof Mailer && $executed === TRUE, 'Factory Closure called');
+        $f3->CONTAINER->make(MailerInterface::class);
+        $f3->CONTAINER->make(MailerInterface::class);
+        $f3->make(MailerInterface::class);
+        $test->expect($executed === 3, 'Factory Closure called');
 
-        $f3->CONTAINER->set('$bar', function() use($f3) {
+        $executed = 0;
+        $f3->CONTAINER->singleton(Mailer3::class, function() use(&$executed) {
+            $executed++;
+            return new Mailer3();
+        });
+        $f3->CONTAINER->get(Mailer3::class);
+        $f3->CONTAINER->get(Mailer3::class);
+        $f3->make(Mailer3::class);
+        $test->expect($executed === 1, 'Singleton Factory Closure called');
+
+        $f3->CONTAINER->singleton('$bar', function() use($f3) {
             return $f3->CONTAINER->make(BazService::class, ['x' => 2048]);
         });
         /** @var BazService $nbar1 */
         $nbar1 = $f3->CONTAINER->get('$bar');
         $test->expect($nbar1 instanceof BazService && $nbar1->getX() === 2048, 'Named service instance');
         $nbar2 = $f3->CONTAINER->get('$bar');
-        $test->expect($nbar1 === $nbar2, 'Named service cached');
+        $test->expect($nbar1 === $nbar2, 'Named singleton service');
 
         /** @var Customer $customer */
         $customer = $f3->CONTAINER->get(Customer::class);
@@ -57,20 +75,35 @@ class Service extends BaseController {
 
         $f3->route('GET /page/container-test', 'App\Controller\ContainerControllerTest->index');
         $response = $f3->mock('GET /page/container-test');
-        $test->expect($response === 'John Wick' && $customer->email === 'john@wick.com', 'Service injected to class constructor');
+        $test->expect($response === '' && $customer->first_name = 'John', 'Service injected to class constructor');
 
         $f3->route('POST /page/container-test-2', 'App\Controller\ContainerControllerTest->post');
         $response = $f3->mock('POST /page/container-test-2');
         $test->expect($response === Mailer::class, 'Service injected to route handler');
 
-        $f3->route('POST /page/container-test-3', function(Base $f3, Customer $customer) use($test) {
+        $service = $f3->CONTAINER->get(SingletonPrefabService::class);
+        $service->foo = 'baaaar';
+
+        $f3->CONTAINER->singleton(SingletonService::class);
+        $service2 = $f3->CONTAINER->get(SingletonService::class);
+        $service2->foo = 'foo0';
+
+        $f3->route('POST /page/container-test-3', function(Base $f3, SingletonPrefabService $service, SingletonService $service2) use($test) {
             $test->expect($f3->PATH === '/page/container-test-3'
-                && $customer->email === 'john@wick.com', 'Service injected to route closure');
+                && $service->foo === 'baaaar' && $service2->foo === 'foo0', 'Service injected to route closure');
         });
         $f3->mock('POST /page/container-test-3');
 
         $bar4 = $f3->make(BarService::class);
         $test->expect($bar4 instanceof BarService, 'make() alias usage');
+
+        $mailer1 = $f3->make(Mailer2::class);
+        $mailer2 = $f3->make(Mailer2::class);
+        $test->expect($mailer1 instanceof Mailer2 && $mailer1 === $mailer2, 'make() respects Prefab');
+
+        $mailer11 = $f3->make(Mailer::class);
+        $mailer22 = $f3->make(Mailer::class);
+        $test->expect($mailer11 instanceof Mailer && $mailer11 !== $mailer22, 'make() ignores Prefab');
 
         $executed = false;
         $f3->CONTAINER = function(string $class, array $args = []) use(&$executed) {
@@ -90,6 +123,9 @@ class Service extends BaseController {
         $mailer2 = $f3->make(Mailer2::class);
         $test->expect($mailer1 instanceof Mailer2 && $mailer1 === $mailer2, 'make() without CONTAINER respects Prefab');
 
+        $mailer1 = $f3->make(Mailer::class);
+        $mailer2 = $f3->make(Mailer::class);
+        $test->expect($mailer1 instanceof Mailer && $mailer1 !== $mailer2, 'make() without CONTAINER ignores Prefab');
         $f3->set('results',$test->results());
     }
 }
@@ -115,9 +151,17 @@ class BazService extends BarService {
     }
 }
 
+class SingletonService {
+    public string $foo;
+}
+class SingletonPrefabService extends SingletonService {
+    use Prefab;
+}
+
 interface MailerInterface {}
 
 class Mailer implements MailerInterface {}
+class Mailer3 implements MailerInterface {}
 
 trait Xyz {
     use \F3\Prefab;
@@ -132,8 +176,7 @@ class ContainerControllerTest {
         protected Base $f3
     ) {}
     public function index(Base $f3, $params) {
-        $this->app->email = 'john@wick.com';
-        return $this->app->first_name.' '.$this->app->last_name;
+        return $this->app->first_name;
     }
     public function post(MailerInterface $mailer) {
         return get_class($mailer);
