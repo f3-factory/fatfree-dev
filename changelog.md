@@ -15,3 +15,4 @@ WIP. Additional notes about changes not directly visible via commit messages
 - added mock sandbox and various fixed
 - removed Base non-clonable restriction
 - LOCALES is null by default, to load locales, set a directoy path to LOCALES
+- language() is now able to set fallback and load locales as well to work more efficient
