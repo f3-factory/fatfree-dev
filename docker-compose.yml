@@ -66,10 +66,6 @@ services:
       - traefik.http.routers.php72.rule=Host(`f3.php72.localhost`)
       - traefik.http.routers.php72.service=php72
       - traefik.http.services.php72.loadbalancer.server.port=8072
-#     php 5.6
-      - traefik.http.routers.php56.rule=Host(`f3.php56.localhost`)
-      - traefik.http.routers.php56.service=php56
-      - traefik.http.services.php56.loadbalancer.server.port=8056
   nginx:
     image: nginx:latest
     container_name: '${COMPOSE_PROJECT_NAME}-nginx'
@@ -150,18 +146,6 @@ services:
     environment:
       <<: *php_env
       PHP_IDE_CONFIG: serverName=f3.php72.localhost
-  php56:
-    <<: *php
-    build:
-      context: ./docker/bin/php56
-    environment:
-      <<: *php_env
-      PHP_IDE_CONFIG: serverName=f3.php56.localhost
-    container_name: '${COMPOSE_PROJECT_NAME}-php56'
-    volumes:
-      - ${DOCUMENT_ROOT}:/var/www/html:rw
-      - ./docker/config/php/php.ini:/usr/local/etc/php/php.ini
-      - ./docker/config/php/docker-php-ext-xdebug2.ini:/usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
   mysql:
     image: mysql:5.7
     container_name: '${COMPOSE_PROJECT_NAME}-mysql'

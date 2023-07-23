@@ -12,7 +12,8 @@ class Env extends Controller
                     'hash',
                     'json',
                     'session',
-                    'mbstring'
+                    'mbstring',
+                    'intl',
                 ],
             'Cache' =>
                 [

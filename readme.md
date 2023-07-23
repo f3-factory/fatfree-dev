@@ -2,7 +2,7 @@
 
 # F3 development bench
 
-This is a dockerized environment for testing and developing things on the [fatfree-core](https://github.com/bcosca/fatfree-core). 
+This is a dockerized environment for testing and developing things on the [fatfree-core](https://github.com/f3-factory/fatfree-core). 
 
 It's utilizing Docker to spin up multiple containers, so the framework can be tested with multiple services and different versions of them at the same time.
 
@@ -15,13 +15,12 @@ Currently included:
 - MySQL 5.7
 - PostgreSQL
 - SQL Server
-- PHP-FPM 5.6
 - PHP-FPM 7.2
 - PHP-FPM 7.3
 - PHP-FPM 7.4
 - PHP-FPM 8.0
 - PHP-FPM 8.1
-- PHP-FPM 8.2-rc2
+- PHP-FPM 8.2
 
 The services are bind to your local machine network using [Traefik](https://doc.traefik.io/traefik/). That way you'll have nice domain names for each php version with zero further configuration. 
 Open localhost:8080 for reviewing the current traefik configuration.
@@ -41,7 +40,6 @@ Also included is ready to use **XDebug**.
      - http://f3.php74.localhost
      - http://f3.php73.localhost
      - http://f3.php72.localhost
-     - http://f3.php56.localhost
    - Nginx
       - http://f3.nginx.php82.localhost
       - http://f3.nginx.php81.localhost
@@ -59,4 +57,4 @@ Also included is ready to use **XDebug**.
 
 This development environment belongs to the f3-factory community and is not meant for usage on a production system. No warranty for any security issues in case you put this on your public root.
 
-**Copyright (c) 2022 F3::Factory**
+**Copyright (c) 2023 F3::Factory**
