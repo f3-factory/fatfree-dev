@@ -45,7 +45,7 @@ class SQL extends Controller {
 						$db=new \DB\SQL('pgsql:host=f3-pgsql;dbname=fatfree', 'fatfree', 'fatfree');
 						break;
 					case 'sqlsrv':
-                        $db = new \DB\SQL('sqlsrv:SERVER=f3-mssql','sa','fatfree-root');
+                        $db = new \DB\SQL('sqlsrv:SERVER=f3-mssql;Encrypt=true;TrustServerCertificate=true;','sa','fatfree-root');
                         break;
 				}
 				$engine=$db->driver();
@@ -73,7 +73,7 @@ class SQL extends Controller {
                     $db->exec('CREATE DATABASE '.$db->quotekey('fatfree'));
 //                    $db->exec('CREATE DATABASE '.$db->quotekey('fatfree').' collate Latin1_General_100_CI_AI_SC_UTF8');
 					unset($db);
-                    $db = new \DB\SQL('sqlsrv:SERVER=f3-mssql;Database=fatfree','sa','fatfree-root');
+                    $db = new \DB\SQL('sqlsrv:SERVER=f3-mssql;Database=fatfree;Encrypt=true;TrustServerCertificate=true;','sa','fatfree-root');
 				}
 				$db->exec(
 					[
