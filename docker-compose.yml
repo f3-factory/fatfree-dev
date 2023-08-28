@@ -1,5 +1,6 @@
 x-php-template: &php
   restart: 'always'
+  platform: linux/x86_64
   networks:
     internal:
   volumes:
@@ -35,6 +36,7 @@ services:
       - "${HOST_PORT_TRAEFIK}:8080"
   apache24:
     image: httpd:2.4
+    platform: linux/x86_64
     container_name: '${COMPOSE_PROJECT_NAME}-apache'
     volumes:
       - ${DOCUMENT_ROOT}:/var/www/html:rw
@@ -92,6 +94,7 @@ services:
       PHP_IDE_CONFIG: serverName=${COMPOSE_PROJECT_NAME}.php82.localhost
   mysql:
     image: mysql:8.0-debian
+    platform: linux/x86_64
     container_name: '${COMPOSE_PROJECT_NAME}-mysql'
     hostname: f3-mysql
     restart: 'always'
@@ -123,6 +126,7 @@ services:
       POSTGRES_PASSWORD: ${PGSQL_PASSWORD}
   mssql:
     image: mcr.microsoft.com/mssql/server:2019-latest
+    platform: linux/x86_64
     container_name: '${COMPOSE_PROJECT_NAME}-mssql'
     hostname: f3-mssql
     restart: 'always'
