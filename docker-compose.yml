@@ -53,12 +53,16 @@ services:
       - traefik.http.routers.php82.rule=Host(`${COMPOSE_PROJECT_NAME}.php82.localhost`)
       - traefik.http.routers.php82.service=php82
       - traefik.http.services.php82.loadbalancer.server.port=8082
-#     php 8.2
+#     php 8.2 ssl
       - traefik.http.routers.php82ssl.rule=Host(`${COMPOSE_PROJECT_NAME}.php82.localhost`)
       - traefik.http.routers.php82ssl.service=php82
       - traefik.http.routers.php82ssl.entrypoints=websecure
       - traefik.http.routers.php82ssl.tls=true
       - traefik.http.services.php82ssl.loadbalancer.server.port=5082
+#     php 8.3
+      - traefik.http.routers.php83.rule=Host(`${COMPOSE_PROJECT_NAME}.php83.localhost`)
+      - traefik.http.routers.php83.service=php83
+      - traefik.http.services.php83.loadbalancer.server.port=8083
   nginx:
     image: nginx:latest
     container_name: '${COMPOSE_PROJECT_NAME}-nginx'
@@ -71,6 +75,8 @@ services:
       - ./docker/data/logs/nginx:/var/log/nginx
     networks:
       - internal
+    depends_on:
+      - php82swoole
     labels:
       - traefik.enable=true
 #     php 8.2
@@ -83,6 +89,14 @@ services:
       - traefik.http.routers.ngx-php82ssl.entrypoints=websecure
       - traefik.http.routers.ngx-php82ssl.tls=true
       - traefik.http.services.ngx-php82ssl.loadbalancer.server.port=5082
+#     php 8.2 + swoole
+      - traefik.http.routers.php82swoole.rule=Host(`${COMPOSE_PROJECT_NAME}.php82swoole.localhost`)
+      - traefik.http.routers.php82swoole.service=php82swoole
+      - traefik.http.services.php82swoole.loadbalancer.server.port=8182
+#     php 8.2
+      - traefik.http.routers.ngx-php83.rule=Host(`${COMPOSE_PROJECT_NAME}.nginx.php83.localhost`)
+      - traefik.http.routers.ngx-php83.service=php83
+      - traefik.http.services.ngx-php83.loadbalancer.server.port=8083
   php82:
     <<: *php
     build:
@@ -92,6 +106,32 @@ services:
     environment:
       <<: *php_env
       PHP_IDE_CONFIG: serverName=${COMPOSE_PROJECT_NAME}.php82.localhost
+  php82swoole:
+    <<: *php
+    volumes:
+      - ${DOCUMENT_ROOT}:/var/www:rw
+      - ./docker/config/php/php.ini:/usr/local/etc/php/php.ini
+      - ./docker/config/php_swoole/docker-php-ext-xdebug3.ini:/usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+    build:
+      context: ./docker/bin/swoole
+    container_name: '${COMPOSE_PROJECT_NAME}-php82swoole'
+    hostname: f3-php82swoole
+    ports:
+      - "8182:9501"
+    environment:
+      <<: *php_env
+      AUTORELOAD_PROGRAMS: "swoole"
+      AUTORELOAD_ANY_FILES: 1
+      PHP_IDE_CONFIG: serverName=${COMPOSE_PROJECT_NAME}.php82swoole.localhost
+  php83:
+    <<: *php
+    build:
+      context: ./docker/bin/php83
+    container_name: '${COMPOSE_PROJECT_NAME}-php83'
+    hostname: f3-php83
+    environment:
+      <<: *php_env
+      PHP_IDE_CONFIG: serverName=${COMPOSE_PROJECT_NAME}.php83.localhost
   mysql:
     image: mysql:8.0-debian
     platform: linux/x86_64
@@ -136,7 +176,7 @@ services:
       - "${HOST_PORT_MSSQL}:1433"
     environment:
       ACCEPT_EULA: Y
-      SA_PASSWORD: fatfree-root
+      SA_PASSWORD: FatFree-r00t!
       MSSQL_PID: Developer
   redis:
     container_name: '${COMPOSE_PROJECT_NAME}-redis'

@@ -16,6 +16,8 @@ Currently included:
 - PostgreSQL
 - SQL Server
 - PHP-FPM 8.2
+- PHP-FPM 8.2 + Swoole
+- PHP-FPM 8.3
 
 The services are bind to your local machine network using [Traefik](https://doc.traefik.io/traefik/). That way you'll have nice domain names for each php version with zero further configuration. 
 Open localhost:8080 for reviewing the current traefik configuration.
@@ -30,8 +32,13 @@ Also included is ready to use **XDebug**.
 5. Open your browser with the desired version to run:
    - Apache Webserver
      - http://f3.php82.localhost
+     - http://f3.php83.localhost
    - Nginx
-      - http://f3.nginx.php82.localhost
+     - http://f3.nginx.php82.localhost
+     - http://f3.nginx.php83.localhost
+   - Swoole
+     - http://localhost:8182/ (raw swoole server)
+     - http://f3.php82swoole.localhost (with nginx proxy)
 6. Some framework tests require additional composer packages. To install these, run `docker-compose exec php82 composer install`.
 
 ## TODO
