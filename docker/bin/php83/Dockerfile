@@ -1,4 +1,4 @@
-FROM php:8.3-fpm-bullseye
+FROM php:8.3-fpm
 
 ARG DEBIAN_FRONTEND=noninteractive
 

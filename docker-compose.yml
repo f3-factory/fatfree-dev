@@ -1,6 +1,5 @@
 x-php-template: &php
   restart: 'always'
-  platform: linux/x86_64
   networks:
     internal:
   volumes:
@@ -93,7 +92,7 @@ services:
       - traefik.http.routers.php82swoole.rule=Host(`${COMPOSE_PROJECT_NAME}.php82swoole.localhost`)
       - traefik.http.routers.php82swoole.service=php82swoole
       - traefik.http.services.php82swoole.loadbalancer.server.port=8182
-#     php 8.2
+#     php 8.3
       - traefik.http.routers.ngx-php83.rule=Host(`${COMPOSE_PROJECT_NAME}.nginx.php83.localhost`)
       - traefik.http.routers.ngx-php83.service=php83
       - traefik.http.services.ngx-php83.loadbalancer.server.port=8083
