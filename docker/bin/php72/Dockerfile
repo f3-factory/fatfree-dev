@@ -1,4 +1,4 @@
-FROM php:7.2-fpm-buster
+FROM php:7.2-fpm
 
 ARG DEBIAN_FRONTEND=noninteractive
 
@@ -36,7 +36,6 @@ RUN install-php-extensions \
     gd \
     geoip \
     igbinary \
-    imagick \
     intl \
     ldap \
     memcache \

@@ -1,4 +1,4 @@
-FROM php:8.0-fpm-buster
+FROM php:8.0-fpm
 
 ARG DEBIAN_FRONTEND=noninteractive
 
@@ -30,12 +30,11 @@ ENV LANG=en_US.UTF-8 \
 COPY --from=mlocati/php-extension-installer /usr/bin/install-php-extensions /usr/local/bin/
 RUN install-php-extensions \
     calendar \
-    xdebug-^3.1 \
+    xdebug \
     apcu \
     exif \
     gd \
     igbinary \
-    imagick \
     intl \
     ldap \
     memcache \

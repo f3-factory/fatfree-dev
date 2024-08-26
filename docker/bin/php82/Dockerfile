@@ -1,4 +1,4 @@
-FROM php:8.2-fpm-buster
+FROM php:8.2-fpm
 
 ARG DEBIAN_FRONTEND=noninteractive
 
@@ -34,7 +34,6 @@ RUN install-php-extensions \
     exif \
     gd \
     igbinary \
-    imagick \
     intl \
     ldap \
     memcache \

@@ -1,4 +1,4 @@
-FROM php:8.1-fpm-buster
+FROM php:8.1-fpm
 
 ARG DEBIAN_FRONTEND=noninteractive
 
@@ -31,11 +31,10 @@ COPY --from=mlocati/php-extension-installer /usr/bin/install-php-extensions /usr
 RUN install-php-extensions \
     calendar \
     gd \
-    xdebug-^3.1 \
+    xdebug \
     apcu \
     exif \
     igbinary \
-    imagick \
     intl \
     ldap \
     memcache \
