@@ -255,6 +255,10 @@ class Template extends Controller {
 			trim($tpl->render('templates/test5.3.htm')) === '10',
 			'test unmatching tag cases'
 		);
+		$test->expect(
+            ($x=preg_replace('/(\s)*/', '', trim($tpl->render('templates/test5.4.htm')))) === '1010',
+			'test multiline tags'. $x
+		);
 		$f3->clear('cond1');
 		$f3->set('test',['string'=>'thin','int'=>123,'bool'=>FALSE]);
 		$test->expect(
