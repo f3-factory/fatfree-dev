@@ -14,7 +14,7 @@ networks:
   internal:
 services:
   traefik:
-    image: "traefik:v2.5"
+    image: "traefik:v3.2"
     container_name: "${COMPOSE_PROJECT_NAME}-traefik"
     command:
       - "--log.level=DEBUG"
@@ -89,9 +89,9 @@ services:
       - traefik.http.routers.ngx-php82ssl.tls=true
       - traefik.http.services.ngx-php82ssl.loadbalancer.server.port=5082
 #     php 8.2 + swoole
-      - traefik.http.routers.php82swoole.rule=Host(`${COMPOSE_PROJECT_NAME}.php82swoole.localhost`)
-      - traefik.http.routers.php82swoole.service=php82swoole
-      - traefik.http.services.php82swoole.loadbalancer.server.port=8182
+      - traefik.http.routers.ngx-php82swoole.rule=Host(`${COMPOSE_PROJECT_NAME}.nginx.php82swoole.localhost`)
+      - traefik.http.routers.ngx-php82swoole.service=ngx-php82swoole
+      - traefik.http.services.ngx-php82swoole.loadbalancer.server.port=8182
 #     php 8.3
       - traefik.http.routers.ngx-php83.rule=Host(`${COMPOSE_PROJECT_NAME}.nginx.php83.localhost`)
       - traefik.http.routers.ngx-php83.service=php83
@@ -115,8 +115,13 @@ services:
       context: ./docker/bin/swoole
     container_name: '${COMPOSE_PROJECT_NAME}-php82swoole'
     hostname: f3-php82swoole
-    ports:
-      - "8182:9501"
+#    ports:
+#      - "8182:9501"
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.raw-php82swoole.rule=Host(`${COMPOSE_PROJECT_NAME}.php82swoole.localhost`)
+      - traefik.http.routers.raw-php82swoole.service=raw-php82swoole
+      - traefik.http.services.raw-php82swoole.loadbalancer.server.port=9501
     environment:
       <<: *php_env
       AUTORELOAD_PROGRAMS: "swoole"
