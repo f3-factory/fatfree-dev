@@ -2,7 +2,7 @@ FROM phpswoole/swoole
 
 RUN apt-get -y update --fix-missing && \
     apt-get upgrade -y && \
-    apt-get --no-install-recommends install -y apt-utils zip
+    apt-get --no-install-recommends install -y apt-utils zip unzip
 
 RUN \
     set -ex && \

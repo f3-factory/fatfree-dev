@@ -5,7 +5,7 @@ ARG DEBIAN_FRONTEND=noninteractive
 # Update
 RUN apt-get -y update --fix-missing && \
     apt-get upgrade -y && \
-    apt-get --no-install-recommends install -y apt-utils zip && \
+    apt-get --no-install-recommends install -y apt-utils zip unzip && \
     rm -rf /var/lib/apt/lists/*
 
 # Install and set up system locales
