@@ -1,0 +1,21 @@
+version: '3'
+
+rpc:
+  listen: tcp://127.0.0.1:6001
+
+server:
+  command: "php overdrive-roadrunner.php"
+  relay: pipes
+
+http:
+  pool:
+    debug: true
+    num_workers: 4
+  fcgi:
+    address: tcp://0.0.0.0:9000
+
+logs:
+  mode: development
+  level: debug
+#  mode: production
+#  level: error

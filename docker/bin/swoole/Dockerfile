@@ -34,4 +34,4 @@ RUN install-php-extensions \
 ## install package plugins
 COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
 ENV COMPOSER_ALLOW_SUPERUSER=1
-CMD ["php","server.php"]
+CMD ["php","overdrive-swoole.php"]

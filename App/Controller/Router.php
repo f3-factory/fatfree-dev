@@ -16,6 +16,8 @@ class Router extends BaseController {
 
     function get(Base $f3) {
         $test=new Test;
+        $f3->copy('ROUTES', 'ROUTES_bak');
+
         $test->expect(
             is_null($f3->get('ERROR')),
             'No errors expected at this point'
@@ -47,7 +49,7 @@ class Router extends BaseController {
         $test_headers = [];
         $orig_headers = $f3->HEADERS;
         $exp_headers = ['X-Foo' => 'Bar'];
-        $os_uri=$_SERVER['REQUEST_URI'];
+        $os_uri=$_SERVER['REQUEST_URI']; // $_SERVER intentional!
         $oh_uri=$f3->URI;
         $th_uri='';
         $ts_uri='';
@@ -85,7 +87,7 @@ class Router extends BaseController {
             && $f3->URI === $oh_uri
             && $th_uri === '/mock'
             && $ts_uri === '/mock'
-            && $f3->SERVER['REQUEST_URI'] === $os_uri
+            && $f3->SERVER['REQUEST_URI'] === $os_uri // should not be altered in sandbox mode
             , 'Route mock test in sandbox');
         // reset
         $mocked = FALSE;
@@ -97,8 +99,7 @@ class Router extends BaseController {
         $ts_uri='';
 
         $f3->route('GET|POST /mock',
-            function() use (&$mocked, &$test_headers, &$th_uri, &$ts_uri) {
-                $f3 = Base::instance();
+            function(Base $f3) use (&$mocked, &$test_headers, &$th_uri, &$ts_uri) {
                 $mocked = true;
                 $f3->mocked = true;
                 $test_headers = $f3->HEADERS;
@@ -232,9 +233,7 @@ class Router extends BaseController {
         );
         $f3->clear('ROUTES');
         $f3->route('GET /',__NAMESPACE__.'\please');
-            function please($f3) {
-                $f3->set('send','money');
-            }
+
         $f3->mock('GET /');
         $test->expect(
             $f3->get('send')=='money',
@@ -257,28 +256,28 @@ class Router extends BaseController {
             $ok,
             'Methods supported'.($list?(': '.$list):'')
         );
-        $f3->set('BODY','');
+        $f3->set('BODY','123');
         $f3->mock('PUT /dummy');
         $test->expect(
-            $f3->exists('BODY'),
+            $f3->exists('BODY') && $f3->BODY = '123',
             'Request body available'
         );
         $f3->mock('OPTIONS /dummy');
         $test->expect(
             preg_grep('/Allow: '.
-                (implode(',',Verb::names()).'/'),headers_list()),
+                (implode(',',Verb::names()).'/'), $f3->RESPONSE_HEADERS),
             'HTTP OPTIONS request returns allowed methods'
         );
         $f3->clear('ERROR');
         $f3->clear('ROUTES');
         $f3->route('OPTIONS /dummy',
             function($f3,$args) {
-                header('Allow: GET, POST');
+                $f3->header('Allow: GET, POST');
             }
         );
         $f3->mock('OPTIONS /dummy');
         $test->expect(
-            preg_grep('/^Allow: GET, POST$/',headers_list()),
+            preg_grep('/^Allow: GET, POST$/', $f3->RESPONSE_HEADERS),
             'HTTP OPTIONS request returns user-specified methods'
         );
         $f3->clear('ERROR');
@@ -405,6 +404,7 @@ class Router extends BaseController {
                 '(~'.(1000/$throttle).'ms): '.
                 sprintf('%.1f',$elapsed*1e3).'ms'
         );
+        $f3->copy('QUIET','QUIET_bak');
         $f3->set('QUIET',TRUE);
         $f3->set('DNSBL','bl.spamcop.net');
         $f3->set('blocked',TRUE);
@@ -419,7 +419,8 @@ class Router extends BaseController {
             !$f3->get('blocked'),
             'DNSBL lookup: '.sprintf('%.1f',(microtime(TRUE)-$mark)*1e3).'ms'
         );
-        $f3->set('QUIET',FALSE);
+        $f3->copy('QUIET_bak', 'QUIET');
+
         $f3->clear('ROUTES');
         $f3->clear('called');
         $f3->call(self::class.'->callee');
@@ -473,19 +474,19 @@ class Router extends BaseController {
 
         $f3->mset($test_headers, 'HEADERS.');
         $f3->mock('OPTIONS /cors-test', null, $test_headers);
-        $headerlist = headers_list();
+        $headerlist = $f3->RESPONSE_HEADERS;
         $test->expect(in_array('Access-Control-Allow-Origin: *', $headerlist), 'CORS Preflight Origin test');
         $test->expect(in_array('Access-Control-Allow-Methods: OPTIONS,GET,POST', $headerlist), 'CORS Preflight Methods');
         $test->expect(in_array('Access-Control-Allow-Credentials: true', $headerlist), 'CORS Preflight Credentials');
         $test->expect(in_array('Access-Control-Max-Age: 60', $headerlist), 'CORS Preflight Max Age');
-        header_remove();
+        $f3->header_remove();
 
         $f3->route('GET|POST /cors-test-ajax [ajax]', function($f3) {
             return 'cors';
         });
         $f3->mock('OPTIONS /cors-test-ajax [ajax]', null, $test_headers);
-        $headerlist = headers_list();
-        header_remove();
+        $headerlist = $f3->RESPONSE_HEADERS;
+        $f3->header_remove();
 
         $test_headers = [
             'Origin' => 'localhost',
@@ -494,13 +495,13 @@ class Router extends BaseController {
 
         $out = $f3->mock('GET /cors-test-ajax [ajax]', null, $test_headers);
         $test->expect($out === 'cors' && in_array('Access-Control-Allow-Origin: *', $headerlist), 'CORS Ajax Route test');
-        header_remove();
+        $f3->header_remove();
 
         $out = $f3->mock('GET /cors-test', null, $test_headers);
-        $headerlist = headers_list();
+        $headerlist = $f3->RESPONSE_HEADERS;
         $test->expect($out === 'cors' && in_array('Access-Control-Allow-Origin: *', $headerlist), 'CORS Request');
         $test->expect(in_array('Access-Control-Expose-Headers: X-Version,Foo', $headerlist), 'CORS Request Expose Headers');
-        header_remove();
+        $f3->header_remove();
 
         $f3->ONERROR = null;
         $f3->HALT = true;
@@ -562,6 +563,7 @@ class Router extends BaseController {
         );
 
         $f3->set('results',$test->results());
+        $f3->copy('ROUTES_bak', 'ROUTES');
     }
 
 }
@@ -600,3 +602,6 @@ function c($z) {
     return $z*4;
 }
 
+function please($f3) {
+    $f3->set('send','money');
+}

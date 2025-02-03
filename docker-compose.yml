@@ -35,7 +35,6 @@ services:
       - "${HOST_PORT_TRAEFIK}:8080"
   apache24:
     image: httpd:2.4
-    platform: linux/x86_64
     container_name: '${COMPOSE_PROJECT_NAME}-apache'
     volumes:
       - ${DOCUMENT_ROOT}:/var/www/html:rw
@@ -79,7 +78,10 @@ services:
     networks:
       - internal
     depends_on:
+      - php82
       - php82swoole
+      - php83
+      - php84
     labels:
       - traefik.enable=true
 #     php 8.2
@@ -100,10 +102,15 @@ services:
       - traefik.http.routers.ngx-php83.rule=Host(`${COMPOSE_PROJECT_NAME}.nginx.php83.localhost`)
       - traefik.http.routers.ngx-php83.service=php83
       - traefik.http.services.ngx-php83.loadbalancer.server.port=8083
+#     php 8.3 + roadrunner
+      - traefik.http.routers.ngx-php83rr.rule=Host(`${COMPOSE_PROJECT_NAME}.nginx.php83rr.localhost`)
+      - traefik.http.routers.ngx-php83rr.service=ngx-php83rr
+      - traefik.http.services.ngx-php83rr.loadbalancer.server.port=8283
 #     php 8.4
       - traefik.http.routers.ngx-php84.rule=Host(`${COMPOSE_PROJECT_NAME}.nginx.php84.localhost`)
       - traefik.http.routers.ngx-php84.service=php84
       - traefik.http.services.ngx-php84.loadbalancer.server.port=8084
+
   php82:
     <<: *php
     build:
@@ -113,6 +120,7 @@ services:
     environment:
       <<: *php_env
       PHP_IDE_CONFIG: serverName=${COMPOSE_PROJECT_NAME}.php82.localhost
+
   php82swoole:
     <<: *php
     volumes:
@@ -123,8 +131,6 @@ services:
       context: ./docker/bin/swoole
     container_name: '${COMPOSE_PROJECT_NAME}-php82swoole'
     hostname: f3-php82swoole
-#    ports:
-#      - "8182:9501"
     labels:
       - traefik.enable=true
       - traefik.http.routers.raw-php82swoole.rule=Host(`${COMPOSE_PROJECT_NAME}.php82swoole.localhost`)
@@ -135,6 +141,36 @@ services:
       AUTORELOAD_PROGRAMS: "swoole"
       AUTORELOAD_ANY_FILES: 1
       PHP_IDE_CONFIG: serverName=${COMPOSE_PROJECT_NAME}.php82swoole.localhost
+
+  php82openswoole:
+    <<: *php
+    volumes:
+      - ${DOCUMENT_ROOT}:/var/www/html:rw
+      - ./docker/config/php/php.ini:/usr/local/etc/php/php.ini
+      - ./docker/config/php_swoole/docker-php-ext-xdebug3.ini:/usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+    build:
+      context: ./docker/bin/open-swoole
+    container_name: '${COMPOSE_PROJECT_NAME}-php82openswoole'
+    hostname: f3-php82swoole
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.raw-php82openswoole.rule=Host(`${COMPOSE_PROJECT_NAME}.php82openswoole.localhost`)
+      - traefik.http.routers.raw-php82openswoole.service=raw-php82openswoole
+      - traefik.http.services.raw-php82openswoole.loadbalancer.server.port=9501
+    environment:
+      <<: *php_env
+      PHP_IDE_CONFIG: serverName=${COMPOSE_PROJECT_NAME}.php82openswoole.localhost
+
+  php83roadrunner:
+    <<: *php
+    build:
+      context: ./docker/bin/php83rr
+    container_name: '${COMPOSE_PROJECT_NAME}-php83rr'
+    hostname: f3-php83rr
+    environment:
+      <<: *php_env
+      PHP_IDE_CONFIG: serverName=${COMPOSE_PROJECT_NAME}.php83rr.localhost
+
   php83:
     <<: *php
     build:
@@ -144,6 +180,7 @@ services:
     environment:
       <<: *php_env
       PHP_IDE_CONFIG: serverName=${COMPOSE_PROJECT_NAME}.php83.localhost
+
   php84:
     <<: *php
     build:
@@ -153,9 +190,16 @@ services:
     environment:
       <<: *php_env
       PHP_IDE_CONFIG: serverName=${COMPOSE_PROJECT_NAME}.php84.localhost
+
+  composer_install:
+    container_name: composer_installation
+    image: composer
+    volumes:
+      - ./:/app
+    command: composer install --ignore-platform-reqs
+
   mysql:
     image: mysql:8.0-debian
-    platform: linux/x86_64
     container_name: '${COMPOSE_PROJECT_NAME}-mysql'
     hostname: f3-mysql
     restart: 'always'
@@ -172,6 +216,7 @@ services:
       MYSQL_DATABASE: ${MYSQL_DATABASE}
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+
   pgsql:
     image: postgres:latest
     container_name: '${COMPOSE_PROJECT_NAME}-pgsql'
@@ -185,9 +230,9 @@ services:
       POSTGRES_DB: ${PGSQL_DATABASE}
       POSTGRES_USER: ${PGSQL_USER}
       POSTGRES_PASSWORD: ${PGSQL_PASSWORD}
+
   mssql:
     image: mcr.microsoft.com/mssql/server:2019-latest
-    platform: linux/x86_64
     container_name: '${COMPOSE_PROJECT_NAME}-mssql'
     hostname: f3-mssql
     restart: 'always'
@@ -199,6 +244,7 @@ services:
       ACCEPT_EULA: Y
       SA_PASSWORD: FatFree-r00t!
       MSSQL_PID: Developer
+
   redis:
     container_name: '${COMPOSE_PROJECT_NAME}-redis'
     hostname: f3-redis
@@ -207,6 +253,7 @@ services:
       internal:
     ports:
       - "${HOST_PORT_REDIS}:6379"
+
   memcached:
     container_name: '${COMPOSE_PROJECT_NAME}-memcached'
     hostname: f3-memcached

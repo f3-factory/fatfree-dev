@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Hive\Customer;
 use F3\Base;
 use F3\Prefab;
+use F3\Registry;
 use F3\Test;
 
 class Service extends BaseController {
@@ -21,13 +22,17 @@ class Service extends BaseController {
         $bar2 = $f3->CONTAINER->get(BarService::class);
         $test->expect($bar !== $bar2, 'Service not cached');
 
-        $f3->CONTAINER->singleton(BarService::class);
-        $obj1 = $f3->CONTAINER->get(BarService::class);
-        $obj2 = $f3->CONTAINER->get(BarService::class);
+        Registry::clear(BarServic2::class);
+        $f3->CONTAINER->singleton(BarServic2::class);
+        $obj1 = $f3->CONTAINER->get(BarServic2::class);
+        $obj2 = $f3->CONTAINER->get(BarServic2::class);
         $test->expect($obj1 === $obj2, 'Singleton Service cached');
 
         $bar3 = $f3->CONTAINER->make(BarService::class);
         $test->expect($bar !== $bar3, 'New service created');
+
+        $bar3 = $f3->CONTAINER->make(BarServic2::class);
+        $test->expect($bar !== $bar3, 'New singleton service created');
 
         /** @var BazService $baz */
         $baz = $f3->CONTAINER->make(BazService::class);
@@ -49,16 +54,18 @@ class Service extends BaseController {
         $f3->make(MailerInterface::class);
         $test->expect($executed === 3, 'Factory Closure called');
 
-        $executed = 0;
-        $f3->CONTAINER->singleton(Mailer3::class, function() use(&$executed) {
-            $executed++;
+        $executed2 = 0;
+        Registry::clear(Mailer3::class);
+        $f3->CONTAINER->singleton(Mailer3::class, function() use(&$executed2) {
+            $executed2++;
             return new Mailer3();
         });
         $f3->CONTAINER->get(Mailer3::class);
         $f3->CONTAINER->get(Mailer3::class);
         $f3->make(Mailer3::class);
-        $test->expect($executed === 1, 'Singleton Factory Closure called');
+        $test->expect($executed2 === 1, 'Singleton Factory Closure called');
 
+        Registry::clear('$bar');
         $f3->CONTAINER->singleton('$bar', function() use($f3) {
             return $f3->CONTAINER->make(BazService::class, ['x' => 2048]);
         });
@@ -97,21 +104,21 @@ class Service extends BaseController {
         $bar4 = $f3->make(BarService::class);
         $test->expect($bar4 instanceof BarService, 'make() alias usage');
 
-        $mailer1 = $f3->make(Mailer2::class);
-        $mailer2 = $f3->make(Mailer2::class);
-        $test->expect($mailer1 instanceof Mailer2 && $mailer1 === $mailer2, 'make() respects Prefab');
+        $mailer1 = $f3->make(MailerSingleton::class);
+        $mailer2 = $f3->make(MailerSingleton::class);
+        $test->expect($mailer1 instanceof MailerSingleton && $mailer1 === $mailer2, 'make() respects Prefab');
 
         $mailer11 = $f3->make(Mailer::class);
         $mailer22 = $f3->make(Mailer::class);
         $test->expect($mailer11 instanceof Mailer && $mailer11 !== $mailer22, 'make() ignores Prefab');
 
-        $executed = false;
-        $f3->CONTAINER = function(string $class, array $args = []) use(&$executed) {
-            $executed = $class;
+        $executedFn = false;
+        $f3->CONTAINER = function(string $class, array $args = []) use(&$executedFn) {
+            $executedFn = $class;
             return new BarService(new FooService());
         };
         $bar5 = $f3->make(BarService::class);
-        $test->expect($bar5 instanceof BarService && $executed === BarService::class, 'Closure CONTAINER');
+        $test->expect($bar5 instanceof BarService && $executedFn === BarService::class, 'Closure CONTAINER');
 
         $f3->clear('CONTAINER');
         $test->expect(empty($f3->CONTAINER), 'CONTAINER reset');
@@ -119,14 +126,16 @@ class Service extends BaseController {
         $foo = $f3->make(FooService::class);
         $test->expect($foo instanceof FooService, 'make() without CONTAINER');
 
-        $mailer1 = $f3->make(Mailer2::class);
-        $mailer2 = $f3->make(Mailer2::class);
-        $test->expect($mailer1 instanceof Mailer2 && $mailer1 === $mailer2, 'make() without CONTAINER respects Prefab');
+        $mailer1 = $f3->make(MailerSingleton::class);
+        $mailer2 = $f3->make(MailerSingleton::class);
+        $test->expect($mailer1 instanceof MailerSingleton && $mailer1 === $mailer2, 'make() without CONTAINER respects Prefab');
 
         $mailer1 = $f3->make(Mailer::class);
         $mailer2 = $f3->make(Mailer::class);
         $test->expect($mailer1 instanceof Mailer && $mailer1 !== $mailer2, 'make() without CONTAINER ignores Prefab');
         $f3->set('results',$test->results());
+
+        $f3->CONTAINER = \F3\Service::instance();
     }
 }
 
@@ -136,6 +145,10 @@ class BarService {
     function __construct(
         protected FooService $foo,
     ) {}
+}
+
+class BarServic2 extends BarService {
+
 }
 
 class BazService extends BarService {
@@ -163,11 +176,11 @@ interface MailerInterface {}
 class Mailer implements MailerInterface {}
 class Mailer3 implements MailerInterface {}
 
-trait Xyz {
+trait PrefabTrait {
     use \F3\Prefab;
 }
-class Mailer2 extends Mailer {
-    use Xyz;
+class MailerSingleton extends Mailer {
+    use PrefabTrait;
 }
 
 class ContainerControllerTest {

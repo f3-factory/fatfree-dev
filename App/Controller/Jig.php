@@ -238,12 +238,11 @@ class Jig extends BaseController {
 			$session->sid()===NULL,
 			'Database-managed session instantiated but not started'
 		);
-		session_start();
+		$f3->set('SESSION.foo','hello world');
 		$test->expect(
 			$sid=$session->sid(),
 			'Database-managed session started: '.$sid
 		);
-		$f3->set('SESSION.foo','hello world');
 		session_write_close();
 		$test->expect(
 			$session->sid()===NULL,
@@ -272,15 +271,15 @@ class Jig extends BaseController {
 		);
 		$before=$after='';
 		if (preg_match('/^Set-Cookie: '.session_name().'=(\w+)/m',
-			implode(PHP_EOL,array_reverse(headers_list())),$m))
+			implode(PHP_EOL,array_reverse(headers_list() ?: $f3->RESPONSE_HEADERS)),$m))
 			$before=$m[1];
 		$f3->clear('SESSION');
 		if (preg_match('/^Set-Cookie: '.session_name().'=(\w+)/m',
-			implode(PHP_EOL,array_reverse(headers_list())),$m))
+			implode(PHP_EOL,array_reverse(headers_list() ?: $f3->RESPONSE_HEADERS)),$m))
 			$after=$m[1];
 		$test->expect(
-			empty($_SESSION) && $session->count(['session_id=?',$sid])==0 &&
-			$before==$sid && $after=='deleted' && empty($_COOKIE[session_name()]),
+			empty($f3->SESSION) && $session->count(['session_id=?',$sid])==0 &&
+			$before==$sid && $after=='deleted' && empty($f3->COOKIE[session_name()]),
 			'Session destroyed and cookie expired'
 		);
 		$db->drop();

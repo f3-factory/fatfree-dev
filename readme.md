@@ -16,8 +16,11 @@ Currently included:
 - PostgreSQL
 - SQL Server
 - PHP-FPM 8.2
-- PHP-FPM 8.2 + Swoole
 - PHP-FPM 8.3
+- PHP-FPM 8.4
+- Swoole
+- OpenSwoole
+- RoadRunner
 
 The services are bind to your local machine network using [Traefik](https://doc.traefik.io/traefik/). That way you'll have nice domain names for each php version with zero further configuration. 
 Open http://localhost:8080 for reviewing the current traefik configuration.
@@ -34,13 +37,17 @@ Also included is ready to use **XDebug**.
      - PHP 8.2: http://f3.php82.localhost
      - PHP 8.2 + SSL: https://f3.php82.localhost
      - PHP 8.3: http://f3.php83.localhost
+     - PHP 8.4: http://f3.php84.localhost
    - Nginx
      - PHP 8.2: http://f3.nginx.php82.localhost
      - PHP 8.2 + SSL: https://f3.nginx.php82.localhost
      - PHP 8.3: http://f3.nginx.php83.localhost
-   - Swoole
-     - PHP 8.2: http://f3.php82swoole.localhost
-     - PHP 8.2 + Nginx Proxy: http://f3.nginx.php82swoole.localhost
+     - PHP 8.4: http://f3.nginx.php84.localhost
+   - F3-Overdrive:
+     - Swoole, PHP 8.2: http://f3.php82swoole.localhost
+     - Swoole, PHP 8.2, Nginx Proxy: http://f3.nginx.php82swoole.localhost
+     - OpenSwoole, PHP 8.2: http://f3.php82openswoole.localhost/
+     - RoadRunner, PHP 8.2, Nginx Proxy: http://f3.nginx.php83rr.localhost/
 6. Some framework tests require additional composer packages. To install these, run `docker-compose exec php82 composer install`.
 
 ## TODO
@@ -53,4 +60,4 @@ Also included is ready to use **XDebug**.
 
 This development environment belongs to the f3-factory community and is not meant for usage on a production system. No warranty for any security issues in case you put this on your public root.
 
-**Copyright (c) 2023 F3::Factory**
+**Copyright (c) 2025 F3::Factory**

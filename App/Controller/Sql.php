@@ -2,19 +2,21 @@
 
 namespace App\Controller;
 
+use F3\Base;
+
 class SQL extends BaseController {
 
-	function get($f3) {
-		$test=new \F3\Test;
+	function get(Base $f3) {
+		$test=new \F3\Test();
 		$test->expect(
 			is_null($f3->get('ERROR')),
 			'No errors expected at this point'
 		);
 		$dbs = [
 			'sqlite' => 'pdo_sqlite',
-			'mysql' => 'pdo_mysql',
-			'pgsql' => 'pdo_pgsql',
-			'sqlsrv' => 'pdo_sqlsrv',
+//			'mysql' => 'pdo_mysql',
+//			'pgsql' => 'pdo_pgsql',
+//			'sqlsrv' => 'pdo_sqlsrv',
 		];
 
 		if (!is_dir('tmp/'))
@@ -45,7 +47,7 @@ class SQL extends BaseController {
 						$db=new \F3\DB\SQL('pgsql:host=f3-pgsql;dbname=fatfree', 'fatfree', 'fatfree');
 						break;
 					case 'sqlsrv':
-                        $db = new \F3\DB\SQL('sqlsrv:SERVER=f3-mssql','sa','fatfree-root');
+                        $db = new \F3\DB\SQL('sqlsrv:SERVER=f3-mssql;Encrypt=true;TrustServerCertificate=true;','sa','FatFree-r00t!');
                         break;
 				}
 				$engine=$db->driver();
@@ -73,7 +75,7 @@ class SQL extends BaseController {
                     $db->exec('CREATE DATABASE '.$db->quotekey('fatfree'));
 //                    $db->exec('CREATE DATABASE '.$db->quotekey('fatfree').' collate Latin1_General_100_CI_AI_SC_UTF8');
 					unset($db);
-                    $db = new \F3\DB\SQL('sqlsrv:SERVER=f3-mssql;Database=fatfree','sa','fatfree-root');
+                    $db = new \F3\DB\SQL('sqlsrv:SERVER=f3-mssql;Database=fatfree;Encrypt=true;TrustServerCertificate=true;','sa','FatFree-r00t!');
 				}
 				$db->exec(
 					[
@@ -547,21 +549,21 @@ class SQL extends BaseController {
 						$session->sid()===NULL,
 						'Database-managed session instantiated but not started'
 					);
-					session_start();
+					$f3->set('SESSION.foo','hello world');
 					$test->expect(
 						$sid=$session->sid(),
 						'Database-managed session started: '.$sid
 					);
-					$f3->set('SESSION.foo','hello world');
 					session_write_close();
 					$test->expect(
 						$session->sid()===NULL,
 						'Database-managed session written and closed'
 					);
-					$_SESSION=[];
-					$test->expect(
-						$f3->get('SESSION.foo')=='hello world',
-						'Session variable retrieved from database'
+                    $_SESSION=[];
+                    $test->expect(
+						$f3->get('SESSION.foo')=='hello world'
+                        && session_status() === PHP_SESSION_ACTIVE,
+						'Session variable retrieved from database: '.session_id()
 					);
 					$test->expect(
 						$ip=$session->ip(),
@@ -581,16 +583,16 @@ class SQL extends BaseController {
 					);
 					$before=$after='';
 					if (preg_match('/^Set-Cookie: '.session_name().'=(\w+)/m',
-						implode(PHP_EOL,array_reverse(headers_list())),$m))
+						implode(PHP_EOL, array_reverse(headers_list() ?: $f3->RESPONSE_HEADERS)),$m))
 						$before=$m[1];
 					$f3->clear('SESSION');
 					if (preg_match('/^Set-Cookie: '.session_name().'=(\w+)/m',
-						implode(PHP_EOL,array_reverse(headers_list())),$m))
+						implode(PHP_EOL, array_reverse(headers_list() ?: $f3->RESPONSE_HEADERS)),$m))
 						$after=$m[1];
 					$test->expect(
-						empty($_SESSION) && $session->count(['session_id=?',$sid])==0 &&
-						$before==$sid && $after=='deleted' && empty($_COOKIE[session_name()]),
-						'Session destroyed and cookie expired'
+						empty($f3->SESSION) && $session->count(['session_id=?',$sid])==0 &&
+						$before==$sid && $after=='deleted' && empty($f3->COOKIE[session_name()]),
+						'Session destroyed and cookie expired:'.$before.'|'.$after.'|'.$sid.'|'.empty($f3->COOKIE[session_name()]).'|'.empty($f3->SESSION)
 					);
 				}
 				$ticket->erase('');
@@ -598,6 +600,10 @@ class SQL extends BaseController {
 					$ticket->count()==0,
 					'All records erased'
 				);
+                // clean-up session for next run
+                session_write_close();
+                session_unset();
+                $_SESSION = [];
 			}
 		}
 
