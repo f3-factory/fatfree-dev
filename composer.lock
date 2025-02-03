@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "1618cca1292030f54339c5b2bad4d041",
+    "content-hash": "731463cc9a25dd4f254ad5ebce370f59",
     "packages": [
         {
             "name": "bcosca/fatfree-core",
@@ -177,6 +177,58 @@
             "time": "2023-07-18T20:41:43+00:00"
         },
         {
+            "name": "f3-factory/f3-overdrive",
+            "version": "dev-main",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/f3-factory/f3-overdrive.git",
+                "reference": "df4e1c8be3c5f2a5cd90d3c8916f82469af1796e"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/f3-factory/f3-overdrive/zipball/df4e1c8be3c5f2a5cd90d3c8916f82469af1796e",
+                "reference": "df4e1c8be3c5f2a5cd90d3c8916f82469af1796e",
+                "shasum": ""
+            },
+            "require": {
+                "bcosca/fatfree-core": "^4.0",
+                "f3-factory/fatfree-psr7-factory": "^1.0",
+                "php": ">=8.2",
+                "psr/http-factory": "^1.0",
+                "psr/http-message": "^1.1 || ^2.0"
+            },
+            "default-branch": true,
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "F3\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Christian Knuth // ikkez",
+                    "email": "ikkez0n3@gmail.com"
+                }
+            ],
+            "description": "Next level performance for your F3 app by serving through a HTTP application server reactor",
+            "keywords": [
+                "F3",
+                "fatfree",
+                "http-message",
+                "roadrunner",
+                "swoole"
+            ],
+            "support": {
+                "issues": "https://github.com/f3-factory/f3-overdrive/issues",
+                "source": "https://github.com/f3-factory/f3-overdrive/tree/main"
+            },
+            "time": "2025-02-03T16:04:30+00:00"
+        },
+        {
             "name": "f3-factory/fatfree-psr7",
             "version": "2.0.1",
             "source": {
@@ -234,16 +286,16 @@
         },
         {
             "name": "f3-factory/fatfree-psr7-factory",
-            "version": "dev-main",
+            "version": "1.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/f3-factory/fatfree-psr7-factory.git",
-                "reference": "7f9549d99fc059a4d3eb6fafe3560f4b0aa27823"
+                "reference": "6e75077368988512d31839f964f3dadae64a7f4d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/f3-factory/fatfree-psr7-factory/zipball/7f9549d99fc059a4d3eb6fafe3560f4b0aa27823",
-                "reference": "7f9549d99fc059a4d3eb6fafe3560f4b0aa27823",
+                "url": "https://api.github.com/repos/f3-factory/fatfree-psr7-factory/zipball/6e75077368988512d31839f964f3dadae64a7f4d",
+                "reference": "6e75077368988512d31839f964f3dadae64a7f4d",
                 "shasum": ""
             },
             "require": {
@@ -255,7 +307,6 @@
             "suggest": {
                 "f3-factory/fatfree-psr7": "A fat-free PHP8 implementation of PSR-7 and PSR-17"
             },
-            "default-branch": true,
             "type": "library",
             "autoload": {
                 "psr-4": {
@@ -282,9 +333,9 @@
             ],
             "support": {
                 "issues": "https://github.com/f3-factory/fatfree-psr7-factory/issues",
-                "source": "https://github.com/f3-factory/fatfree-psr7-factory/tree/main"
+                "source": "https://github.com/f3-factory/fatfree-psr7-factory/tree/1.0.0"
             },
-            "time": "2025-02-02T23:34:06+00:00"
+            "time": "2025-02-03T00:02:39+00:00"
         },
         {
             "name": "google/protobuf",
@@ -2851,7 +2902,7 @@
     "aliases": [],
     "minimum-stability": "dev",
     "stability-flags": {
-        "f3-factory/fatfree-psr7-factory": 20
+        "f3-factory/f3-overdrive": 20
     },
     "prefer-stable": false,
     "prefer-lowest": false,
