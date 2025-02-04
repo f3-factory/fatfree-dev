@@ -146,6 +146,26 @@ class Audit extends BaseController {
 		);
 		$test->message('isdesktop: '.$f3->stringify($audit->isdesktop()));
 		$test->message('ismobile: '.$f3->stringify($audit->ismobile()));
+        $test->expect(
+            $audit->mac('52:74:F2:B1:A8:7F') &&
+            $audit->mac('3B:7C:9D:FF:FE:4E:8A:1C') &&
+            $audit->mac('A3-56-78-9A-BC-DE') &&
+            $audit->mac('4F5E.6D7C.8B9A') &&
+            !$audit->mac('52:74:F2:B1:A8') &&
+            !$audit->mac('6C:60:8C:D3:4F:EA:77') &&
+            !$audit->mac('6C:60:8C:D3:4F:GA') &&
+            !$audit->mac('52:74:F2:B1:A8:') &&
+            !$audit->mac('52:74:F2:B1:A8:7F:ZZ') &&
+            !$audit->mac('52:74:F2:B1:A8:7F:89:12') &&
+            !$audit->mac('52:74::B1:A8:7F') &&
+            !$audit->mac('52::F2:B1:A8:7F') &&
+            !$audit->mac('00:14:22:ff:ef:01:23:45') &&
+            !$audit->mac('00:14:ff:22:fe:01:23:45') &&
+            !$audit->mac('00:22:14:ff:01:fe:23:45') &&
+            !$audit->mac('6C:60:8C-D3:4F:EA') &&
+            !$audit->mac('52:74:F2.B1:A8:7F'),
+            'MAC address'
+        );
 		$f3->set('results',$test->results());
 	}
 
