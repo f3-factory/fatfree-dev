@@ -1,4 +1,6 @@
-FROM phpswoole/swoole
+FROM php:8.4-cli
+
+ARG DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get -y update --fix-missing && \
     apt-get upgrade -y && \
@@ -15,6 +17,7 @@ RUN sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen && \
     sed -i '/de_DE.UTF-8/s/^# //g' /etc/locale.gen && \
     sed -i '/fr_FR.UTF-8/s/^# //g' /etc/locale.gen && \
     locale-gen
+
 ENV LANG=en_US.UTF-8 \
     LANGUAGE=en_US:en \
     LC_ALL=en_US.UTF-8
@@ -29,9 +32,13 @@ RUN install-php-extensions \
     pdo_pgsql \
     redis \
     sockets \
+    swoole \
     zip
 
 ## install package plugins
 COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
 ENV COMPOSER_ALLOW_SUPERUSER=1
+
+WORKDIR /var/www/html/
+
 CMD ["php","overdrive-swoole.php"]
