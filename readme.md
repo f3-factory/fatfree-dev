@@ -47,7 +47,7 @@ Also included is ready to use **XDebug**.
      - Swoole, PHP 8.2: http://f3.php82swoole.localhost
      - Swoole, PHP 8.2, Nginx Proxy: http://f3.nginx.php82swoole.localhost
      - OpenSwoole, PHP 8.2: http://f3.php82openswoole.localhost/
-     - RoadRunner, PHP 8.2, Nginx Proxy: http://f3.nginx.php83rr.localhost/
+     - RoadRunner, PHP 8.4, Nginx Proxy: http://f3.nginx.php84rr.localhost/
 6. Some framework tests require additional composer packages. To install these, run `docker-compose exec php82 composer install`.
 
 ## TODO

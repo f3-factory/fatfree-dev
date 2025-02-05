@@ -102,10 +102,10 @@ services:
       - traefik.http.routers.ngx-php83.rule=Host(`${COMPOSE_PROJECT_NAME}.nginx.php83.localhost`)
       - traefik.http.routers.ngx-php83.service=php83
       - traefik.http.services.ngx-php83.loadbalancer.server.port=8083
-#     php 8.3 + roadrunner
-      - traefik.http.routers.ngx-php83rr.rule=Host(`${COMPOSE_PROJECT_NAME}.nginx.php83rr.localhost`)
-      - traefik.http.routers.ngx-php83rr.service=ngx-php83rr
-      - traefik.http.services.ngx-php83rr.loadbalancer.server.port=8283
+#     php 8.4 + roadrunner
+      - traefik.http.routers.ngx-php84rr.rule=Host(`${COMPOSE_PROJECT_NAME}.nginx.php84rr.localhost`)
+      - traefik.http.routers.ngx-php84rr.service=ngx-php84rr
+      - traefik.http.services.ngx-php84rr.loadbalancer.server.port=8284
 #     php 8.4
       - traefik.http.routers.ngx-php84.rule=Host(`${COMPOSE_PROJECT_NAME}.nginx.php84.localhost`)
       - traefik.http.routers.ngx-php84.service=php84
@@ -164,12 +164,12 @@ services:
   php83roadrunner:
     <<: *php
     build:
-      context: ./docker/bin/php83rr
-    container_name: '${COMPOSE_PROJECT_NAME}-php83rr'
-    hostname: f3-php83rr
+      context: ./docker/bin/php84rr
+    container_name: '${COMPOSE_PROJECT_NAME}-php84rr'
+    hostname: f3-php84rr
     environment:
       <<: *php_env
-      PHP_IDE_CONFIG: serverName=${COMPOSE_PROJECT_NAME}.php83rr.localhost
+      PHP_IDE_CONFIG: serverName=${COMPOSE_PROJECT_NAME}.php84rr.localhost
 
   php83:
     <<: *php
