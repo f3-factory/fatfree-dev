@@ -141,10 +141,10 @@ class Internals extends BaseController {
 		$locales = ['en-US','de-DE','fr-FR'];
 //		$f3->TZ = 'Europe/Berlin';
 		foreach ($locales as $locale) {
-			$f3->set('LANGUAGE', $locale);
-			$language=$f3->get('LANGUAGE');
+            $f3->LANGUAGE = $locale;
+			$language = $f3->LANGUAGE; // intentional, receive from hook
 			$test->expect(
-				strpos($language,$locale) !== FALSE,
+				strpos($language, $locale) !== FALSE,
 				'['.$locale.']: Language set: '.$language
 			);
 			$date=$f3->format('{0,date}', time());

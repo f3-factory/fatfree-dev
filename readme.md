@@ -26,8 +26,6 @@ Currently included:
   - SQL Server
 - PHP Versions
   - PHP-FPM 8.4
-  - PHP-FPM 8.3
-  - PHP-FPM 8.2
 
 The services are bind to your local machine network using [Traefik](https://doc.traefik.io/traefik/). That way you'll have nice domain names for each php version with zero further configuration. 
 Open http://localhost:8080 for reviewing the current traefik configuration.
@@ -42,18 +40,14 @@ Also included is ready to use **XDebug**.
 5. Open your browser with the desired version to run:
    - Apache Webserver
      - PHP 8.4: http://f3.php84.localhost
-     - PHP 8.3: http://f3.php83.localhost
-     - PHP 8.2: http://f3.php82.localhost
-     - PHP 8.2 + SSL: https://f3.php82.localhost
+     - PHP 8.4 + SSL: https://f3.php84.localhost
    - Nginx
      - PHP 8.4: http://f3.nginx.php84.localhost
-     - PHP 8.3: http://f3.nginx.php83.localhost
-     - PHP 8.2: http://f3.nginx.php82.localhost
-     - PHP 8.2 + SSL: https://f3.nginx.php82.localhost
+     - PHP 8.4 + SSL: https://f3.nginx.php84.localhost
    - F3-Overdrive:
      - Swoole, PHP 8.4: http://f3.php84swoole.localhost
      - Swoole, PHP 8.4, Nginx Proxy: http://f3.nginx.php84swoole.localhost
-     - OpenSwoole, PHP 8.2: http://f3.php84openswoole.localhost/
+     - OpenSwoole, PHP 8.4: http://f3.php84openswoole.localhost/
      - RoadRunner, PHP 8.4, Nginx Proxy: http://f3.nginx.php84rr.localhost/
 
 ## TODO

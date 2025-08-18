@@ -4,6 +4,9 @@ namespace App\Hive;
 
 use \F3\Hive;
 
+/**
+ * @property array foo
+ */
 class Customer extends Hive {
 
     public ?string $first_name = '';

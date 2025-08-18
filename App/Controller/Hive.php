@@ -3,10 +3,12 @@
 namespace App\Controller;
 
 use App\Hive\Customer;
+use App\Hive\HookedDto;
+use F3\Base;
 
 class Hive extends BaseController {
 
-	function get($f3) {
+	function get(Base $f3) {
 		$test=new \F3\Test;
 		$test->expect(
 			is_null($f3->get('ERROR')),
@@ -139,7 +141,7 @@ class Hive extends BaseController {
 			is_array($f3->a->z) && $f3->a->z['x']=='foo',
 			'Object property containing array'
 		);
-		$f3->set('a->z.qux',function() {
+		$f3->set('a->z.qux', function() {
 			return 'hello';
 		});
 		$test->expect(
@@ -204,14 +206,16 @@ class Hive extends BaseController {
 		);
 
 		$array = ['foo'=>['bar'=>456]];
-		$bar = $f3->ref('foo.bar', false, $array);
-		$bar2 = $f3->ref('foo->bar', false, $array);
+        $f3->set('array', $array);
+		$bar2 = $f3->ref('array.foo->bar', false);
+		$bar = $f3->ref('array.foo.bar', false);
 		$test->expect(
 			$bar===456 && $bar2===null,
 			'Reference to custom array'
 		);
-		$baz = &$f3->ref('foo.baz', true, $array);
+		$baz = &$f3->ref('array.foo.baz');
 		$baz = 'test';
+        $array = $f3->get('array');
 		$test->expect(
 			is_array($array) && array_key_exists('foo', $array)
 			&& is_array($array['foo']) && array_key_exists('baz', $array['foo'])
@@ -221,13 +225,14 @@ class Hive extends BaseController {
 		unset($baz);
 
 		$obj = (object) ['foo'=> (object) ['bar'=>456] ];
-		$bar = $f3->ref('foo->bar', false, $obj);
-		$bar2 = $f3->ref('foo.bar', false, $obj);
+        $f3->set('obj', $obj);
+		$bar = $f3->ref('obj.foo->bar', false);
+		$bar2 = $f3->ref('obj.foo.bar', false);
 		$test->expect(
-			$bar===456 && $bar2===null,
+			$bar===456 && $bar2===456,
 			'Reference to custom object'
 		);
-		$baz = &$f3->ref('foo->baz', true, $obj);
+		$baz = &$f3->ref('obj.foo->baz');
 		$baz = 'test';
 		$test->expect(
 			is_object($obj) && property_exists($obj,'foo')
@@ -253,7 +258,7 @@ class Hive extends BaseController {
 		$customer->set('meta.foo', 'bar');
 		$customer->set('obj->foo', 'bar');
         $arr = ['bar' => 123];
-		$customer->foo = $arr;
+		$customer->foo = $arr; // no typed property
 		$customer->arr1 = $arr;
 		$customer->arr2 = $arr;
 		$customer->arr3 = $arr;
@@ -271,6 +276,8 @@ class Hive extends BaseController {
 			isset($customer->foo) && $customer->get('foo.bar') === 123,
 			'Custom Hive sets properties'
 		);
+
+        $f3->customer = clone $customer;
 
 		$customer->clear('first_name');
 		unset($customer->last_name);
@@ -290,9 +297,43 @@ class Hive extends BaseController {
             $customer->arr3 === null &&
             $customer->arr4 === [] &&
             !$customer->exists('obj->foo')
-            && $customer->exists('obj'),
-            'Handle clearing class properties'
+            && !$customer->exists('obj')
+            , 'Handle clearing class properties'
         );
+
+        $test->expect(
+            $f3->get('customer')->first_name === 'John'
+            && $f3->get('customer->first_name') === 'John'
+            && $f3->get('customer.first_name') === 'John'
+        ,'access nested hive');
+
+        $hooked = new HookedDto();
+        $hooked->stringWithGetter = 'Johnny';
+        $hooked->narf = 'array item';
+
+        $f3->set('hooked', $hooked);
+
+        $a = !$hooked->exists('_hive_data');
+        $hooked->_hive_data = 'foo';
+        $b = $hooked->exists('_hive_data');
+        $test->expect($a && $b && $hooked->_hive_data === 'foo', 'reserved props test');
+
+        $a = !$hooked->exists('nullableString');
+        $hooked->nullableString = 'foo';
+        $b = $hooked->exists('nullableString');
+        $hooked->clear('nullableString');
+        $c = !$hooked->exists('nullableString');
+        $cc = $hooked->nullableString === null;
+        $test->expect($a && $b && $c && $cc, 'nullable string access');
+
+        $test->expect(
+            $hooked->stringWithGetter === 'JOHNNY'
+            && $hooked->get('stringWithGetter') === 'JOHNNY'
+            && $f3->get('hooked')->stringWithGetter === 'JOHNNY'
+            && $f3->get('hooked->stringWithGetter') === 'JOHNNY'
+            && $f3->get('hooked.stringWithGetter') === 'JOHNNY'
+            && $f3->get('hooked.narf') === 'array item'
+            ,'access with property hooks');
 
 		$f3->set('LOCALES','dict/');
 		$test->expect(
@@ -345,6 +386,25 @@ class Hive extends BaseController {
 			$f3->get('q')==[2=>'a',5=>'b',7=>'c'],
 			'Array flip'
 		);
+        $test->expect(
+            $f3->JAR->expire === 0 && $f3->JAR->lifetime === 0,
+            'Cookie Jar defaults'
+        );
+        $f3->JAR->lifetime = 3600;
+        $test->expect(
+            $f3->JAR->expire >= time() + 3600,
+            'Cookie Jar adjustment by property '.$f3->JAR->expire
+        );
+
+        $f3->set('JAR.lifetime', 7200);
+        $test->expect(
+            $f3->JAR->expire >= time() + 7200,
+            'Cookie Jar adjustment by hive '.$f3->JAR->expire
+        );
+        $test->expect(
+            true,
+            'Request time: '.$f3->TIME,
+        );
 		$f3->set('results',$test->results());
 	}
 

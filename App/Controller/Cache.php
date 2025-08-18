@@ -7,8 +7,8 @@ use F3\Test;
 
 class Cache extends BaseController {
 
-	function get(Base $f3) {
-		$test=new Test();
+    function get(Base $f3) {
+        $test=new Test();
         $f3->copy('ROUTES', 'ROUTES_bak');
         $f3->set('CACHE',TRUE);
 
@@ -16,15 +16,17 @@ class Cache extends BaseController {
             is_null($f3->get('ERROR')),
             'No errors expected at this point'
         );
-        $backend=$f3->set('CACHE',FALSE);
+        $f3->set('CACHE',FALSE);
+        $backend=$f3->get('CACHE');
         $test->expect(
             !$backend,
             'Cache engine disabled: '.$f3->stringify($backend)
         );
-        $backend=$f3->set('CACHE','invalid');
+        $f3->set('CACHE','invalid');
+        $backend=$f3->get('CACHE');
         $test->expect(
             $backend!='invalid',
-            'Invalid backend specified (fallback invoked)'
+            'Invalid backend specified (fallback invoked): '.$backend
         );
         $test->expect(
             $backend=$f3->get('CACHE'),
@@ -251,7 +253,7 @@ class Cache extends BaseController {
             $repeat=FALSE;
         }
         $f3->copy('ROUTES_bak', 'ROUTES');
-		$f3->set('results',$test->results());
-	}
+        $f3->set('results',$test->results());
+    }
 
 }
