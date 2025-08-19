@@ -3,6 +3,9 @@
     "license": "MIT",
     "minimum-stability": "dev",
     "type": "project",
+    "description": "Dockerized development environment for the PHP Fat-Free Framework",
+    "keywords": ["F3","fatfree","micro-framework","php"],
+    "homepage": "https://github.com/f3-factory/fatfree-dev",
     "require": {
         "php": ">=8.2",
         "bcosca/fatfree-core": "*",

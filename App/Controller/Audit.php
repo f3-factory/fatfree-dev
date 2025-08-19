@@ -86,23 +86,23 @@ class Audit extends BaseController {
 			'IPv6 address'
 		);
 		$test->expect(
-			!$audit->isprivate('0.1.2.3') &&
-			!$audit->isprivate('201.176.14.4') &&
-			$audit->isprivate('fc00::') &&
-			$audit->isprivate('10.10.10.10') &&
-			$audit->isprivate('172.16.93.7') &&
-			$audit->isprivate('192.168.3.5'),
+			!$audit->isPrivate('0.1.2.3') &&
+			!$audit->isPrivate('201.176.14.4') &&
+			$audit->isPrivate('fc00::') &&
+			$audit->isPrivate('10.10.10.10') &&
+			$audit->isPrivate('172.16.93.7') &&
+			$audit->isPrivate('192.168.3.5'),
 			'Local IP range'
 		);
 		$test->expect(
-			!$audit->isreserved('193.194.195.196') &&
-			$audit->isreserved('::1') &&
-			$audit->isreserved('127.0.0.1') &&
-			$audit->isreserved('0.1.2.3') &&
-			$audit->isreserved('169.254.1.2') &&
-			!$audit->isreserved('192.0.2.1') &&
-			!$audit->isreserved('224.225.226.227') &&
-			$audit->isreserved('240.241.242.243'),
+			!$audit->isReserved('193.194.195.196') &&
+			$audit->isReserved('::1') &&
+			$audit->isReserved('127.0.0.1') &&
+			$audit->isReserved('0.1.2.3') &&
+			$audit->isReserved('169.254.1.2') &&
+			!$audit->isReserved('192.0.2.1') &&
+			!$audit->isReserved('224.225.226.227') &&
+			$audit->isReserved('240.241.242.243'),
 			'Reserved IP range'
 		);
 		$type='American Express';
@@ -144,8 +144,8 @@ class Audit extends BaseController {
 			$audit->card('4012888888881881')==$type,
 			$type
 		);
-		$test->message('isdesktop: '.$f3->stringify($audit->isdesktop()));
-		$test->message('ismobile: '.$f3->stringify($audit->ismobile()));
+		$test->message('isdesktop: '.$f3->stringify($audit->isDesktop()));
+		$test->message('ismobile: '.$f3->stringify($audit->isMobile()));
         $test->expect(
             $audit->mac('52:74:F2:B1:A8:7F') &&
             $audit->mac('3B:7C:9D:FF:FE:4E:8A:1C') &&
