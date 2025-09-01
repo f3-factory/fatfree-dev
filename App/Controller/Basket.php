@@ -86,7 +86,7 @@ class Basket extends BaseController {
 			$basket->get('_id'),
 			'Current item survives'
 		);
-		$basket->copyto('foo');
+		$basket->copyTo('foo');
 		$test->expect(
 			$f3->get('foo.item')=='blue cheese' &&
 			$f3->get('foo.quantity')==1 &&

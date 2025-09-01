@@ -14,7 +14,7 @@ class App implements AppInterface {
         ini_set('display_errors', 1);
         error_reporting(-1);
 
-        $f3->DEBUG = 0;
+        $f3->DEBUG = 2;
         $f3->LOGGABLE = '500';
         $f3->UI = 'ui/';
         $f3->TZ = 'Europe/Berlin';
