@@ -57,6 +57,10 @@ services:
       - traefik.http.routers.php84ssl.entrypoints=websecure
       - traefik.http.routers.php84ssl.tls=true
       - traefik.http.services.php84ssl.loadbalancer.server.port=5084
+#     php 8.5
+      - traefik.http.routers.php85.rule=Host(`${COMPOSE_PROJECT_NAME}.php85.localhost`)
+      - traefik.http.routers.php85.service=php85
+      - traefik.http.services.php85.loadbalancer.server.port=8085
   nginx:
     image: nginx:latest
     container_name: '${COMPOSE_PROJECT_NAME}-nginx'
@@ -93,6 +97,10 @@ services:
       - traefik.http.routers.ngx-php84ssl.entrypoints=websecure
       - traefik.http.routers.ngx-php84ssl.tls=true
       - traefik.http.services.ngx-php84ssl.loadbalancer.server.port=5084
+#     php 8.5
+      - traefik.http.routers.ngx-php85.rule=Host(`${COMPOSE_PROJECT_NAME}.nginx.php85.localhost`)
+      - traefik.http.routers.ngx-php85.service=php85
+      - traefik.http.services.ngx-php85.loadbalancer.server.port=8085
 
   php84swoole:
     <<: *php
@@ -153,6 +161,16 @@ services:
     environment:
       <<: *php_env
       PHP_IDE_CONFIG: serverName=${COMPOSE_PROJECT_NAME}.php84.localhost
+
+  php85:
+    <<: *php
+    build:
+      context: ./docker/bin/php85
+    container_name: '${COMPOSE_PROJECT_NAME}-php85'
+    hostname: f3-php85
+    environment:
+      <<: *php_env
+      PHP_IDE_CONFIG: serverName=${COMPOSE_PROJECT_NAME}.php85.localhost
 
   composer_install:
     container_name: composer_installation

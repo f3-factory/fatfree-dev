@@ -26,6 +26,7 @@ Currently included:
   - SQL Server
 - PHP Versions
   - PHP-FPM 8.4
+  - PHP-FPM 8.5.beta-2
 
 The services are bind to your local machine network using [Traefik](https://doc.traefik.io/traefik/). That way you'll have nice domain names for each php version with zero further configuration. 
 Open http://localhost:8080 for reviewing the current traefik configuration.
@@ -39,9 +40,11 @@ Also included is ready to use **XDebug**.
 4. Run `docker-compose up -d` to start the dev bench
 5. Open your browser with the desired version to run:
    - Apache Webserver
+     - PHP 8.5: http://f3.php85.localhost
      - PHP 8.4: http://f3.php84.localhost
      - PHP 8.4 + SSL: https://f3.php84.localhost
    - Nginx
+     - PHP 8.5: http://f3.nginx.php85.localhost
      - PHP 8.4: http://f3.nginx.php84.localhost
      - PHP 8.4 + SSL: https://f3.nginx.php84.localhost
    - F3-Overdrive:

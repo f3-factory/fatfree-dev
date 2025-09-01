@@ -4,18 +4,22 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "025d5d7f38bde67d19522c03fea2412c",
+    "content-hash": "835288fc3465253df1635818c27cf748",
     "packages": [
         {
             "name": "bcosca/fatfree-core",
-            "version": "4.0.0-alpha.5",
+            "version": "4.0.0-alpha.7",
             "dist": {
                 "type": "path",
                 "url": "./lib",
-                "reference": "81832a271a85351eab8356bb81abe40ebd550ba6"
+                "reference": "bd02fef1ea96b266972e02eb52febc609fd4711b"
             },
             "require": {
-                "php": ">=8.2"
+                "ext-ctype": "*",
+                "ext-hash": "*",
+                "ext-intl": "*",
+                "ext-json": "*",
+                "php": ">=8.4"
             },
             "type": "library",
             "autoload": {
@@ -27,7 +31,13 @@
                 "GPL-3.0"
             ],
             "description": "A powerful yet easy-to-use PHP micro-framework designed to help you build dynamic and robust Web applications - fast!",
-            "homepage": "http://fatfreeframework.com/",
+            "homepage": "https://fatfreeframework.com/",
+            "keywords": [
+                "F3",
+                "fatfree",
+                "micro-framework",
+                "php"
+            ],
             "transport-options": {
                 "relative": true
             }
@@ -427,6 +437,84 @@
                 "source": "https://github.com/imefisto/psr-swoole-native/tree/v1.1.5"
             },
             "time": "2025-01-20T01:47:58+00:00"
+        },
+        {
+            "name": "mongodb/mongodb",
+            "version": "v2.x-dev",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/mongodb/mongo-php-library.git",
+                "reference": "771b3da5358daeb632dec63b1b27563366d713e1"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/mongodb/mongo-php-library/zipball/771b3da5358daeb632dec63b1b27563366d713e1",
+                "reference": "771b3da5358daeb632dec63b1b27563366d713e1",
+                "shasum": ""
+            },
+            "require": {
+                "composer-runtime-api": "^2.0",
+                "ext-mongodb": "^2.1",
+                "php": "^8.1",
+                "psr/log": "^1.1.4|^2|^3",
+                "symfony/polyfill-php85": "^1.32"
+            },
+            "replace": {
+                "mongodb/builder": "*"
+            },
+            "require-dev": {
+                "doctrine/coding-standard": "^12.0",
+                "phpunit/phpunit": "^10.5.35",
+                "rector/rector": "^2.1.4",
+                "squizlabs/php_codesniffer": "^3.7",
+                "vimeo/psalm": "6.5.*"
+            },
+            "default-branch": true,
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.x-dev"
+                }
+            },
+            "autoload": {
+                "files": [
+                    "src/functions.php"
+                ],
+                "psr-4": {
+                    "MongoDB\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "Apache-2.0"
+            ],
+            "authors": [
+                {
+                    "name": "Andreas Braun",
+                    "email": "andreas.braun@mongodb.com"
+                },
+                {
+                    "name": "Jeremy Mikola",
+                    "email": "jmikola@gmail.com"
+                },
+                {
+                    "name": "Jérôme Tamarelle",
+                    "email": "jerome.tamarelle@mongodb.com"
+                }
+            ],
+            "description": "MongoDB driver library",
+            "homepage": "https://jira.mongodb.org/browse/PHPLIB",
+            "keywords": [
+                "database",
+                "driver",
+                "mongodb",
+                "persistence"
+            ],
+            "support": {
+                "issues": "https://github.com/mongodb/mongo-php-library/issues",
+                "source": "https://github.com/mongodb/mongo-php-library/tree/v2.x"
+            },
+            "time": "2025-08-28T06:46:08+00:00"
         },
         {
             "name": "openswoole/core",
@@ -2623,6 +2711,87 @@
             "time": "2024-09-09T11:45:10+00:00"
         },
         {
+            "name": "symfony/polyfill-php85",
+            "version": "1.x-dev",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/polyfill-php85.git",
+                "reference": "65345afb52bf45a3d996295b3504ace5db1be853"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/polyfill-php85/zipball/65345afb52bf45a3d996295b3504ace5db1be853",
+                "reference": "65345afb52bf45a3d996295b3504ace5db1be853",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.2"
+            },
+            "default-branch": true,
+            "type": "library",
+            "extra": {
+                "thanks": {
+                    "url": "https://github.com/symfony/polyfill",
+                    "name": "symfony/polyfill"
+                }
+            },
+            "autoload": {
+                "files": [
+                    "bootstrap.php"
+                ],
+                "psr-4": {
+                    "Symfony\\Polyfill\\Php85\\": ""
+                },
+                "classmap": [
+                    "Resources/stubs"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Nicolas Grekas",
+                    "email": "p@tchwork.com"
+                },
+                {
+                    "name": "Symfony Community",
+                    "homepage": "https://symfony.com/contributors"
+                }
+            ],
+            "description": "Symfony polyfill backporting some PHP 8.5+ features to lower PHP versions",
+            "homepage": "https://symfony.com",
+            "keywords": [
+                "compatibility",
+                "polyfill",
+                "portable",
+                "shim"
+            ],
+            "support": {
+                "source": "https://github.com/symfony/polyfill-php85/tree/1.x"
+            },
+            "funding": [
+                {
+                    "url": "https://symfony.com/sponsor",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://github.com/fabpot",
+                    "type": "github"
+                },
+                {
+                    "url": "https://github.com/nicolas-grekas",
+                    "type": "github"
+                },
+                {
+                    "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
+                    "type": "tidelift"
+                }
+            ],
+            "time": "2025-08-20T10:49:54+00:00"
+        },
+        {
             "name": "symfony/service-contracts",
             "version": "dev-main",
             "source": {
@@ -2904,6 +3073,7 @@
     "minimum-stability": "dev",
     "stability-flags": {
         "f3-factory/f3-overdrive": 20,
+        "mongodb/mongodb": 20,
         "openswoole/core": 20
     },
     "prefer-stable": false,

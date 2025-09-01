@@ -1,4 +1,4 @@
-FROM php:8.3-fpm
+FROM php:8.5-rc-fpm
 
 ARG DEBIAN_FRONTEND=noninteractive
 
@@ -29,24 +29,11 @@ ENV LANG=en_US.UTF-8 \
 # install extensions, see https://github.com/mlocati/docker-php-extension-installer#supported-php-extensions
 COPY --from=mlocati/php-extension-installer /usr/bin/install-php-extensions /usr/local/bin/
 RUN install-php-extensions \
-    apcu \
-    xdebug \
-    calendar \
-    exif \
     gd \
-    igbinary \
     intl \
-    ldap \
-    memcache \
-    memcached \
-    mongodb \
     pcntl \
     pdo_mysql \
-    pdo_oci \
-    pdo_odbc \
     pdo_pgsql \
-    pdo_sqlsrv \
-    redis \
     sockets \
     xmlrpc \
     zip
