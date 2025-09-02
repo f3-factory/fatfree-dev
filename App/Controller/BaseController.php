@@ -2,20 +2,23 @@
 
 namespace App\Controller;
 
-abstract class BaseController {
+abstract class BaseController
+{
 
-	function beforeroute($f3) {
-		$base=$f3->get('BASE');
-		$uri=preg_replace('/^'.preg_quote($base,'/').'/','',$f3->get('URI'));
-		if ($uri=='/router')
-			$uri='/redir';
-		elseif (preg_match('/\/openid2\b/',$uri))
-			$uri='/openid';
-		$f3->set('active',$f3->get('menu["'.$uri.'"]'));
-	}
+    function beforeroute($f3)
+    {
+        $base = $f3->get('BASE');
+        $uri = preg_replace('/^'.preg_quote($base, '/').'/', '', $f3->get('URI'));
+        if ($uri == '/router')
+            $uri = '/redir';
+        elseif (preg_match('/\/openid2\b/', $uri))
+            $uri = '/openid';
+        $f3->set('active', $f3->get('menu["'.$uri.'"]'));
+    }
 
-	function afterroute() {
-		echo \F3\Preview::instance()->render('layout.htm');
-	}
+    function afterroute()
+    {
+        echo \F3\Preview::instance()->render('layout.htm');
+    }
 
 }

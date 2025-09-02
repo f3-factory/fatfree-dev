@@ -8,9 +8,11 @@ use F3\Prefab;
 use F3\Registry;
 use F3\Test;
 
-class Service extends BaseController {
+class Service extends BaseController
+{
 
-    public function get(Base $f3) {
+    public function get(Base $f3): void
+    {
         $test = new Test();
 
         $f3->CONTAINER = \F3\Service::instance();
@@ -45,7 +47,7 @@ class Service extends BaseController {
         $test->expect($mailer instanceof Mailer, 'Interface resolved');
 
         $executed = 0;
-        $f3->CONTAINER->set(Mailer::class, function() use(&$executed) {
+        $f3->CONTAINER->set(Mailer::class, function () use (&$executed) {
             $executed++;
             return new Mailer();
         });
@@ -56,7 +58,7 @@ class Service extends BaseController {
 
         $executed2 = 0;
         Registry::clear(Mailer3::class);
-        $f3->CONTAINER->singleton(Mailer3::class, function() use(&$executed2) {
+        $f3->CONTAINER->singleton(Mailer3::class, function () use (&$executed2) {
             $executed2++;
             return new Mailer3();
         });
@@ -66,12 +68,15 @@ class Service extends BaseController {
         $test->expect($executed2 === 1, 'Singleton Factory Closure called');
 
         Registry::clear('$bar');
-        $f3->CONTAINER->singleton('$bar', function() use($f3) {
+        $f3->CONTAINER->singleton('$bar', function () use ($f3) {
             return $f3->CONTAINER->make(BazService::class, ['x' => 2048]);
         });
         /** @var BazService $nbar1 */
         $nbar1 = $f3->CONTAINER->get('$bar');
-        $test->expect($nbar1 instanceof BazService && $nbar1->getX() === 2048, 'Named service instance');
+        $test->expect(
+            $nbar1 instanceof BazService && $nbar1->getX() === 2048,
+            'Named service instance',
+        );
         $nbar2 = $f3->CONTAINER->get('$bar');
         $test->expect($nbar1 === $nbar2, 'Named singleton service');
 
@@ -82,7 +87,10 @@ class Service extends BaseController {
 
         $f3->route('GET /page/container-test', 'App\Controller\ContainerControllerTest->index');
         $response = $f3->mock('GET /page/container-test');
-        $test->expect($response === '' && $customer->first_name = 'John', 'Service injected to class constructor');
+        $test->expect(
+            $response === '' && $customer->first_name = 'John',
+            'Service injected to class constructor',
+        );
 
         $f3->route('POST /page/container-test-2', 'App\Controller\ContainerControllerTest->post');
         $response = $f3->mock('POST /page/container-test-2');
@@ -95,10 +103,18 @@ class Service extends BaseController {
         $service2 = $f3->CONTAINER->get(SingletonService::class);
         $service2->foo = 'foo0';
 
-        $f3->route('POST /page/container-test-3', function(Base $f3, SingletonPrefabService $service, SingletonService $service2) use($test) {
-            $test->expect($f3->PATH === '/page/container-test-3'
-                && $service->foo === 'baaaar' && $service2->foo === 'foo0', 'Service injected to route closure');
-        });
+        $f3->route(
+            'POST /page/container-test-3',
+            function (Base $f3, SingletonPrefabService $service, SingletonService $service2) use (
+                $test,
+            ) {
+                $test->expect(
+                    $f3->PATH === '/page/container-test-3'
+                    && $service->foo === 'baaaar' && $service2->foo === 'foo0',
+                    'Service injected to route closure',
+                );
+            },
+        );
         $f3->mock('POST /page/container-test-3');
 
         $bar4 = $f3->make(BarService::class);
@@ -106,19 +122,28 @@ class Service extends BaseController {
 
         $mailer1 = $f3->make(MailerSingleton::class);
         $mailer2 = $f3->make(MailerSingleton::class);
-        $test->expect($mailer1 instanceof MailerSingleton && $mailer1 === $mailer2, 'make() respects Prefab');
+        $test->expect(
+            $mailer1 instanceof MailerSingleton && $mailer1 === $mailer2,
+            'make() respects Prefab',
+        );
 
         $mailer11 = $f3->make(Mailer::class);
         $mailer22 = $f3->make(Mailer::class);
-        $test->expect($mailer11 instanceof Mailer && $mailer11 !== $mailer22, 'make() ignores Prefab');
+        $test->expect(
+            $mailer11 instanceof Mailer && $mailer11 !== $mailer22,
+            'make() ignores Prefab',
+        );
 
         $executedFn = false;
-        $f3->CONTAINER = function(string $class, array $args = []) use(&$executedFn) {
+        $f3->CONTAINER = function (string $class, array $args = []) use (&$executedFn) {
             $executedFn = $class;
             return new BarService(new FooService());
         };
         $bar5 = $f3->make(BarService::class);
-        $test->expect($bar5 instanceof BarService && $executedFn === BarService::class, 'Closure CONTAINER');
+        $test->expect(
+            $bar5 instanceof BarService && $executedFn === BarService::class,
+            'Closure CONTAINER',
+        );
 
         $f3->clear('CONTAINER');
         $test->expect(empty($f3->CONTAINER), 'CONTAINER reset');
@@ -128,12 +153,18 @@ class Service extends BaseController {
 
         $mailer1 = $f3->make(MailerSingleton::class);
         $mailer2 = $f3->make(MailerSingleton::class);
-        $test->expect($mailer1 instanceof MailerSingleton && $mailer1 === $mailer2, 'make() without CONTAINER respects Prefab');
+        $test->expect(
+            $mailer1 instanceof MailerSingleton && $mailer1 === $mailer2,
+            'make() without CONTAINER respects Prefab',
+        );
 
         $mailer1 = $f3->make(Mailer::class);
         $mailer2 = $f3->make(Mailer::class);
-        $test->expect($mailer1 instanceof Mailer && $mailer1 !== $mailer2, 'make() without CONTAINER ignores Prefab');
-        $f3->set('results',$test->results());
+        $test->expect(
+            $mailer1 instanceof Mailer && $mailer1 !== $mailer2,
+            'make() without CONTAINER ignores Prefab',
+        );
+        $f3->set('results', $test->results());
 
         $f3->CONTAINER = \F3\Service::instance();
     }
@@ -141,17 +172,18 @@ class Service extends BaseController {
 
 
 class FooService {}
-class BarService {
+
+class BarService
+{
     function __construct(
         protected FooService $foo,
     ) {}
 }
 
-class BarServic2 extends BarService {
+class BarServic2 extends BarService {}
 
-}
-
-class BazService extends BarService {
+class BazService extends BarService
+{
     function __construct(
         protected FooService $foo,
         protected ?int $x = 5,
@@ -159,39 +191,52 @@ class BazService extends BarService {
         parent::__construct($foo);
     }
 
-    function getX(): ?int {
+    function getX(): ?int
+    {
         return $this->x;
     }
 }
 
-class SingletonService {
+class SingletonService
+{
     public string $foo;
 }
-class SingletonPrefabService extends SingletonService {
+
+class SingletonPrefabService extends SingletonService
+{
     use Prefab;
 }
 
 interface MailerInterface {}
 
 class Mailer implements MailerInterface {}
+
 class Mailer3 implements MailerInterface {}
 
-trait PrefabTrait {
+trait PrefabTrait
+{
     use \F3\Prefab;
 }
-class MailerSingleton extends Mailer {
+
+class MailerSingleton extends Mailer
+{
     use PrefabTrait;
 }
 
-class ContainerControllerTest {
+class ContainerControllerTest
+{
     public function __construct(
         protected Customer $app,
         protected Base $f3
     ) {}
-    public function index(Base $f3, $params) {
+
+    public function index(Base $f3, $params)
+    {
         return $this->app->first_name;
     }
-    public function post(MailerInterface $mailer) {
+
+    public function post(MailerInterface $mailer)
+    {
         return get_class($mailer);
     }
 }

@@ -4,12 +4,14 @@ namespace App\Controller;
 
 use F3\Prefab;
 
-class Helper {
+class Helper
+{
 
-	use Prefab;
+    use Prefab;
 
-	function pick($val,$match) {
-		return preg_grep('/'.$match.'/',$val);
-	}
+    function pick($val, $match)
+    {
+        return preg_grep('/'.$match.'/', $val);
+    }
 
 }
