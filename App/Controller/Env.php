@@ -52,7 +52,7 @@ class Env extends BaseController
             'SMTP' =>
                 ['openssl'],
             'Web' =>
-                ['curl', 'openssl', 'simplexml'],
+                ['curl', 'openssl', 'simplexml', 'zlib', 'fileinfo', 'libxml', 'sockets'],
             'Web\Geo' =>
                 ['geoip', 'json'],
             'Web\OpenID' =>

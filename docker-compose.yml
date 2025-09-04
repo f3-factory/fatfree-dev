@@ -14,7 +14,7 @@ networks:
   internal:
 services:
   traefik:
-    image: "traefik:v3.2"
+    image: "traefik:v3.5"
     container_name: "${COMPOSE_PROJECT_NAME}-traefik"
     command:
       - "--log.level=DEBUG"
