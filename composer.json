@@ -7,7 +7,7 @@
     "keywords": ["F3","fatfree","micro-framework","php"],
     "homepage": "https://github.com/f3-factory/fatfree-dev",
     "require": {
-        "php": ">=8.2",
+        "php": ">=8.4",
         "bcosca/fatfree-core": "*",
         "f3-factory/fatfree-psr7": "^2.0",
         "f3-factory/fatfree-psr7-factory": "^1.0",
@@ -29,6 +29,24 @@
         }
     ],
     "require-dev": {
-        "swoole/ide-helper": "~5.0.0"
+        "swoole/ide-helper": "~5.0.0",
+        "pestphp/pest": "4.x-dev",
+        "pestphp/pest-plugin-type-coverage": "4.x-dev",
+        "phpunit/phpunit": "^12.0"
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test": "vendor/bin/pest",
+        "test:coverage": "vendor/bin/pest --coverage",
+        "test:type-coverage": "vendor/bin/pest --type-coverage"
+    },
+    "config": {
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
+        }
     }
 }

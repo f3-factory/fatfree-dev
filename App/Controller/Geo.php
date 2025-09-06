@@ -19,7 +19,6 @@ class Geo extends BaseController
             isset($info['dst']),
             'Server timezone info: '.$tz,
         );
-        var_dump($info);
         $test->expect(
             is_array($loc = $geo->location()),
             'Detect geolocation: '.($loc['city'] ?? '').

@@ -1,0 +1,11 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Pest Test Suite" type="PestRunConfigurationType">
+    <CommandLine>
+      <PhpTestInterpreterSettings>
+        <option name="interpreterName" value="php84" />
+      </PhpTestInterpreterSettings>
+    </CommandLine>
+    <PestRunner method="" scope="ConfigurationFile" />
+    <method v="2" />
+  </configuration>
+</component>
