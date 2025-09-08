@@ -24,6 +24,15 @@ abstract class TestCase extends BaseTestCase
         restore_exception_handler();
         // this ensures that the framework is re-booted for every new test -> test(...) or it(...)
         Registry::reset();
+        // clear session
+        if (\session_status() === PHP_SESSION_ACTIVE) {
+            \session_unset();
+            \session_destroy();
+        }
+        // reset globals
+        foreach (['GET','POST','COOKIE','REQUEST','SESSION','FILES'] as $global) {
+            $GLOBALS['_'.$global] = [];
+        }
         parent::tearDown();
     }
 }
