@@ -47,3 +47,87 @@ test('Framework boots', function () {
     expect($fw)->toBeInstanceOf(Base::class);
     expect(Registry::exists(Base::class))->toBeTrue('Singleton instance registered');
 })->depends('`Registry` → reset storage');
+
+
+describe('error handling', function () {
+
+    it('provides error information', function () {
+        $fw = Base::instance();
+        $fw->HALT = false;
+        $fw->DEBUG = 0;
+
+        expect($fw->CLI)->toBeTrue();
+        $fw->error(500, 'foo bar');
+        $err = '==================================='.PHP_EOL
+            .'ERROR 500 - Internal Server Error'.PHP_EOL
+            .'foo bar';
+        expect(trim($fw->RESPONSE))->toBe($err);
+    });
+
+    it('default error handler formats', function () {
+        $fw = Base::instance();
+        $fw->HALT = false;
+        $fw->DEBUG = 0;
+        $fw->CLI = false;
+
+        expect($fw->CLI)->toBeFalse();
+        $fw->error(500, 'foo bar');
+
+        $err = <<<HTML
+<!DOCTYPE html>
+<html>
+<head><title>500 Internal Server Error</title></head>
+<body>
+<h1>Internal Server Error</h1>
+<p>foo bar</p>
+</body>
+</html>
+HTML;
+
+        expect(trim($fw->RESPONSE))->toBe($err);
+    });
+
+    it('DEBUG information', function () {
+        $fw = Base::instance();
+        $fw->HALT = false;
+        $fw->DEBUG = 1;
+        $fw->CLI = false;
+
+        expect($fw->CLI)->toBeFalse();
+        $fw->error(500, 'foo bar');
+
+        expect($fw->RESPONSE)
+            ->toContain('<pre>')
+            ->and($fw->RESPONSE)->toContain('F3\Base->error')
+            ->and($fw->RESPONSE)->toContain(basename(__FILE__));
+    });
+
+    it('re-throws exception', function () {
+        $fw = Base::instance();
+        $fw->ONERROR = function(Base $fw) {
+            throw new \Exception($fw->ERROR['text']);
+        };
+        $fw->error(500, 'foo bar');
+    })->throws(\Exception::class, 'foo bar');
+
+    it('re-throws explicit exception', function () {
+        $fw = Base::instance();
+        $fw->ONERROR = function(Base $fw) {
+            if ($fw->EXCEPTION)
+                throw $fw->EXCEPTION;
+            throw new \Exception($fw->ERROR['text']);
+        };
+        $fw->route('GET /', function() {
+            throw new \RuntimeException('not found');
+        });
+        $fw->mock('GET /');
+    })->throws(\RuntimeException::class, 'not found');
+
+    it('mock throws exception directly', function () {
+        $fw = Base::instance();
+        $fw->route('GET /', function() {
+            throw new \RuntimeException('not found');
+        });
+        $fw->mock('GET /', throw: true);
+    })->throws(\RuntimeException::class, 'not found');
+});

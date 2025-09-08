@@ -13,6 +13,9 @@ abstract class TestCase extends BaseTestCase
     protected function setUp(): void
     {
         $this->f3 = \F3\Base::instance();
+        $this->f3->ONERROR = function(Base $fw) {
+            throw new \Exception($fw->ERROR['text'], $fw->ERROR['code']);
+        };
     }
 
     protected function tearDown(): void

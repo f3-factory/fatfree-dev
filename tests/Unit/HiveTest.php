@@ -11,6 +11,7 @@ describe('dynamic data', function () {
     });
 
     it('clears a value', function () {
+        $this->f3->set('i', 123);
         $this->f3->clear('i');
         $this->f3->exists('i');
         expect($this->f3->exists('i'))
