@@ -74,8 +74,7 @@ describe('Session', function () {
     });
 });
 
-describe('GLOBALS', function() {
-
+describe('GLOBALS', function () {
     test('PHP globals same as hive globals', function () {
         $ok = true;
         $list = '';
@@ -92,9 +91,7 @@ describe('GLOBALS', function() {
         $ok = true;
         $list = '';
         foreach (explode('|', $this->f3::GLOBALS) as $global) {
-            if (!$this->f3->NONBLOCKING) {
-                $this->f3->sync($global);
-            }
+            $this->f3->sync($global);
             $this->f3->set($global.'.foo', 'bar');
             if ($GLOBALS['_'.$global] !== $this->f3->get($global)) {
                 $ok = false;
@@ -116,5 +113,97 @@ describe('GLOBALS', function() {
             }
         }
         expect($ok)->toBeTrue(($list ? (': '.$list) : ''));
+    });
+
+    test('PHP global variables in sync', function () {
+        $this->f3->sync();
+        $this->f3->set('GET["bar"]', 'foo');
+        $this->f3->set('POST.baz', 'qux');
+
+        expect($this->f3->get('GET.bar'))
+            ->toBe('foo')
+            ->and($_GET['bar'])->toBe('foo')
+            ->and($this->f3->get('REQUEST.bar'))->toBe('foo')
+            ->and($_REQUEST['bar'])->toBe('foo')
+            ->and($this->f3->get('POST.baz'))->toBe('qux')
+            ->and($_POST['baz'])->toBe('qux')
+            ->and($this->f3->get('REQUEST.baz'))->toBe('qux')
+            ->and($_REQUEST['baz'])->toBe('qux');
+    });
+
+    test('PHP global variables cleared', function () {
+        $this->f3->sync();
+        $this->f3->set('GET["bar"]', 'foo');
+        $this->f3->clear('GET["bar"]');
+
+        expect($this->f3->exists('GET["bar"]'))
+            ->toBeFalse()
+            ->and(empty($_GET['bar']))->toBeTrue()
+            ->and($this->f3->exists('REQUEST["bar"]'))
+            ->toBeFalse()
+            ->and(empty($_REQUEST['bar']))->toBeTrue();
+    });
+
+    test('sync GLOBALS test', function () {
+        $this->f3->sync('GET');
+        $this->f3->set('GET.a', 'a');
+        $_GET['b'] = 'b';
+        $this->f3->GET['c'] = 'c';
+
+        expect($_GET['a'])
+            ->toBe('a')
+            ->and($this->f3->GET['b'])->toBe('b')
+            ->and($this->f3->get('GET.c'))->toBe('c');
+    });
+
+    test('GLOBALS exists after desync', function () {
+        $this->f3->sync('GET');
+        $_GET['a'] = 'a';
+        $_GET['b'] = 'b';
+        $this->f3->desync('GET');
+
+        expect($this->f3->GET['a'])
+            ->toBe('a')
+            ->and($_GET['b'])->toBe('b');
+    });
+
+    test('desync GLOBALS', function () {
+        $this->f3->sync('GET');
+        $_GET['c'] = 'c';
+        expect($this->f3->GET['c'])
+            ->toBe('c');
+
+        $this->f3->desync('GET');
+        $this->f3->set('GET.c', 'cc');
+
+        expect($_GET['c'])
+            ->toBe('c')
+            ->and($this->f3->GET['c'])
+            ->toBe('cc');
+
+        $this->f3->sync('GET');
+        expect($_GET['c'])
+            ->toBe('c')
+            ->and($this->f3->GET['c'])
+            ->toBe('c', 're-synced GLOBALS to HIVE');
+
+        $this->f3->clear('GET');
+        expect($this->f3->GET)->toBeEmpty();
+        expect(empty($_GET))->toBeTrue();
+    });
+
+    test('clear global', function () {
+        $this->f3->sync();
+        $this->f3->set('GET.a', 'a');
+        $this->f3->clear('GET');
+        expect($this->f3->GET)->toBeEmpty();
+
+        expect(empty($_GET))->toBeTrue();
+
+        // restore global
+        $this->f3->set('GET[baz]', 'baz');
+        expect(empty($this->f3->GET))
+            ->toBeFalse()
+            ->and(empty($_GET))->toBeFalse();
     });
 });

@@ -68,22 +68,9 @@ class Globals extends BaseController
             'AGENT (user agent): '.$f3->stringify($agent),
         );
         $test->expect(
-            !($ajax = $f3->get('AJAX')),
-            'AJAX: '.$f3->stringify($ajax),
-        );
-        $test->expect(
             $pattern = $f3->get('PATTERN'),
             'PATTERN (matching route): '.$f3->stringify($pattern),
         );
-        $test->expect(
-            ($charset = $f3->get('ENCODING')) == 'UTF-8',
-            'ENCODING (character set): '.$f3->stringify($charset),
-        );
-        if (extension_loaded('mbstring'))
-            $test->expect(
-                ($charset = mb_internal_encoding()) == 'UTF-8',
-                'Multibyte encoding: '.$f3->stringify($charset),
-            );
         $test->expect(
             ($language = $f3->get('LANGUAGE')),
             'LANGUAGE: '.$f3->stringify($language),
@@ -92,13 +79,6 @@ class Globals extends BaseController
             $tz = $f3->get('TZ'),
             'TZ (time zone): '.$f3->stringify($tz),
         );
-        $f3->copy('TZ', 'TZ_bak');
-        $f3->set('TZ', 'America/New_York');
-        $test->expect(
-            ($tz = $f3->get('TZ')) == date_default_timezone_get(),
-            'Time zone adjusted: '.$f3->stringify($tz),
-        );
-        $f3->copy('TZ_bak', 'TZ');
         $test->expect(
             $serializer = $f3->get('SERIALIZER'),
             'SERIALIZER: '.$f3->stringify($serializer),
@@ -186,154 +166,20 @@ class Globals extends BaseController
                 'ReactorMode: PHP globals are de-sync\'d'.
                 ($list ? (': '.$list) : ''),
             );
-        } else {
-            foreach (explode('|', $f3::GLOBALS) as $global)
-                if ($GLOBALS['_'.$global] != $f3->get($global)) {
-                    $ok = false;
-                    $list .= ($list ? ',' : '').$global;
-                }
-            $test->expect(
-                $ok,
-                'PHP globals same as hive globals'.
-                ($list ? (': '.$list) : ''),
-            );
-
-            $ok = true;
-            $list = '';
-            foreach (explode('|', $f3::GLOBALS) as $global) {
-                if (!$f3->NONBLOCKING) {
-                    $f3->sync($global);
-                }
-                $f3->set($global.'.foo', 'bar');
-                if ($GLOBALS['_'.$global] !== $f3->get($global)) {
-                    $ok = false;
-                    $list .= ($list ? ',' : '').$global;
-                }
-            }
-            $test->expect(
-                $ok,
-                'Altering hive globals affects PHP globals'.
-                ($list ? (': '.$list) : ''),
-            );
-            $ok = true;
-            $list = '';
-            foreach (explode('|', $f3::GLOBALS) as $global) {
-                $GLOBALS['_'.$global]['bar'] = 'foo';
-                if ($GLOBALS['_'.$global] !== $f3->get($global)) {
-                    $ok = false;
-                    $list .= ($list ? ',' : '').$global;
-                }
-            }
-            $test->expect(
-                $ok,
-                'Altering PHP globals affects hive globals'.
-                ($list ? (': '.$list) : ''),
-            );
-            foreach (explode('|', $f3::GLOBALS) as $global) {
-                unset($GLOBALS['_'.$global]['foo'], $GLOBALS['_'.$global]['bar']);
-                $f3->sync($global);
-            }
-
-            $f3->set('GET["bar"]', 'foo');
-            $f3->set('POST.baz', 'qux');
-            $test->expect(
-                $f3->get('GET.bar') == 'foo' && $_GET['bar'] == 'foo' &&
-                $f3->get('REQUEST.bar') == 'foo' && $_REQUEST['bar'] == 'foo' &&
-                $f3->get('POST.baz') == 'qux' && $_POST['baz'] == 'qux' &&
-                $f3->get('REQUEST.baz') == 'qux' && $_REQUEST['baz'] == 'qux',
-                'PHP global variables in sync',
-            );
-            $f3->clear('GET["bar"]');
-            $test->expect(
-                !$f3->exists('GET["bar"]') && empty($_GET['bar']) &&
-                !$f3->exists('REQUEST["bar"]') && empty($_REQUEST['bar']),
-                'PHP global variables cleared',
-            );
-
-
-            $f3->set('GET.a', 'a');
-            $_GET['b'] = 'b';
-            $f3->GET['c'] = 'c';
-            $test->expect(
-                $_GET['a'] === 'a' &&
-                $f3->GET['b'] === 'b' &&
-                $f3->get('GET.c') === 'c',
-                'sync GLOBALS #1',
-            );
-
-            $_GET['a'] = 'b';
-            $test->expect(
-                $f3->get('GET.a') === 'b',
-                'sync GLOBALS #2',
-            );
-
-            $f3->desync('GET');
-            $test->expect(
-                $f3->get('GET.a') === 'b' &&
-                $_GET['b'] === 'b',
-                'GLOBALS exists after desync',
-            );
         }
-
-        //        throw new \Exception('what a madness');
-        //        user_error('wunderful error', E_USER_ERROR);
-        //        $f3->error(427, 'not validated');
-
-        $f3->set('GET.c', 'cc');
-        $_GET['c'] = 'c';
-        $test->expect(
-            $f3->get('GET.c') === 'cc' &&
-            $_GET['c'] === 'c',
-            'desync GLOBALS',
-        );
-        if (!$f3->NONBLOCKING) {
-            $f3->sync('GET');
-            $test->expect(
-                $f3->get('GET.c') === 'c' &&
-                $_GET['c'] === 'c',
-                're-sync GLOBALS to HIVE',
-            );
-        }
-
-        $f3->set('foo', 'foo');
-        $test->expect(
-            $f3->get('foo') === 'foo',
-            'simple key-value storage',
-        );
-
-        $f3->data = 'reserved word';
-        $test->expect(
-            $f3->get('data') === 'reserved word',
-            'reserved key handling',
-        );
-
-        $f3->clear('GET');
-        $test->expect(
-            empty($f3->GET) &&
-            ($f3->NONBLOCKING || empty($_GET)),
-            'clear global',
-        );
 
         if (!$f3->NONBLOCKING) {
-            $f3->set('GET[baz]', 'baz');
+            $ok = true;
+            foreach ($f3->get('HEADERS') as $hdr => $val) {
+                $key = 'HTTP_'.strtoupper(str_replace('-', '_', $hdr));
+                if ($_SERVER[$key] != $val)
+                    $ok = false;
+            }
             $test->expect(
-                !empty($f3->GET) &&
-                !empty($_GET),
-                'restore global',
+                $ok,
+                'HTTP headers match HEADERS variable',
             );
         }
-
-        $ok = true;
-        $initHeader = $f3->HEADERS['Accept-Encoding'];
-        foreach ($f3->get('HEADERS') as $hdr => $val) {
-            $key = 'HTTP_'.strtoupper(str_replace('-', '_', $hdr));
-            if (isset($_SERVER[$key]) && $_SERVER[$key] != $val)
-                $ok = false;
-        }
-        $test->expect(
-            $ok,
-            'HTTP headers match HEADERS variable',
-        );
 
         if ($f3->exists('COOKIE.baz')) {
             $test->message('HTTP cookie retrieved');

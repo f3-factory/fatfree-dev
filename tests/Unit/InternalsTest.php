@@ -93,8 +93,7 @@ test('Time zone adjusted: ', function () {
         ->and($tz)->toBe(date_default_timezone_get());
 });
 
-describe('SERIALIZER', function() {
-
+describe('SERIALIZER', function () {
     test('default', function () {
         $obj = new stdClass();
         $obj->foo = 'bar';
@@ -124,5 +123,8 @@ describe('SERIALIZER', function() {
             ->toHaveProperty('foo')
             ->and($o2->foo)->toBe('bar');
     });
+});
 
+test('Relative links', function () {
+    expect($this->f3->rel($this->f3->get('BASE').'/hello/world'))->toBe('/hello/world');
 });
