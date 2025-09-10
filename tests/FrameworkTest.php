@@ -3,6 +3,7 @@
 namespace Tests;
 
 use F3\Base;
+use F3\Matrix;
 use F3\Registry;
 use stdClass;
 
@@ -39,6 +40,11 @@ describe('Registry', function () {
             ->toBeFalse()
             ->and(Registry::exists('B'))->toBeFalse();
     })->depends($t2);
+
+    test('instance() saves object to framework registry', function () {
+        $obj = Matrix::instance();
+        expect(Registry::exists($class = get_class($obj)))->toBeTrue();
+    });
 });
 
 
@@ -50,7 +56,6 @@ test('Framework boots', function () {
 
 
 describe('error handling', function () {
-
     it('provides error information', function () {
         $fw = Base::instance();
         $fw->HALT = false;
@@ -74,15 +79,15 @@ describe('error handling', function () {
         $fw->error(500, 'foo bar');
 
         $err = <<<HTML
-<!DOCTYPE html>
-<html>
-<head><title>500 Internal Server Error</title></head>
-<body>
-<h1>Internal Server Error</h1>
-<p>foo bar</p>
-</body>
-</html>
-HTML;
+            <!DOCTYPE html>
+            <html>
+            <head><title>500 Internal Server Error</title></head>
+            <body>
+            <h1>Internal Server Error</h1>
+            <p>foo bar</p>
+            </body>
+            </html>
+            HTML;
 
         expect(trim($fw->RESPONSE))->toBe($err);
     });
@@ -104,7 +109,7 @@ HTML;
 
     it('re-throws exception', function () {
         $fw = Base::instance();
-        $fw->ONERROR = function(Base $fw) {
+        $fw->ONERROR = function (Base $fw) {
             throw new \Exception($fw->ERROR['text']);
         };
         $fw->error(500, 'foo bar');
@@ -112,12 +117,12 @@ HTML;
 
     it('re-throws explicit exception', function () {
         $fw = Base::instance();
-        $fw->ONERROR = function(Base $fw) {
+        $fw->ONERROR = function (Base $fw) {
             if ($fw->EXCEPTION)
                 throw $fw->EXCEPTION;
             throw new \Exception($fw->ERROR['text']);
         };
-        $fw->route('GET /', function() {
+        $fw->route('GET /', function () {
             throw new \RuntimeException('not found');
         });
         $fw->mock('GET /');
@@ -125,7 +130,7 @@ HTML;
 
     it('mock throws exception directly', function () {
         $fw = Base::instance();
-        $fw->route('GET /', function() {
+        $fw->route('GET /', function () {
             throw new \RuntimeException('not found');
         });
         $fw->mock('GET /', throw: true);
