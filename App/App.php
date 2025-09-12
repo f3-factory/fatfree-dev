@@ -29,7 +29,6 @@ class App implements AppInterface
         $f3->set('menu', [
             '/' => 'Env',
             '/globals' => 'Globals',
-            '/internals' => 'Internals',
             '/service' => 'Container',
             '/hive' => 'Hive',
             '/lexicon' => 'Lexicon',

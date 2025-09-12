@@ -1,5 +1,8 @@
 <?php
 
+use F3\Base;
+use F3\ISO;
+
 test('ROOT (document root)', function () {
     expect(is_dir($root = $this->f3->ROOT))
         ->toBeTrue('ROOT is valid directoy: '.$root);
@@ -226,13 +229,25 @@ describe('Scrub HTML', function () {
 });
 
 describe('Encoding', function () {
-    test($t1='Encode HTML entities', function () {
+    test($t1 = 'Encode HTML entities', function () {
         expect($this->f3->encode('I\'ll "walk" the <b>dog</b> now™'))
-            ->toBe($out='I\'ll &quot;walk&quot; the &lt;b&gt;dog&lt;/b&gt; now™');
+            ->toBe($out = 'I\'ll &quot;walk&quot; the &lt;b&gt;dog&lt;/b&gt; now™');
         return $out;
     });
     test('Decode HTML entities', function ($str) {
         expect($this->f3->decode($str))
             ->toBe('I\'ll "walk" the <b>dog</b> now™');
     })->depends($t1);
+});
+
+it('fetches constants from an object', function () {
+    expect($this->f3->constants($this->f3, 'REQ_'))->toBe(
+        ['SYNC' => Base::REQ_SYNC, 'AJAX' => Base::REQ_AJAX, 'CLI' => Base::REQ_CLI],
+    );
+});
+
+it('fetches constants from a class-string', function () {
+    expect($this->f3->constants(\F3\ISO::class, 'CC_'))->toBe(
+        ISO::instance()->countries(),
+    );
 });

@@ -25,6 +25,11 @@ class Router extends BaseController
             is_null($f3->get('ERROR')),
             'No errors expected at this point',
         );
+        $f3->foo = 'bar';
+        $test->expect(
+            $f3 === Base::instance() && Base::instance()->foo == 'bar',
+            'Same framework instance returned',
+        );
         $test->expect(
             $result = is_file($file = $f3->get('TEMP').'redir') &&
                 $val = $f3->read($file),
