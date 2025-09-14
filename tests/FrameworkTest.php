@@ -60,12 +60,14 @@ describe('error handling', function () {
         $fw = Base::instance();
         $fw->HALT = false;
         $fw->DEBUG = 0;
+        $fw->LOGGABLE = '0';
+        $fw->QUIET = true;
 
         expect($fw->CLI)->toBeTrue();
-        $fw->error(500, 'foo bar');
+        $fw->error(500, 'foo bar1');
         $err = '==================================='.PHP_EOL
             .'ERROR 500 - Internal Server Error'.PHP_EOL
-            .'foo bar';
+            .'foo bar1';
         expect(trim($fw->RESPONSE))->toBe($err);
     });
 
@@ -74,9 +76,11 @@ describe('error handling', function () {
         $fw->HALT = false;
         $fw->DEBUG = 0;
         $fw->CLI = false;
+        $fw->LOGGABLE = '0';
+        $fw->QUIET = true;
 
         expect($fw->CLI)->toBeFalse();
-        $fw->error(500, 'foo bar');
+        $fw->error(500, 'foo bar2');
 
         $err = <<<HTML
             <!DOCTYPE html>
@@ -84,7 +88,7 @@ describe('error handling', function () {
             <head><title>500 Internal Server Error</title></head>
             <body>
             <h1>Internal Server Error</h1>
-            <p>foo bar</p>
+            <p>foo bar2</p>
             </body>
             </html>
             HTML;
@@ -97,9 +101,11 @@ describe('error handling', function () {
         $fw->HALT = false;
         $fw->DEBUG = 1;
         $fw->CLI = false;
+        $fw->LOGGABLE = '0';
+        $fw->QUIET = true;
 
         expect($fw->CLI)->toBeFalse();
-        $fw->error(500, 'foo bar');
+        $fw->error(500, 'foo bar3');
 
         expect($fw->RESPONSE)
             ->toContain('<pre>')
@@ -109,14 +115,16 @@ describe('error handling', function () {
 
     it('re-throws exception', function () {
         $fw = Base::instance();
+        $fw->LOGGABLE = '0';
         $fw->ONERROR = function (Base $fw) {
             throw new \Exception($fw->ERROR['text']);
         };
-        $fw->error(500, 'foo bar');
-    })->throws(\Exception::class, 'foo bar');
+        $fw->error(500, 'foo bar4');
+    })->throws(\Exception::class, 'foo bar4');
 
     it('re-throws explicit exception', function () {
         $fw = Base::instance();
+        $fw->LOGGABLE = '0';
         $fw->ONERROR = function (Base $fw) {
             if ($fw->EXCEPTION)
                 throw $fw->EXCEPTION;

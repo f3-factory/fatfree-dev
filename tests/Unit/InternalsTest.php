@@ -115,8 +115,11 @@ describe('SERIALIZER', function () {
         $obj->foo = 'bar';
         expect($this->f3->SERIALIZER)
             ->toBe('php');
-        $s1 = $this->f3->serialize($obj);
-        expect(extension_loaded('igbinary'))->toBe(true);
+        $igBinary = extension_loaded('igbinary');
+        if (!$igBinary) {
+            $this->markTestSkipped('igbinary extension not available');
+        }
+        expect($igBinary)->toBe(true);
 
         $this->f3->SERIALIZER = 'igbinary';
         $s2 = $this->f3->serialize($obj);
