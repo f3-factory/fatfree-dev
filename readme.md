@@ -15,6 +15,7 @@ Currently included:
 - MySQL 5.7
 - PostgreSQL
 - SQL Server
+- PHP-FPM 8.5
 - PHP-FPM 8.4
 - PHP-FPM 8.3
 - PHP-FPM 8.2
@@ -36,6 +37,7 @@ Also included is ready to use **XDebug**.
 4. Run `docker-compose up -d` to start the dev bench
 5. Open your browser with the desired version to run:
    - Apache Webserver
+     - http://f3.php85.localhost
      - http://f3.php84.localhost
      - http://f3.php83.localhost
      - http://f3.php82.localhost
@@ -45,6 +47,7 @@ Also included is ready to use **XDebug**.
      - http://f3.php73.localhost
      - http://f3.php72.localhost
    - Nginx
+      - http://f3.nginx.php85.localhost
       - http://f3.nginx.php84.localhost
       - http://f3.nginx.php83.localhost
       - http://f3.nginx.php82.localhost
@@ -63,4 +66,4 @@ Also included is ready to use **XDebug**.
 
 This development environment belongs to the f3-factory community and is not meant for usage on a production system. No warranty for any security issues in case you put this on your public root.
 
-**Copyright (c) 2024 F3::Factory**
+**Copyright (c) 2025 F3::Factory**
