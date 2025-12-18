@@ -1,0 +1,1 @@
+XDEBUG_MODE=coverage php vendor/bin/pest --coverage --coverage-clover ./tmp/pest/output.xml

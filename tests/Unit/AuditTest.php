@@ -182,6 +182,12 @@ describe('F3\\Audit', function () {
                 ->and($audit->card('4111111111111111'))->toBe('Visa')
                 ->and($audit->card('4012888888881881'))->toBe('Visa');
         });
+
+        test('No Card', function () {
+            $audit = Audit::instance();
+            expect($audit->card('abcdfeg'))
+                ->toBeFalse();
+        });
     });
 
     test('MAC address', function () {
@@ -250,6 +256,50 @@ describe('F3\\Audit', function () {
                 ->toBeTrue();
         }
     })->with('user_agents');
+
+    it('uses detected AGENT', function($type, $ua) {
+        $audit = Audit::instance();
+        expect($this->f3->AGENT)->toBeEmpty();
+
+        if ($type === 'desktop') {
+            expect($audit->isDesktop())->toBeFalse();
+            $this->f3->AGENT = $ua;
+            expect($audit->isDesktop())
+                ->toBeTrue()
+                ->and($audit->isMobile())->toBeFalse();
+        } elseif ($type === 'mobile') {
+            expect($audit->isMobile())->toBeFalse();
+            $this->f3->AGENT = $ua;
+            expect($audit->isDesktop())
+                ->toBeFalse()
+                ->and($audit->isMobile())->toBeTrue();
+        } elseif ($type === 'bot') {
+            expect($audit->isBot())->toBeFalse();
+            $this->f3->AGENT = $ua;
+            expect($audit->isBot())
+                ->toBeTrue();
+        } elseif ($type === 'ai') {
+            expect($audit->isAI())->toBeFalse();
+            $this->f3->AGENT = $ua;
+            expect($audit->isAI())
+                ->toBeTrue();
+        }
+    })->with([
+        ['desktop', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:143.0) Gecko/20100101 Firefox/143.0'],
+        ['mobile', 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.6.2 Mobile/15E148 Safari/604.1'],
+        ['bot', 'Mozilla/5.0 (compatible; Yahoo! Slurp; http://help.yahoo.com/help/us/ysearch/slurp)'],
+        ['ai', 'Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko); compatible; GPTBot/1.1; +https://openai.com/gptbot)'],
+    ]);
+
+    test('is bot or ai', function($expected, $ua) {
+        $audit = Audit::instance();
+        expect($audit->isBotOrAI($ua))->toBe($expected);
+    })->with([
+        [false, 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:143.0) Gecko/20100101 Firefox/143.0'],
+        [true, 'Mozilla/5.0 (compatible; Yahoo! Slurp; http://help.yahoo.com/help/us/ysearch/slurp)'],
+        [true, 'Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko); compatible; GPTBot/1.1; +https://openai.com/gptbot)'],
+        [false, 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.6.2 Mobile/15E148 Safari/604.1'],
+    ]);
 
     test('entropy', function ($pw, $complexity) {
         $audit = Audit::instance();

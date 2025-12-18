@@ -481,20 +481,22 @@ describe('Cookie JAR', function () {
     });
 
     test('adjustment by property', function () {
+        $this->f3->TIME = $time = time();
         $this->f3->JAR->lifetime = 3600;
         expect($this->f3->JAR->expire)
-            ->toBeGreaterThanOrEqual(time() + 3600);
+            ->toBeGreaterThanOrEqual($time + 3600);
     });
 
     test('adjustment by hive setter', function () {
+        $this->f3->TIME = $time = time();
         $this->f3->set('JAR.lifetime', 7200);
         expect($this->f3->JAR->expire)
-            ->toBeGreaterThanOrEqual(time() + 7200);
+            ->toBeGreaterThanOrEqual($time + 7200);
     });
 
 });
 
 test('request time', function () {
-    expect($this->f3->TIME)
-        ->toBeGreaterThan(time() - 1);
+    expect((int) $this->f3->TIME)
+        ->toBeLessThanOrEqual(time());
 });

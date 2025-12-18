@@ -179,12 +179,12 @@ test('Flatten and convert array to CSV string', function () {
 });
 
 test('Snake-case', function () {
-    expect($this->f3->snakecase('helloWorld'))
+    expect($this->f3->snakeCase('helloWorld'))
         ->toBe('hello_world');
 });
 
 test('Camel-case', function () {
-    expect($this->f3->camelcase('hello_world'))
+    expect($this->f3->camelCase('hello_world'))
         ->toBe('helloWorld');
 });
 

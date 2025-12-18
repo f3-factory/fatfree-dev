@@ -1,9 +1,12 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Pest Test Suite" type="PestRunConfigurationType">
+  <configuration default="false" name="Pest Test Suite" type="PestRunConfigurationType" focusToolWindowBeforeRun="true">
     <CommandLine>
       <PhpTestInterpreterSettings>
         <option name="interpreterName" value="php84" />
       </PhpTestInterpreterSettings>
+      <envs>
+        <env name="XDEBUG_MODE" value="coverage" />
+      </envs>
     </CommandLine>
     <PestRunner method="" scope="ConfigurationFile" />
     <method v="2" />

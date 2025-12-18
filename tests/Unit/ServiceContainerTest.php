@@ -197,6 +197,29 @@ describe('make() without CONTAINER', function () {
             ->and($mailer1)->toBe($mailer2);
     });
 
+    it('throws if not instantiable', function () {
+        expect(function () {
+            $this->f3->make(NoConstruct::class);
+        })->toThrow(\Exception::class, 'is not instantiable');
+    });
+
+    it('throws if not resolvable', function () {
+        expect(function () {
+            $this->f3->make(UnknownParam::class);
+        })->toThrow(\Exception::class, 'Cannot resolve class dependency');
+    });
+
+    it('uses custom arguments', function () {
+        expect($this->f3->make(UnknownParam::class, ['foo' => 123]))
+            ->toBeInstanceOf(UnknownParam::class)
+            ->toHaveProperty('foo', 123);
+    });
+
+    it('ignores unknown types without default', function () {
+        expect($this->f3->make(UnknownParamType::class))
+            ->toBeInstanceOf(UnknownParamType::class);
+    });
+
 });
 
 class FooService {}
@@ -228,6 +251,25 @@ class BazService extends BarService
 class SingletonService
 {
     public string $foo;
+}
+
+class NoConstruct
+{
+    private function __construct() { }
+}
+
+class UnknownParam
+{
+    public function __construct(
+        public int $foo,
+    ) { }
+}
+
+class UnknownParamType
+{
+    public function __construct(
+        protected $foo,
+    ) { }
 }
 
 class SingletonPrefabService extends SingletonService

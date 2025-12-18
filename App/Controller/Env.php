@@ -65,7 +65,7 @@ class Env extends BaseController
                 ['pcntl']
         ];
 
-        $test = new \F3\Test;
+        $test = new \F3\Test();
         $test->expect(
             PHP_VERSION,
             'PHP version '.PHP_VERSION
