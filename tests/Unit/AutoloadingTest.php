@@ -1,12 +1,7 @@
 <?php
 
-test('No errors expected at this point', function () {
-    expect(is_null($this->f3->get('ERROR')))
-        ->toBeTrue();
-});
-
 test('Namespace search path is defined', function () {
-    expect($this->f3->AUTOLOAD)->not()->toBeEmpty('autoload path: '.$this->f3->AUTOLOAD);
+    expect($this->f3->AUTOLOAD)->toBe('./');
 });
 
 describe('Namespace class autoloading', function () {
@@ -37,6 +32,24 @@ describe('Namespace class autoloading', function () {
     test('NS\NS6\NS7\C', function () {
         expect(class_exists('NS\NS6\NS7\C'))->toBeTrue();
     });
+
+    test('App Customer', function () {
+        expect(class_exists('DTOs\Customer'))->toBeFalse();
+
+        $this->f3->AUTOLOAD = './,./ns2/';
+
+        expect(class_exists('DTOs\Customer'))->toBeTrue();
+    });
+
+    test('Customer Loader', function () {
+        expect(class_exists('DTOs\User'))->toBeFalse();
+
+        $this->f3->AUTOLOAD = ['./ns2/', function(string $namespace) {
+            return $namespace.'.class';
+        }];
+        expect(class_exists('DTOs\User'))->toBeTrue();
+    });
+
 });
 
 test('Root namespaced framework class F3\Cache is autoloadable', function () {

@@ -29,9 +29,6 @@ class App implements AppInterface
         $f3->set('menu', [
             '/' => 'Env',
             '/globals' => 'Globals',
-            '/hive' => 'Hive',
-            '/lexicon' => 'Lexicon',
-            '/autoload' => 'Autoloader',
             '/redir' => 'Router',
             '/cli' => 'CLI',
             '/cache' => 'Cache Engine',
@@ -40,7 +37,6 @@ class App implements AppInterface
             '/template' => 'Template',
             '/markdown' => 'Markdown',
             '/unicode' => 'Unicode',
-            '/audit' => 'Audit',
             '/basket' => 'Basket',
             '/sql' => 'SQL',
             '/mongo' => 'MongoDB',

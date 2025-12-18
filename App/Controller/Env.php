@@ -54,7 +54,7 @@ class Env extends BaseController
             'Web' =>
                 ['curl', 'openssl', 'simplexml', 'zlib', 'fileinfo', 'libxml', 'sockets'],
             'Web\Geo' =>
-                ['geoip', 'json'],
+                ['json'],
             'Web\OpenID' =>
                 ['json', 'simplexml'],
             'Web\OAuth2' =>
