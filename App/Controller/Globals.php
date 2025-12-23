@@ -76,6 +76,10 @@ class Globals extends BaseController
             'LANGUAGE: '.$f3->stringify($language),
         );
         $test->expect(
+            true,
+            'Locale loaded: '.$f3->stringify(setlocale(LC_ALL, 0)),
+        );
+        $test->expect(
             $tz = $f3->get('TZ'),
             'TZ (time zone): '.$f3->stringify($tz),
         );

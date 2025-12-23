@@ -54,6 +54,15 @@ test('Framework boots', function () {
     expect(Registry::exists(Base::class))->toBeTrue('Singleton instance registered');
 })->depends('`Registry` → reset storage');
 
+test('Alias available', function () {
+    $fw = Base::instance();
+    expect($fw->camelCase('foo_bar'))
+        ->toBe(\F3::camelCase('foo_bar'));
+
+    $fw->foo = 123;
+    expect($fw->foo)
+        ->toBe(\F3::get('foo'));
+});
 
 describe('error handling', function () {
     it('provides error information', function () {

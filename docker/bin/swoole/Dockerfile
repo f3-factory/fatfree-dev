@@ -1,4 +1,4 @@
-FROM php:8.4-cli
+FROM phpswoole/swoole:6.1-php8.4
 
 ARG DEBIAN_FRONTEND=noninteractive
 
@@ -14,8 +14,11 @@ RUN \
 ## Install and set up system locales
 RUN apt-get update && apt-get -y install locales
 RUN sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen && \
+    sed -i '$ a\en    en_US.UTF-8' /etc/locale.alias && \
     sed -i '/de_DE.UTF-8/s/^# //g' /etc/locale.gen && \
+    sed -i '$ a\de    de_DE.UTF-8' /etc/locale.alias && \
     sed -i '/fr_FR.UTF-8/s/^# //g' /etc/locale.gen && \
+    sed -i '$ a\fr    fr_FR.UTF-8' /etc/locale.alias && \
     locale-gen
 
 ENV LANG=en_US.UTF-8 \
@@ -32,7 +35,6 @@ RUN install-php-extensions \
     pdo_pgsql \
     redis \
     sockets \
-    swoole \
     zip
 
 ## install package plugins

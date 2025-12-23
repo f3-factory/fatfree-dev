@@ -17,25 +17,41 @@ it('sets the language', function (string $locale) {
 it('detects language from header', function (
     string $header,
     string $fallback,
-    string $expected
+    string $expectedLang,
+    string $expectedLoc,
 ) {
+    // ensure test has same start conditions
+    $this->f3->LANGUAGE = 'en-US';
+    \setlocale(LC_ALL, 'en_US.UTF-8');
+    // default Fallback is "en"
     expect($this->f3->FALLBACK)->toBe('en');
+    expect($this->f3->LANGUAGE)->toBe('en-US,en'); // Language + Fallback
+
     $this->f3->FALLBACK = $fallback;
     expect($this->f3->FALLBACK)->toBe($fallback, 'new fallback');
+    expect(\setlocale(LC_ALL, 0))
+        ->toBe('en_US.UTF-8', 'locale should not change at this point');
 
     $this->f3->route('GET /lang', function (\F3\Base $f3) {
-        return $f3->LANGUAGE;
+        // return active configuration
+        return [$f3->LANGUAGE, \setlocale(LC_ALL, 0)];
     });
-    $out = $this->f3->mock(
+    [$lang, $locale] = $this->f3->mock(
         'GET /lang',
         headers: ['Accept-Language' => $header],
         sandbox: true,
     );
-    expect($out)->toBe($expected);
+    // check active config within mocked route
+    expect($lang)->toBe($expectedLang, 'language set');
+    expect($locale)->toBe($expectedLoc, 'locale set');
+    // mock should not change locale setting in current scope
+    expect($this->f3->LANGUAGE)->toBe('en-US,en', 'language should reset');
+    expect(\setlocale(LC_ALL, 0))->toBe('en_US.UTF-8', 'locale should reset');
 })->with([
-    ['de,en-US;q=0.7,en;q=0.3', 'en', 'de,en-US,en'],
-    ['de,en-US;q=0.7,en;q=0.3', 'da', 'de,en-US,en,da'],
-    ['fr-CH, fr;q=0.9, en;q=0.8, de;q=0.7, *;q=0.5', 'it', 'fr-CH,fr,en,de,it']
+    ['de-DE,de,en-US;q=0.7,en;q=0.3', 'en', 'de-DE,de,en-US,en', 'de_DE.UTF-8'],
+    ['de,en-US;q=0.7,en;q=0.3', 'en', 'de,en-US,en', 'de'], // Locale Alias usage, @see Dockerfile
+    ['en-US;q=0.7,en;q=0.3', 'da', 'en-US,en,da', 'en_US.UTF-8'],
+    ['fr-FR, fr;q=0.9, en;q=0.8, de;q=0.7, *;q=0.5', 'it', 'fr-FR,fr,en,de,it', 'fr_FR.UTF-8']
 ]);
 
 \date_default_timezone_set('Europe/Berlin');
