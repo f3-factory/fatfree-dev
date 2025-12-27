@@ -144,8 +144,6 @@ class Globals extends BaseController
             !session_id() && empty($_SESSION) && empty($f3->SESSION),
             'Session cleared',
         );
-        $ok = true;
-        $list = '';
         $test->expect(
             true,
             'ReactorMode: '.var_export($f3->NONBLOCKING, true),
