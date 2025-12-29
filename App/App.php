@@ -30,7 +30,6 @@ class App implements AppInterface
             '/' => 'Env',
             '/globals' => 'Globals',
             '/redir' => 'Router',
-            '/cli' => 'CLI',
             '/cache' => 'Cache Engine',
             '/config' => 'Config',
             '/view' => 'View',
