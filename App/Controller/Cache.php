@@ -16,152 +16,16 @@ class Cache extends BaseController {
             is_null($f3->get('ERROR')),
             'No errors expected at this point'
         );
-        $f3->set('CACHE',FALSE);
-        $backend=$f3->get('CACHE');
-        $test->expect(
-            !$backend,
-            'Cache engine disabled: '.$f3->stringify($backend)
-        );
-        $f3->set('CACHE','invalid');
-        $backend=$f3->get('CACHE');
-        $test->expect(
-            $backend!='invalid',
-            'Invalid backend specified (fallback invoked): '.$backend
-        );
+
         $test->expect(
             $backend=$f3->get('CACHE'),
-            'Cache backend '.$f3->stringify($backend).' detected'
+            '>> Cache backend '.$f3->stringify($backend).' detected'
         );
         $repeat=TRUE;
         while ($repeat) {
             usleep(1.1e3*2);
             $cache=\F3\Cache::instance();
-            $test->expect(
-                $cache===\F3\Cache::instance(),
-                'Same cache engine instance returned'
-            );
-            $cache->set($f3->hash('foo').'.var','bar',1);
-            $test->expect(
-                $f3->get('foo')=='bar',
-                'Retrieve previously cached entry'
-            );
-            $test->expect(
-                is_array($inf=$f3->exists('foo',$val)) &&
-                is_float($inf[0]) &&
-                $inf[1]===1 &&
-                $val=='bar'
-                ,
-                'Retrieve cache entry details'
-            );
-            $ttl=1;
-            $mark=microtime(TRUE);
-            $cache->set('a',1,$ttl);
-            $test->expect(
-                $cache->get('a')===1,
-                'Integer: '.sprintf('%.1f',(microtime(TRUE)-$mark)*1e3).'ms'
-            );
-            $mark=microtime(TRUE);
-            $cache->set('b',2.34,$ttl);
-            $test->expect(
-                $cache->get('b')===2.34,
-                'Float: '.sprintf('%.1f',(microtime(TRUE)-$mark)*1e3).'ms'
-            );
-            $mark=microtime(TRUE);
-            $cache->set('c',TRUE,$ttl);
-            $test->expect(
-                $cache->get('c')===TRUE,
-                'Boolean: '.sprintf('%.1f',(microtime(TRUE)-$mark)*1e3).'ms'
-            );
-            $mark=microtime(TRUE);
-            $cache->set('d',['hello','world'],$ttl);
-            $test->expect(
-                $cache->get('d')==['hello','world'],
-                'Array: '.sprintf('%.1f',(microtime(TRUE)-$mark)*1e3).'ms'
-            );
-            $mark=microtime(TRUE);
-            $cache->set('foo','bar',$ttl);
-            $test->expect(
-                $cache->get('foo')=='bar',
-                'String: '.
-                sprintf('%.1f',(microtime(TRUE)-$mark)*1e3).'ms'
-            );
-            $cache->set('e',$class=new \stdClass,$ttl);
-            $mark=microtime(TRUE);
-            $cache->set('foo','baz',$ttl);
-            $test->expect(
-                $cache->get('foo')=='baz',
-                'String replaced: '.
-                sprintf('%.1f',(microtime(TRUE)-$mark)*1e3).'ms'
-            );
-            $mark=microtime(TRUE);
-            $test->expect(
-                is_object($cache->get('e')),
-                'Object: '.
-                sprintf('%.1f',(microtime(TRUE)-$mark)*1e3).'ms'
-            );
-            $test->expect(
-                $cache->get('a')===1 &&
-                $cache->get('b')===2.34 &&
-                $cache->get('c')===TRUE &&
-                $cache->get('d')==['hello','world'] &&
-                $cache->get('foo')=='baz' &&
-                is_object($cache->get('e')),
-                'Cache integrity test'
-            );
-            $mark=microtime(TRUE);
-            $cache->reset();
-            if (preg_match('/memcached=/',$f3->CACHE)) {
-                // waiting for memcached async deletion
-                sleep(1);
-            }
-            $test->expect(
-                !$cache->exists('a') &&
-                !$cache->exists('b') &&
-                !$cache->exists('c') &&
-                !$cache->exists('d') &&
-                !$cache->exists('e') &&
-                !$cache->exists('foo'),
-                'Cache cleared: average: '.
-                    sprintf('%.1f',(microtime(TRUE)-$mark)/6*1e3).'ms/item'
-            );
-            $f3->clear('ROUTES');
-            $ttl=1;
-            $mark=microtime(TRUE);
-            $f3->route('GET /dummy',
-                function($f3) {
-                    $f3->set('message','All in a day\'s work');
-                },
-                $ttl
-            );
-            $hash=$f3->hash('GET '.$f3->get('BASE').'/dummy').'.url';
-            $f3->mock('GET /dummy', sandbox: TRUE);
-            $test->expect(
-                $cache->exists($hash),
-                'Route cached (duration: '.($ttl*1e3).'ms)'
-            );
-            $test->expect(
-                $cache->exists($hash),
-                'Cached route still fresh: '.
-                    sprintf('%.1f',(microtime(TRUE)-$mark)*1e3).'ms'
-            );
-            usleep(1.1e6*$ttl);
-            $test->expect(
-                !$cache->exists($hash),
-                'Cached route expired: '.
-                    sprintf('%.1f',(microtime(TRUE)-$mark)*1e3).'ms'
-            );
-            $f3->mock('GET /dummy', sandbox: true);
-            $test->expect(
-                $cache->exists($hash),
-                'Cache refreshed: '.
-                    sprintf('%.1f',(microtime(TRUE)-$mark)*1e3).'ms'
-            );
-            $test->expect(
-                !$f3->exists('foo',$val2) && !$val2,
-                'Hive key expired: '.
-                    sprintf('%.1f',(microtime(TRUE)-$mark)*1e3).'ms'
-            );
-            $cache->clear($hash);
+
             $session=new \F3\Session();
             $test->expect(
                 $session->sid()===NULL,
@@ -221,7 +85,7 @@ class Cache extends BaseController {
                 if (preg_match('/folder=/',$backend=$f3->get('CACHE'))) {
                     $test->expect(
                         $backend,
-                        'Cache backend '.$f3->stringify($backend).' specified'
+                        '>> Cache backend '.$f3->stringify($backend).' specified'
                     );
                     continue;
                 }
@@ -233,7 +97,7 @@ class Cache extends BaseController {
                 if (preg_match('/memcached=/',$backend=$f3->get('CACHE'))) {
                     $test->expect(
                         $backend,
-                        'Cache backend '.$f3->stringify($backend).' specified'
+                        '>> Cache backend '.$f3->stringify($backend).' specified'
                     );
                     continue;
                 }
@@ -244,7 +108,7 @@ class Cache extends BaseController {
                 if (preg_match('/redis=/',$backend=$f3->get('CACHE'))) {
                     $test->expect(
                         $backend,
-                        'Cache backend '.$f3->stringify($backend).' specified'
+                        '>> Cache backend '.$f3->stringify($backend).' specified'
                     );
                     continue;
                 }

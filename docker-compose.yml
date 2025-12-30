@@ -226,6 +226,19 @@ services:
       SA_PASSWORD: FatFree-r00t!
       MSSQL_PID: Developer
 
+  mongo:
+    image: mongo
+    container_name: '${COMPOSE_PROJECT_NAME}-mongodb'
+    hostname: f3-mongodb
+    restart: always
+    networks:
+      internal:
+    ports:
+      - "${HOST_PORT_MONGO}:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: fatfree
+
   redis:
     container_name: '${COMPOSE_PROJECT_NAME}-redis'
     hostname: f3-redis

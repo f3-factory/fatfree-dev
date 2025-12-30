@@ -19,7 +19,10 @@ class Mongo extends BaseController
         );
         if ($loaded) {
             try {
-                $db = new \F3\DB\Mongo('mongodb://localhost:27017', 'test');
+                $db = new \F3\DB\Mongo('mongodb://f3-mongodb:27017', 'test', [
+                    'username' => 'root',
+                    'password' => 'fatfree',
+                ]);
             } catch (\Exception $x) {
                 $db = null;
             }
@@ -155,12 +158,12 @@ class Mongo extends BaseController
                 );
                 $movie->copyto('GET');
                 $test->expect(
-                    $_GET['title'] == 'Zodiac' &&
-                    $_GET['director'] == 'David Fincher' &&
-                    $_GET['year'] == 2007,
+                    $f3->GET['title'] == 'Zodiac' &&
+                    $f3->GET['director'] == 'David Fincher' &&
+                    $f3->GET['year'] == 2007,
                     'Copy fields to hive key',
                 );
-                $_GET['year'] = 2008;
+                $f3->GET['year'] = 2008;
                 $movie->copyfrom('GET');
                 $test->expect(
                     $movie->get('title') == 'Zodiac' &&
