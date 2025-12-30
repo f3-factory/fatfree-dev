@@ -42,11 +42,12 @@ it('detects language from header', function (
         sandbox: true,
     );
     // check active config within mocked route
-    expect($lang)->toBe($expectedLang, 'language set');
-    expect($locale)->toBe($expectedLoc, 'locale set');
+    expect($lang)->toBe($expectedLang, 'language set')
+        ->and($locale)->toBe($expectedLoc, 'locale set');
     // mock should not change locale setting in current scope
-    expect($this->f3->LANGUAGE)->toBe('en-US,en', 'language should reset');
-    expect(\setlocale(LC_ALL, 0))->toBe('en_US.UTF-8', 'locale should reset');
+    expect($this->f3->LANGUAGE)->toBe('en-US,en', 'language should reset')
+        ->and(\setlocale(LC_ALL, 0))
+        ->toBe('en_US.UTF-8', 'locale should reset');
 })->with([
     ['de-DE,de,en-US;q=0.7,en;q=0.3', 'en', 'de-DE,de,en-US,en', 'de_DE.UTF-8'],
     ['de,en-US;q=0.7,en;q=0.3', 'en', 'de,en-US,en', 'de'], // Locale Alias usage, @see Dockerfile
@@ -159,6 +160,69 @@ describe('format date/time', function () use ($frFR, $deDE, $enUS, $dateTime) {
 
 });
 
+describe('format numbers', function () use ($frFR, $deDE, $enUS) {
+    test(
+        'integer',
+        function (string $locale, float $value, string $expected) {
+            $this->f3->LANGUAGE = $locale;
+            $formatted = $this->f3->format('{0,number,integer}', $value);
+            expect($formatted)->toBe($expected);
+        }
+    )->with([
+        [$enUS, 1999.99, '2,000'],
+        [$deDE, 1999.99, '2.000'],
+        [$frFR, 1999.99, '2 000'],
+    ]);
+
+    test(
+        'decimal',
+        function (string $locale, float $value, string $expected) {
+            $this->f3->LANGUAGE = $locale;
+            $formatted = $this->f3->format('{0,number,decimal,2}', $value);
+            expect($formatted)->toBe($expected);
+        }
+    )->with([
+        [$enUS, 1678.9876, '1,678.99'],
+        [$deDE, 1678.9876, '1.678,99'],
+        [$frFR, 1678.9876, '1 678,99'],
+    ]);
+
+    test(
+        'percent',
+        function (string $locale, float $value, string $expected) {
+            $this->f3->LANGUAGE = $locale;
+            $formatted = $this->f3->format('{0,number,percent}', $value);
+            expect($formatted)->toBe($expected);
+        }
+    )->with([
+        [$enUS, .50, '50%'],
+        [$enUS, 10.754, '1,075%'],
+        [$deDE, 10.754, '1.075%'],
+        [$frFR, 10.754, '1 075%'],
+    ]);
+
+    test(
+        'currency',
+        function (string $locale, float $value, ?string $option, string $expected) {
+            $this->f3->LANGUAGE = $locale;
+            if ($option)
+                $option = ','.$option;
+            $formatted = $this->f3->format('{0,number,currency'.$option.'}', $value);
+            expect($formatted)->toBe($expected);
+        }
+    )->with([
+        [$enUS, 1699.95, null, '$1,699.95'],
+        [$deDE, 1699.95, null, '1.699,95 €'],
+        [$frFR, 1699.95, null, '1 699,95 €'],
+        [$enUS, 1699.95, 'int', 'USD 1,699.95'],
+        [$deDE, 1699.95, 'int', '1.699,95 EUR'],
+        [$frFR, 1699.95, 'int', '1 699,95 EUR'],
+        [$enUS, 1699.95, '¥', '¥1,699.95'],
+        [$deDE, 1699.95, '¥', '1.699,95 ¥'],
+        [$frFR, 1699.95, '¥', '1 699,95 ¥'],
+    ]);
+
+});
 
 describe('locales', function () {
 
@@ -232,17 +296,18 @@ describe('locales', function () {
     test('Pluralization', function (int $num, string $expected) {
         $this->f3->set(
             'foo',
-            '{0, plural, '.
-            'zero {There\'s nothing on the table.}, '.
-            'one {A book is on the table.}, '.
-            'other {There are # books on the table.}'.
+            '{0, plural, '.PHP_EOL.
+            '   zero {There\'s nothing on the table.}, '.PHP_EOL.
+            '   one {A book is on the table.}, '.PHP_EOL.
+            '   two {Two (#) books are on this table.}, '.PHP_EOL.
+            '   other {There are # books on the table.}'.PHP_EOL.
             '}',
         );
         expect($this->f3->get('foo', $num))->toBe($expected);
     })->with([
         'zero' => [0, 'There\'s nothing on the table.'],
         'one' => [1, 'A book is on the table.'],
-        'two' => [2, 'There are 2 books on the table.'],
+        'two' => [2, 'Two (2) books are on this table.'],
         'other' => [9, 'There are 9 books on the table.'],
     ]);
 
@@ -255,4 +320,82 @@ describe('locales', function () {
         [5, '5 results'],
     ]);
 
+});
+
+describe('Custom Formats', function () {
+
+    test('Localized plurals', function (int $num, string $expected) {
+        $this->f3->set('FORMATS.polish',function($nb, $mod) {
+            preg_match_all('/(\d)\s*\{\s*(.+?)\s*}/',$mod,$matches,PREG_SET_ORDER);
+            $terms=[];
+            foreach ($matches as $m)
+                $terms[$m[1]]=$m[2];
+            $k = $nb == 1 ? 1 : (preg_match('/(?<!1)[234]$/',$nb) ? 2 : 5);
+            return isset($terms[$k]) ? str_replace('#', $nb, $terms[$k]) : $nb;
+        });
+        $line='{0, polish, 1 {# linia}, 2 {# linie}, 5 {# linii}}';
+        expect($this->f3->format($line,$num))->toBe($expected);
+    })->with([
+        [1, '1 linia'],
+        [2, '2 linie'],
+        [5, '5 linii'],
+        [12, '12 linii'],
+        [21, '21 linii'],
+        [22, '22 linie'],
+    ]);
+
+    test('Timeago formatter', function (string $value, string $expected) {
+        $this->f3->TZ = 'Europe/Berlin';
+        $this->f3->set('FORMATS.timeago',function($nb, $mod){
+            if (is_string($nb))
+                $nb = strtotime($nb);
+            $nb = time() - $nb;
+            preg_match_all('/(\w+)\s*\{\s*(.+?)\s*}/', $mod, $matches, PREG_SET_ORDER);
+            $terms=[];
+            $gaps=[
+                's'  => 0,
+                'm'  => 60,
+                'mm' => 60*2,
+                'h'  => 60*60,
+                'hh' => 60*60*2,
+                'd'  => 60*60*24,
+                'dd' => 60*60*24*2,
+                'M'  => 60*60*24*30,
+                'MM' => 60*60*24*30*2,
+                'Y'  => 60*60*24*30*12,
+                'YY' => 60*60*24*30*12*2,
+            ];
+            foreach ($matches as $m)
+                $terms[$m[1]] = $m[2];
+            $k='s';
+            foreach ($gaps as $gk => $v)
+                if ($nb > $v)
+                    $k = $gk;
+            if (strlen($k) > 1)
+                $nb = round($nb / $gaps[$k[0]]);
+            return isset($terms[$k]) ? str_replace('#', $nb, $terms[$k]) : $nb;
+        });
+        $posted='{0, timeago, 
+            s {just now}, 
+            m {a minute ago}, 
+            mm {# minutes ago}, 
+            h {an hour ago}, 
+            hh {# hours ago}, 
+            d {yesterday}
+            dd {# days ago}
+            M {last month}
+            MM {# months ago}
+            Y {last year}
+            YY {# years ago}
+        }';
+        expect($this->f3->format($posted, $value))->toBe($expected);
+    })->with([
+        ['-30 seconds', 'just now'],
+        ['-65 second', 'a minute ago'],
+        ['-300 seconds', '5 minutes ago'],
+        [date('d.m.Y', strtotime('-1 day')), 'yesterday'],
+        [date('d.m.Y', strtotime('-2 days')), '3 days ago'], // TODO: check that
+        [date('d.m.Y', strtotime('-5 months')), '5 months ago'],
+        [date('d.m.Y', strtotime('-1 year')), 'last year'],
+    ]);
 });

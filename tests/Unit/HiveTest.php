@@ -419,6 +419,15 @@ it('copies a hive variable', function () {
     expect($this->f3->x)->toBe($this->f3->y);
 });
 
+it('format with get', function () {
+    $this->f3->LANGUAGE = 'de-DE';
+    $this->f3->TZ = 'Europe/Berlin';
+    $this->f3->set('msg', 'Hallo {0}. The time is: {1, time}');
+    $time = time();
+    $out = $this->f3->get('msg', ['John', $time]);
+    expect($out)->toBe('Hallo John. The time is: '.date('H:i', $time));
+});
+
 test('String concatenation', function () {
     $this->f3->set('y', 'foo');
     $this->f3->concat('y', ' bar');

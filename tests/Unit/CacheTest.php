@@ -154,6 +154,22 @@ test('cache key expired', function ($backend) {
     expect($cache->exists('foo'))->toBeFalse();
 })->with('backends');
 
+it('uses SEED to prefix cache keys', function ($backend) {
+    $ttl = 30;
+    $cache = new F3\Cache();
+    $cache->load(dsn: $backend, seed: $s1 = 'abcd1234');
+    $cache->set('baz','stringy', $ttl);
+
+    $cache2 = new F3\Cache();
+    $cache2->load(dsn: $backend, seed: 'xyz987');
+    expect($cache->exists('baz'))->not->toBeFalse();
+    expect($cache2->exists('baz'))->toBeFalse();
+
+    $this->f3->SEED = $s1;
+    $this->f3->CACHE = $backend;
+    expect(F3\Cache::instance()->exists('baz'))->not->toBeFalse();
+})->with('backends');
+
 test('Cache reset', function ($backend) {
     $this->f3->CACHE = $backend;
     $cache=\F3\Cache::instance();
@@ -168,22 +184,61 @@ test('Cache reset', function ($backend) {
         ->and($cache->get('c'))->toBe(true)
         ->and($cache->get('d'))->toBe('stringy');
 
-    if (str_starts_with($this->f3->CACHE, 'memcache')) {
-        // waiting for memcached async storage
+    // waiting for memcached async storage
+    if (str_starts_with($this->f3->CACHE, 'memcache'))
         sleep(1);
-    }
+
     $cache->reset();
 
-    if (str_starts_with($this->f3->CACHE, 'memcache')) {
-        // waiting for memcached async deletion
-        sleep(1);
-    }
     expect($cache->exists('a'))->toBeFalse()
         ->and($cache->exists('b'))->toBeFalse()
         ->and($cache->exists('c'))->toBeFalse()
         ->and($cache->exists('d'))->toBeFalse();
 
 })->with('backends');
+
+test('reset with key suffix', function ($backend) {
+    $this->f3->SEED = 'test';
+    $this->f3->CACHE = $backend;
+    $cache = \F3\Cache::instance();
+    $ttl = 30;
+    $cache->set('value1.42.user',1, $ttl);
+    $cache->set('value2.42.user',2.54, $ttl);
+    $cache->set('value2.66.user',3.1415, $ttl);
+    $cache->set('main.contents.3.pages','Lorem Ipsun', $ttl);
+    $cache->set('location1.maps.3.pages',[53.91517894633916, 10.973163105778042], $ttl);
+
+    expect($cache->exists('value1.42.user'))->not->toBeFalse();
+    expect($cache->exists('value2.42.user'))->not->toBeFalse();
+
+    // waiting for memcached async storage
+    if (str_starts_with($this->f3->CACHE, 'memcache'))
+        sleep(1);
+
+    $cache->reset('42.user');
+
+    expect($cache->exists('value1.42.user'))->toBeFalse();
+    expect($cache->exists('value2.42.user'))->toBeFalse();
+    expect($cache->exists('value2.66.user'))->not->toBeFalse();
+    expect($cache->exists('main.contents.3.pages'))->not->toBeFalse();
+    expect($cache->exists('location1.maps.3.pages'))->not->toBeFalse();
+
+    $cache->reset('user');
+    expect($cache->exists('value2.66.user'))->toBeFalse();
+
+    $cache->reset('contents.3.pages');
+    expect($cache->exists('main.contents.3.pages'))->toBeFalse();
+    expect($cache->exists('location1.maps.3.pages'))->not->toBeFalse();
+
+    $cache->reset('pages');
+    expect($cache->exists('location1.maps.3.pages'))->toBeFalse();
+
+})->with('backends');
+
+
+//test('cache tags', function ($backend) {
+
+//})->with('backends');
 
 it('caches a route', function ($backend) {
     $this->f3->CACHE = $backend;
@@ -215,8 +270,11 @@ it('caches a route', function ($backend) {
 
 describe('Cache-Based Session Handler', function () {
 
-    test('Session handler', function () {
+    beforeEach(function () {
         $this->f3->CACHE = true;
+    });
+
+    test('Session handler', function () {
         $session = new \F3\Session();
         expect($session->sid())->toBeNull('Cache-based session instantiated but not started');
 
@@ -241,7 +299,6 @@ describe('Cache-Based Session Handler', function () {
     });
 
     test('Session details, IP address', function () {
-        $this->f3->CACHE = true;
         $this->f3->IP = '127.0.0.1';
         $session = new \F3\Session();
         $this->f3->set('SESSION.foo','hello world');
@@ -252,7 +309,6 @@ describe('Cache-Based Session Handler', function () {
 
     test('Session details, Timestamp', function () {
         $time = time();
-        $this->f3->CACHE = true;
         $session = new \F3\Session();
         $this->f3->set('SESSION.foo','hello world');
         session_write_close();
@@ -261,7 +317,6 @@ describe('Cache-Based Session Handler', function () {
     });
 
     test('Session details, User agent', function () {
-        $this->f3->CACHE = true;
         $this->f3->set('HEADERS.User-Agent', 'foobar');
         $session = new \F3\Session();
         $this->f3->set('SESSION.foo','hello world');
@@ -272,15 +327,60 @@ describe('Cache-Based Session Handler', function () {
     });
 
     test('Session details, CSRF', function () {
-        $this->f3->CACHE = true;
         $session = new \F3\Session();
         $this->f3->set('SESSION.foo','hello world');
         session_write_close();
         expect($session->csrf())->toBeString();
     });
 
+    test('Suspicion check', function ($type) {
+        $this->f3->clear('SESSION');
+        // initialise session
+        $session = new \F3\Session();
+        $this->f3->set('SESSION.foo','hello world');
+        // persist session
+        session_write_close();
+
+        // alter user props
+        if ($type === 'agent') {
+            $this->f3->set('HEADERS.User-Agent', 'foobar');
+        } else {
+            $this->f3->IP = '127.0.0.1';
+        }
+
+        // reboot session handler (simulates 2nd request)
+        $session = new \F3\Session();
+
+        expect(function () {
+            $this->f3->set('SESSION.foo','hello world');
+        })->toThrow(\Exception::class, 'HTTP 403');
+    })->with(['agent','ip']);
+
+    test('Custom Suspicion handler', function ($type) {
+        $this->f3->clear('SESSION');
+        // initialise session
+        $session = new \F3\Session();
+        $this->f3->set('SESSION.foo','hello world');
+        // persist session
+        session_write_close();
+
+        // alter user props
+        if ($type === 'agent') {
+            $this->f3->set('HEADERS.User-Agent', 'foobar');
+        } else {
+            $this->f3->IP = '127.0.0.1';
+        }
+
+        $called = false;
+        // reboot session handler (simulates 2nd request)
+        $session = new \F3\Session(onSuspect: function () use (&$called) {
+            $called = true;
+        });
+        $this->f3->set('SESSION.foo','hello world');
+        expect($called)->toBeTrue('Custom onSuspect handler');
+    })->with(['agent','ip']);
+
     test('Session destroyed and cookie expired', function () {
-        $this->f3->CACHE = true;
         $session = new \F3\Session();
         $this->f3->set('SESSION.foo','hello world');
         $sid=$session->sid();
@@ -290,11 +390,12 @@ describe('Cache-Based Session Handler', function () {
         $this->f3->clear('SESSION');
         $after=$this->f3->get('COOKIE.PHPSESSID');
         $cache=\F3\Cache::instance();
-        expect(empty($this->f3->SESSION))->toBeTrue();
-        expect($cache->exists($sid.'@'))->toBeFalse();
-        expect($before)->toBe($sid);
-        expect($after)->toBeNull();
-        expect(empty($this->f3->COOKIE[session_name()]))->toBeTrue();
+        expect(empty($this->f3->SESSION))
+            ->toBeTrue()
+            ->and($cache->exists($sid.'@'))->toBeFalse()
+            ->and($before)->toBe($sid)
+            ->and($after)->toBeNull()
+            ->and(empty($this->f3->COOKIE[session_name()]))->toBeTrue();
     });
 
 });

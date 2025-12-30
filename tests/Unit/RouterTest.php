@@ -472,6 +472,11 @@ describe('method calls', function () {
         expect($this->f3->get('called'))->toBeTrue();
     });
 
+    it('Calls methods (PHP callable)', function () {
+        $this->f3->call([TestRouter::class, 'callee']);
+        expect($this->f3->get('called'))->toBeTrue();
+    });
+
     it('Calls methods (PHP function)', function () {
         $this->f3->call('callee');
         expect($this->f3->get('called'))->toBeTrue();
