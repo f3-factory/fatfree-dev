@@ -236,9 +236,23 @@ test('reset with key suffix', function ($backend) {
 })->with('backends');
 
 
-//test('cache tags', function ($backend) {
+test('cache tags', function () {
+    $this->f3->CACHE = true;
+    $cache=\F3\Cache::instance();
 
-//})->with('backends');
+    $func = fn() => 'Hallo world '.rand(1,1000);
+    $value1 = $cache->remember('message', $func, [10, 'test']);
+    $value2 = $cache->remember('message', $func, [10, 'test']);
+    $value3 = $cache->remember('message', $func, [10, 'foo']);
+    expect($value1)->toContain('Hallo world');
+    expect($value2)->toBe($value1);
+    expect($value3)->not->toBe($value1);
+    expect($cache->exists('message.test'))->not->toBeFalse();
+
+    $cache->reset('test');
+    expect($cache->exists('message.test'))->toBeFalse();
+    expect($cache->exists('message.foo'))->not->toBeFalse();
+});
 
 it('caches a route', function ($backend) {
     $this->f3->CACHE = $backend;
