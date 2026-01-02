@@ -236,6 +236,14 @@ test('reset with key suffix', function ($backend) {
 })->with('backends');
 
 
+it('executes remember with disabled cache', function () {
+    $this->f3->CACHE = false;
+    $cache=\F3\Cache::instance();
+    expect($cache->engine())->toBeFalse();
+    $value = $cache->remember('message', fn() => 'Hallo world', 10);
+    expect($value)->toBe('Hallo world');
+});
+
 test('cache tags', function () {
     $this->f3->CACHE = true;
     $cache=\F3\Cache::instance();
@@ -245,7 +253,7 @@ test('cache tags', function () {
     $value2 = $cache->remember('message', $func, [10, 'test']);
     $value3 = $cache->remember('message', $func, [10, 'foo']);
     expect($value1)->toContain('Hallo world');
-    expect($value2)->toBe($value1);
+    expect($value2)->toBe($value1, 'function not executed twice');
     expect($value3)->not->toBe($value1);
     expect($cache->exists('message.test'))->not->toBeFalse();
 
@@ -341,10 +349,11 @@ describe('Cache-Based Session Handler', function () {
     });
 
     test('Session details, CSRF', function () {
-        $session = new \F3\Session();
+        $session = new \F3\Session(CsrfKeyName: 'CSRFToken');
         $this->f3->set('SESSION.foo','hello world');
         session_write_close();
         expect($session->csrf())->toBeString();
+        expect($this->f3->get('CSRFToken'))->toBe($session->csrf());
     });
 
     test('Suspicion check', function ($type) {
@@ -364,7 +373,7 @@ describe('Cache-Based Session Handler', function () {
 
         // reboot session handler (simulates 2nd request)
         $session = new \F3\Session();
-
+        $session->threatLevelThreshold = 1;
         expect(function () {
             $this->f3->set('SESSION.foo','hello world');
         })->toThrow(\Exception::class, 'HTTP 403');
@@ -390,6 +399,7 @@ describe('Cache-Based Session Handler', function () {
         $session = new \F3\Session(onSuspect: function () use (&$called) {
             $called = true;
         });
+        $session->threatLevelThreshold = 1;
         $this->f3->set('SESSION.foo','hello world');
         expect($called)->toBeTrue('Custom onSuspect handler');
     })->with(['agent','ip']);

@@ -394,7 +394,7 @@ describe('Custom Formats', function () {
         ['-65 second', 'a minute ago'],
         ['-300 seconds', '5 minutes ago'],
         [date('d.m.Y', strtotime('-1 day')), 'yesterday'],
-        [date('d.m.Y', strtotime('-2 days')), '3 days ago'], // TODO: check that
+        [date('d.m.Y H:i', strtotime('-48 hours')), '2 days ago'],
         [date('d.m.Y', strtotime('-5 months')), '5 months ago'],
         [date('d.m.Y', strtotime('-1 year')), 'last year'],
     ]);

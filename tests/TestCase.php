@@ -33,6 +33,7 @@ abstract class TestCase extends BaseTestCase
         foreach (['GET','POST','COOKIE','REQUEST','SESSION','FILES'] as $global) {
             $GLOBALS['_'.$global] = [];
         }
+        $this->f3->unload(getcwd());
         parent::tearDown();
     }
 }

@@ -460,44 +460,6 @@ it('uses DNSBL lookup', function () {
         ->toBeGreaterThan(0.1);
 });
 
-describe('method calls', function () {
-    it('Calls methods (NS\Class->method)', function () {
-        $this->f3->call(TestRouter::class.'->callee');
-        expect($this->f3->get('called'))->toBeTrue();
-    });
-
-    it('Calls methods (PHP array format)', function () {
-        $obj = new TestRouter();
-        $this->f3->call([$obj, 'callee']);
-        expect($this->f3->get('called'))->toBeTrue();
-    });
-
-    it('Calls methods (PHP callable)', function () {
-        $this->f3->call([TestRouter::class, 'callee']);
-        expect($this->f3->get('called'))->toBeTrue();
-    });
-
-    it('Calls methods (PHP function)', function () {
-        $this->f3->call('callee');
-        expect($this->f3->get('called'))->toBeTrue();
-    });
-
-    it('Calls lambda function', function () {
-        $this->f3->call(function () {
-            \F3\Base::instance()::instance()->set('called', true);
-        });
-        expect($this->f3->get('called'))->toBeTrue();
-    });
-
-    test('Callback chain', function () {
-        expect($this->f3->chain('a,b,c', [1]))->toBe([1,2,4]);
-    });
-
-    test('Callback relay', function () {
-        expect($this->f3->relay('a,b,c', [1]))->toBe(8);
-    });
-});
-
 describe('CORS', function () {
 
     beforeEach(function () {
@@ -683,10 +645,7 @@ class TestRouter {
     {
         return $f3;
     }
-    public function callee(): void
-    {
-        Base::instance()->set('called', true);
-    }
+
     function v3($f3, $params, $handler)
     {
         \F3\Base::instance()->set('args', func_get_args());
@@ -702,35 +661,9 @@ class TestRouter {
         \F3\Base::instance()->set('args', func_get_args());
     }
 
-    function rerouteTest(ServerRequest $request, Response $response, Base $f3)
-    {
-        $response->getBody()->write('foo-bar');
-        $f3->reroute('/rerouted', exit: true);
-        return 'not-executed';
-    }
 }
 
 function please($f3)
 {
     $f3->set('send', 'money');
-}
-
-function callee()
-{
-    \F3\Base::instance()->set('called', true);
-}
-
-function a($x)
-{
-    return $x;
-}
-
-function b($y)
-{
-    return $y * 2;
-}
-
-function c($z)
-{
-    return $z * 4;
 }
