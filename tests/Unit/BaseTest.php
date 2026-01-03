@@ -128,23 +128,26 @@ describe('mutex lock', function () {
         $this->f3->CACHE = 'redis=f3-redis'; // used by mutex.php to store result
 
         $cache = \F3\Cache::instance();
-        $cache->clear('mutex');
+        $cache->clear('mutex1');
+        $cache->clear('mutex2');
 
         $mark = microtime(true);
-        exec('php tests/classes/mutex.php --driver='.$driver.' > /dev/null 2>&1 &', $output, $return);
-        exec('php tests/classes/mutex.php --driver='.$driver.' > /dev/null 2>&1 &', $output, $return);
+        exec('php tests/classes/mutex.php --driver='.$driver.' --t=1 > /dev/null 2>&1 &');
+        usleep(100*1000);
+        exec('php tests/classes/mutex.php --driver='.$driver.' --t=2 > /dev/null 2>&1 &');
 
         expect(microtime(true))->toBeLessThan($mark + 0.5, 'exec should execute async');
-        expect($cache->exists('mutex'))->toBeFalse('cache entry should be delayed');
+        expect($cache->exists('mutex1'))->toBeFalse('cache entry 1 should be delayed');
+        expect($cache->exists('mutex2'))->toBeFalse('cache entry 2 should be delayed');
 
-        while(($m1=$cache->get('mutex')) === false) {
+        while(($m1=$cache->get('mutex1')) === false) {
             usleep(0.1*1e6);
             if (microtime(true) > $mark + 10)
                 break;
         }
         expect($m1)->not->toBeFalse();
 
-        while(($m2=$cache->get('mutex')) === $m1) {
+        while(($m2=$cache->get('mutex2')) === false) {
             usleep(0.1*1e6);
             if (microtime(true) > $mark + 20)
                 break;

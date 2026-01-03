@@ -39,7 +39,6 @@ ENV LANG=en_US.UTF-8 \
 COPY --from=mlocati/php-extension-installer /usr/bin/install-php-extensions /usr/local/bin/
 RUN install-php-extensions \
     apcu \
-    xdebug \
     calendar \
     exif \
     gd \
@@ -50,6 +49,7 @@ RUN install-php-extensions \
     memcached \
     mongodb \
     pcntl \
+    pdo_dblib \
     pdo_mysql \
     pdo_oci \
     pdo_odbc \
@@ -57,6 +57,7 @@ RUN install-php-extensions \
     pdo_sqlsrv \
     redis \
     sockets \
+    xdebug \
     xmlrpc \
     zip
 

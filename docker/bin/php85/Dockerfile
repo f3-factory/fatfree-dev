@@ -48,11 +48,13 @@ RUN install-php-extensions \
     memcached \
     mongodb \
     pcntl \
+    pdo_dblib \
     pdo_mysql \
     pdo_odbc \
     pdo_pgsql \
     redis \
     sockets \
+    xdebug \
     xmlrpc \
     zip
 

@@ -349,7 +349,8 @@ describe('Cache-Based Session Handler', function () {
     });
 
     test('Session details, CSRF', function () {
-        $session = new \F3\Session(CsrfKeyName: 'CSRFToken');
+        $session = new \F3\Session();
+        $session->csrfKey = 'CSRFToken';
         $this->f3->set('SESSION.foo','hello world');
         session_write_close();
         expect($session->csrf())->toBeString();
@@ -374,9 +375,15 @@ describe('Cache-Based Session Handler', function () {
         // reboot session handler (simulates 2nd request)
         $session = new \F3\Session();
         $session->threatLevelThreshold = 1;
+        $session->onRead = function ($handler, $threatLevel) {
+            $this->f3->set('threatLevel', $threatLevel);
+        };
         expect(function () {
             $this->f3->set('SESSION.foo','hello world');
         })->toThrow(\Exception::class, 'HTTP 403');
+
+        expect($session->threatLevelThreshold)->toBe(1);
+
     })->with(['agent','ip']);
 
     test('Custom Suspicion handler', function ($type) {
@@ -396,9 +403,10 @@ describe('Cache-Based Session Handler', function () {
 
         $called = false;
         // reboot session handler (simulates 2nd request)
-        $session = new \F3\Session(onSuspect: function () use (&$called) {
+        $session = new \F3\Session();
+        $session->onSuspect = function () use (&$called) {
             $called = true;
-        });
+        };
         $session->threatLevelThreshold = 1;
         $this->f3->set('SESSION.foo','hello world');
         expect($called)->toBeTrue('Custom onSuspect handler');
@@ -422,4 +430,20 @@ describe('Cache-Based Session Handler', function () {
             ->and(empty($this->f3->COOKIE[session_name()]))->toBeTrue();
     });
 
+    it('sanitizes user-agent', function () {
+        $this->f3->clear('SESSION');
+        $this->f3->set('HEADERS.User-Agent', 'foo_0 + ☆ 🥸�� (bar-;.:/)');
+        $session = new \F3\Session();
+        expect($session->agent())->toBe('foo_0 + (bar-;.:/)');
+    });
+
+    it('validates session cookie', function () {
+        $this->f3->clear('SESSION');
+        $this->f3->set('COOKIE.PHPSESSID', 'abc<";\x20');
+        $session = new \F3\Session();
+        expect($this->f3->exists('COOKIE.PHPSESSID'))->toBeFalse();
+        $this->f3->session_start();
+        expect($this->f3->exists('COOKIE.PHPSESSID', $val))->not->toBeFalse()
+            ->and(preg_match('/^[a-zA-Z0-9]{24,256}$/', $val))->not->toBeFalse();
+    });
 });
