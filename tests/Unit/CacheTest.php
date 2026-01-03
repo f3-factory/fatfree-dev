@@ -375,7 +375,7 @@ describe('Cache-Based Session Handler', function () {
         // reboot session handler (simulates 2nd request)
         $session = new \F3\Session();
         $session->threatLevelThreshold = 1;
-        $session->onRead = function ($handler, $threatLevel) {
+        $session->onRead = function (\F3\Session $handler, int $threatLevel) {
             $this->f3->set('threatLevel', $threatLevel);
         };
         expect(function () {
@@ -389,7 +389,9 @@ describe('Cache-Based Session Handler', function () {
     test('Custom Suspicion handler', function ($type) {
         $this->f3->clear('SESSION');
         // initialise session
-        $session = new \F3\Session();
+        $this->f3->set('HEADERS.User-Agent', 'Mozilla');
+        $this->f3->IP = '192.168.0.1';
+        new \F3\Session();
         $this->f3->set('SESSION.foo','hello world');
         // persist session
         session_write_close();
@@ -398,19 +400,49 @@ describe('Cache-Based Session Handler', function () {
         if ($type === 'agent') {
             $this->f3->set('HEADERS.User-Agent', 'foobar');
         } else {
-            $this->f3->IP = '127.0.0.1';
+            $this->f3->IP = '192.168.0.199';
         }
 
         $called = false;
         // reboot session handler (simulates 2nd request)
         $session = new \F3\Session();
+        $session->threatLevelThreshold = 1;
         $session->onSuspect = function () use (&$called) {
             $called = true;
         };
-        $session->threatLevelThreshold = 1;
+        $session->onRead = function (\F3\Session $handler, int $threatLevel) {
+            $this->f3->set('threatLevel', $threatLevel);
+            $this->f3->set('agent', $handler->agent());
+            $this->f3->set('ip', $handler->ip());
+        };
         $this->f3->set('SESSION.foo','hello world');
         expect($called)->toBeTrue('Custom onSuspect handler');
+        expect($this->f3->get('threatLevel'))->toBe(0);
+        expect($this->f3->get('agent'))->toBe(0);
+        expect($this->f3->get('ip'))->toBe(0);
+
     })->with(['agent','ip']);
+
+    test('Custom onRead handler', function () {
+        $this->f3->clear('SESSION');
+        $this->f3->set('HEADERS.User-Agent', 'Mozilla');
+        $this->f3->IP = '192.168.0.1';
+        new \F3\Session();
+        $this->f3->set('SESSION.foo','hello world');
+        // persist session
+        session_write_close();
+
+        $session = new \F3\Session();
+        $session->onRead = function (\F3\Session $handler, int $threatLevel) {
+            $this->f3->set('threatLevel', $threatLevel);
+            $this->f3->set('agent', $handler->agent());
+            $this->f3->set('ip', $handler->ip());
+        };
+        $this->f3->set('SESSION.foo','hello world');
+        expect($this->f3->get('threatLevel'))->toBe(0);
+        expect($this->f3->get('agent'))->toBe('Mozilla');
+        expect($this->f3->get('ip'))->toBe('192.168.0.1');
+    });
 
     test('Session destroyed and cookie expired', function () {
         $session = new \F3\Session();
