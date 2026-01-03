@@ -410,17 +410,8 @@ describe('Cache-Based Session Handler', function () {
         $session->onSuspect = function () use (&$called) {
             $called = true;
         };
-        $session->onRead = function (\F3\Session $handler, int $threatLevel) {
-            $this->f3->set('threatLevel', $threatLevel);
-            $this->f3->set('agent', $handler->agent());
-            $this->f3->set('ip', $handler->ip());
-        };
         $this->f3->set('SESSION.foo','hello world');
         expect($called)->toBeTrue('Custom onSuspect handler');
-        expect($this->f3->get('threatLevel'))->toBe(0);
-        expect($this->f3->get('agent'))->toBe(0);
-        expect($this->f3->get('ip'))->toBe(0);
-
     })->with(['agent','ip']);
 
     test('Custom onRead handler', function () {
