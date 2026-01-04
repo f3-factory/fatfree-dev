@@ -330,12 +330,14 @@ describe('Cache-Based Session Handler', function () {
     });
 
     test('Session details, Timestamp', function () {
+        $this->f3->clear('SESSION');
         $time = time();
         $session = new \F3\Session();
         $this->f3->set('SESSION.foo','hello world');
         session_write_close();
         expect($session->stamp())->toBeString()
         ->and(date('d-m-Y-H-i', $time))->toBe(date('d-m-Y-H-i'));
+        $this->f3->clear('SESSION');
     });
 
     test('Session details, User agent', function () {
@@ -413,6 +415,38 @@ describe('Cache-Based Session Handler', function () {
         $this->f3->set('SESSION.foo','hello world');
         expect($called)->toBeTrue('Custom onSuspect handler');
     })->with(['agent','ip']);
+
+    test('Reroute in Suspicion handler', function () {
+        $this->f3->clear('SESSION');
+        // initialise session
+        $this->f3->set('HEADERS.User-Agent', 'Mozilla');
+        $this->f3->IP = '192.168.0.1';
+        new \F3\Session();
+        $this->f3->set('SESSION.foo','hello world');
+        // persist session
+        session_write_close();
+
+        // alter user props
+        $this->f3->set('HEADERS.User-Agent', 'foobar');
+        $this->f3->IP = '192.168.0.199';
+        $this->f3->CLI = false;
+
+        $this->f3->route('GET /expired', function (){
+            // NOOP
+        });
+        $session = new \F3\Session();
+        $session->threatLevelThreshold = 2;
+        $session->onSuspect = function ($session, $sid) {
+            $session->destroy($sid);
+            $session->close();
+            unset($this->f3->{'COOKIE.'.\session_name()});
+            $this->f3->reroute('/expired');
+        };
+        expect(function () {
+            $this->f3->set('SESSION.foo','hello world');
+        })->toThrow(F3\ResponseException::class);
+        expect($this->f3->exists('COOKIE.'.\session_name()))->toBeFalse();
+    });
 
     test('Custom onRead handler', function () {
         $this->f3->clear('SESSION');

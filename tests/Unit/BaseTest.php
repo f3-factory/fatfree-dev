@@ -30,6 +30,34 @@ describe('method calls', function () {
         expect($this->f3->get('called'))->toBeTrue();
     });
 
+    it('Calls Closure with inject', function () {
+        $this->f3->CONTAINER = \F3\Service::instance();
+        $func = fn(TestObj $obj, int $num) => [$obj, $num];
+
+        [$o, $n] = $this->f3->call($func, ['num' => 123]);
+        expect($o)
+            ->toBeInstanceOf(TestObj::class)
+            ->and($n)->toBe(123);
+
+        [$s, $n] = $this->f3->call(fn(string $str, int $num)
+            => [$str, $num], ['baz', 456]);
+
+        expect($s)
+            ->toBe('baz')
+            ->and($n)->toBe(456);
+
+        [$o, $n] = $this->f3->call($func, [1 => 789]);
+        expect($o)
+            ->toBeInstanceOf(TestObj::class)
+            ->and($n)->toBe(789);
+
+        [$o, $n] = $this->f3->call(fn(int $num, TestObj $obj)
+            => [$obj, $num], [321]);
+        expect($o)
+            ->toBeInstanceOf(TestObj::class)
+            ->and($n)->toBe(321);
+    });
+
     test('Callback chain', function () {
         expect($this->f3->chain('a,b,c', [1]))->toBe([1,2,4]);
     });

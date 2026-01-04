@@ -35,7 +35,6 @@ class App implements AppInterface
             '/view' => 'View',
             '/template' => 'Template',
             '/markdown' => 'Markdown',
-            '/unicode' => 'Unicode',
             '/basket' => 'Basket',
             '/sql' => 'SQL',
             '/mongo' => 'MongoDB',
