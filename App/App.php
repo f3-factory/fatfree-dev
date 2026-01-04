@@ -49,6 +49,7 @@ class App implements AppInterface
             '/google' => 'Google',
             '/openid' => 'OpenID',
             '/pingback' => 'Pingback',
+            '/subdir' => 'Subdir',
         ]);
 
         $f3->map('/', 'App\Controller\Env');

@@ -21,14 +21,11 @@ class Env extends BaseController
                     'memcache',
                     'memcached',
                     'redis',
-//                    'wincache',   // deprecated
-//                    'xcache'      // deprecated
                 ],
             'DB\SQL' =>
                 [
                     'pdo',
                     'pdo_dblib',
-//                    'pdo_mssql',  // deprecated
                     'pdo_mysql',
                     'pdo_odbc',
                     'pdo_pgsql',

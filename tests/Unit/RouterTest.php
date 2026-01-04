@@ -72,6 +72,16 @@ it('reroute halts execution', function () {
     expect($this->f3->RESPONSE)->not->toEqual('foo-bar');
 });
 
+it('includes BASE in reroute uri', function () {
+    $this->f3->BASE = '/subdir';
+    $this->f3->route('GET /test', function (\F3\Base $f3) {
+        $f3->reroute('/rerouted', true, false);
+    });
+    $this->f3->mock('GET /test');
+    $loc = \preg_grep('/Location: https?:\/\/.*?\/subdir\/rerouted/', $this->f3->RESPONSE_HEADERS);
+    expect($loc)->not()->toBeEmpty();
+});
+
 it('follow reroute in cli mode', function () {
     $this->f3->CLI = true;
     $this->f3->route('GET /test', function (\F3\Base $f3) {
@@ -179,6 +189,22 @@ test('alias() resolves named routes', function () {
     expect($this->f3->alias('complex', 'format=20x20,*=[foo,bar]', ['x' => 123, 'y' => ['z' => 2]]))
         ->toBe('/resize/20x20/foo/sep/bar?x=123&y%5Bz%5D=2');
 });
+
+test('alias() generation with BASE', function ($prepend, $baseHandling, $basePath, $expected) {
+    $this->f3->ABSOLUTE_ALIAS = $prepend;
+    $this->f3->BASE = $basePath;
+    $this->f3->route('GET @simple:/test/route', 'App->nowhere');
+    expect($this->f3->alias('simple', baseHandling: $baseHandling))->toBe($expected);
+})->with([
+    'prepend, no BASE path' =>       [true,  true,  '',        '/test/route'],
+    'prepend, with BASE' =>          [true,  true,  '/subdir', '/subdir/test/route'],
+    'no prepend, no BASE path' =>    [false, true,  '',        'test/route'],
+    'no prepend, with BASE' =>       [false, true,  '/subdir', 'test/route'],
+    'skip handling, no BASE' =>      [true,  false, '',        '/test/route'],
+    'skip handling, with BASE' =>    [true,  false, '/subdir', '/test/route'],
+    'skip handling #2, no BASE' =>   [false, false, '',        '/test/route'],
+    'skip handling #2, with BASE' => [false, false, '/subdir', '/test/route'],
+]);
 
 test('rerouting to alias', function ($route, $expected) {
     $this->f3->route('GET @hello:/', 'App->somewhere');

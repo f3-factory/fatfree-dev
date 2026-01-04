@@ -7,8 +7,7 @@ abstract class BaseController
 
     function beforeroute($f3)
     {
-        $base = $f3->get('BASE');
-        $uri = preg_replace('/^'.preg_quote($base, '/').'/', '', $f3->get('URI'));
+        $uri = $f3->PATH;
         if ($uri == '/router')
             $uri = '/redir';
         elseif (preg_match('/\/openid2\b/', $uri))

@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<F3:check if="{{@withBaseTag === true}}">
+	<base href="{{@SCHEME.'://'.@HOST.@BASE.'/'}}">
+</F3:check>
+	<meta charset="UTF-8">
+	<title>F3 App</title>
+</head>
+<body>
+<h1>Alias: {{@ALIAS}}</h1>
+<p>html Base tag: <code>{{@withBaseTag ? 'yes' : 'no'}}</code><br/>
+	ABSOLUTE_ALIAS: <code>{{@ABSOLUTE_ALIAS ? 'yes' : 'no'}}</code></p>
+<p>
+	PATH: <code>{{@PATH}}</code><br>
+	BASE: <code>{{@BASE}}</code><br>
+</p>
+<a href="/">Web Root</a><br>
+<a href="{{'main'|alias}}">App Root</a><br>
+<a href="{{'test1'|alias}}">Test1</a><br>
+<a href="{{'test2'|alias}}">Test2</a><br>
+<a href="{{'test3'|alias}}">Test3</a><br>
+<a href="{{'reroute'|alias}}">reroute</a><br>
+</body>
+</html>
