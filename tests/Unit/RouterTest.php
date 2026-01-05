@@ -94,6 +94,15 @@ it('follow reroute in cli mode', function () {
     expect($this->f3->RESPONSE)->toEqual('rerouted');
 });
 
+it('reroute trailing slash URIs', function () {
+    $this->f3->route('GET /test', function (\F3\Base $f3) {
+        return "ok";
+    });
+    $this->f3->mock('GET /test/');
+    $loc = \preg_grep('/Location: https?:\/\/.*?\/test/', $this->f3->RESPONSE_HEADERS);
+    expect($loc)->not()->toBeEmpty();
+});
+
 test('custom rerouting', function ($route, $p, $e) {
     $this->f3->ONREROUTE = function (string $url, bool $permanent, bool $exit) {
         $f3 = \F3\Base::instance();

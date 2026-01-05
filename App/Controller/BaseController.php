@@ -5,7 +5,7 @@ namespace App\Controller;
 abstract class BaseController
 {
 
-    function beforeroute($f3)
+    function beforeRoute(\F3\Base $f3)
     {
         $uri = $f3->PATH;
         if ($uri == '/router')
@@ -15,7 +15,7 @@ abstract class BaseController
         $f3->set('active', $f3->get('menu["'.$uri.'"]'));
     }
 
-    function afterroute()
+    function afterRoute()
     {
         echo \F3\Preview::instance()->render('layout.htm');
     }

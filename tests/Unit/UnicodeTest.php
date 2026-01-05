@@ -16,6 +16,11 @@ test('substr (at zero offset)', function () {
         ->toBe('Я можу');
 });
 
+test('strrev', function () {
+    expect($this->utf->strrev('Я можу їсти скло', 0, 6))
+        ->toBe('олкс итсї ужом Я');
+});
+
 test('substr (at zero offset RTL-language)', function () {
     expect($this->utf->substr('أنا قادر على أكل الزجاج و هذا لا يؤلمني', 0, 8))
         ->toBe('أنا قادر');
@@ -43,6 +48,13 @@ test('substr (negative offset and specified length)', function () {
 test('strpos', function () {
     expect($this->utf->strpos('Góa ē-tàng chia̍h po-lê', 'h'))
         ->toBe(12);
+    expect($this->utf->strpos('Góa ē-tàng chia̍h po-lê', 'H'))
+        ->toBeFalse();
+});
+
+test('stripos', function () {
+    expect($this->utf->stripos('Góa ē-tàng chia̍h po-lê', 'H'))
+        ->toBe(12);
 });
 
 test('strpos with offset', function () {
@@ -60,6 +72,12 @@ test('strstr (after needle)', function () {
     $str = 'ᛋᚳᛖᚪᛚ᛫ᚦᛖᚪᚻ᛫ᛗᚪᚾᚾᚪ᛫ᚷᛖᚻᚹᛦᛚᚳ᛫ᛗᛁᚳᛚᚢᚾ᛫ᚻᛦᛏ᛫ᛞᚫᛚᚪᚾ';
     expect($this->utf->strstr($str, 'ᛁᚳᛚᚢᚾ'))
         ->toBe('ᛁᚳᛚᚢᚾ᛫ᚻᛦᛏ᛫ᛞᚫᛚᚪᚾ');
+});
+
+test('stristr (after needle)', function () {
+    $str = 'Góa ē-tàng chia̍h po-lê';
+    expect($this->utf->stristr($str, 'CHIA̍H'))
+        ->toBe('chia̍h po-lê');
 });
 
 test('substr_count', function () {
@@ -84,3 +102,30 @@ test('trim', function () {
     expect($this->utf->trim($str))
         ->toBe('#string#');
 });
+
+
+test('bom', function () {
+    expect($this->utf->bom())
+        ->toBe("\xef\xbb\xbf");
+});
+
+test('translate', function () {
+    expect($this->utf->translate('\u263a'))
+        ->toBe("☺");
+});
+
+test('emojify', function ($in, $out) {
+    expect($this->utf->emojify($in))
+        ->toBe($out);
+})->with([
+    [':(', '☹'],
+    [':)', '☺'],
+    ['<3', '♥'],
+    [':D', '😃'],
+    ['XD', '😆'],
+    [';)', '😉'],
+    [':P', '😋'],
+    [':,', '😏'],
+    [':/', '😣'],
+    ['8O', '😲'],
+]);

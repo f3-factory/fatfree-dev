@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 	<head>
-		<base href="{{ @SCHEME.'://'.@HOST.(!@PORT||@PORT==80||@PORT==443?'':':'.@PORT).@BASE.'/'.@UI }}" />
+		<base href="{{ @SCHEME.'://'.@HOST.(!@PORT||@PORT==80||@PORT==443?'':':'.@PORT).@BASE.'/' }}" />
 		<meta charset="{{ @ENCODING}}" />
 		<title>{{ @VERSION }}: {{ @active }}</title>
-		<link rel="stylesheet" type="text/css" href="css/theme.css" />
+		<link rel="stylesheet" type="text/css" href="ui/css/theme.css" />
 		<style>
 			{~ if (isset(@ERROR)): ~}
 				{{ file_get_contents('lib/code.css') }}
@@ -14,6 +14,9 @@
 	<body>
 		<div class="row">
 			<div class="sidebar">
+				<div class="logo">
+					<a href="https://fatfreeframework.com/"><img src="ui/images/watermark.png" width="160" title="Fat-Free Framework" /></a>
+				</div>
 				<h1>{{ @VERSION }}</h1>
 				<ul>
 					{~ foreach (@menu as @url=>@desc): ~}
@@ -23,14 +26,18 @@
 			</div>
 			<div class="main">
 				<h1>{{ @active }}</h1>
-				{~ foreach (@results as @i=>@result): ~}
-				<p>
-					<span class="status {{ @result.status?'pass':'fail' }}">{{ @i+1 }}</span>
-					<span class="text">{{ @result.text }} {~ if (!@result.status && @result.source) echo '('.@result.source.')' ~}</span><br/>
-				</p>
-				{~ endforeach ~}
+				{~ if (isset(@contents)): ~}
+					{{ @contents | raw }}
+				{~ endif ~}
+				{~ if (isset(@results)): ~}
+					{~ foreach (@results as @i=>@result): ~}
+					<p>
+						<span class="status {{ @result.status?'pass':'fail' }}">{{ @i+1 }}</span>
+						<span class="text">{{ @result.text }} {~ if (!@result.status && @result.source) echo '('.@result.source.')' ~}</span><br/>
+					</p>
+					{~ endforeach ~}
+				{~ endif ~}
 				<div class="js-insert"></div>
-				<p><a href="http://fatfree.sf.net/"><img src="images/powered.png" title="Fat-Free Framework" /></a><br />
 				<p class="stats">{{ 'Page rendered in {0} msecs / Memory usage {1} Kibytes',round(1e3*(microtime(TRUE)-$TIME),2),round(memory_get_usage(TRUE)/1e3,1) | format }}</p>
 			</div>
 		</div>

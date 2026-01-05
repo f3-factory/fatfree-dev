@@ -1,0 +1,48 @@
+<div>
+	<table>
+		<tr>
+			<td width="250">Session-Cookie exists:</td>
+			<td><pre>{{ @COOKIE[session_name()] ?? '-'}}</pre></td>
+		</tr>
+		<tr>
+			<td>Session active:</td>
+			<td><pre>{{ session_status() === PHP_SESSION_ACTIVE ? 'yes' : 'no' }}</pre></td>
+		</tr>
+		<tr>
+			<td>Session-ID:</td>
+			<td><pre>{{ session_id() ?: '-'}}</pre></td>
+		</tr>
+		<tr>
+			<td>Cookies:</td>
+			<td><pre>{{ var_export(@COOKIE, true) }}</pre></td>
+		</tr>
+		<tr>
+			<td>F3-Session:</td>
+			<td><pre>{{ var_export(@SESSION, true) }}</pre></td>
+		</tr>
+		<tr>
+			<td>Global $_Session:</td>
+			<td><pre>{{ var_export(@$_SESSION, true) }}</pre></td>
+		</tr>
+		<tr>
+			<td>Session active:</td>
+			<td><pre>{{ session_status() === PHP_SESSION_ACTIVE ? 'yes' : 'no' }}</pre></td>
+		</tr>
+	</table>
+
+	<div>
+		<a class="button" href="session-start">start session</a>
+		<a class="button" href="session-clear">clear session</a>
+		<a class="button" href="session-fail">trigger suspect session</a>
+	</div>
+	<br>
+	<div>
+		<a class="button" href="session-addSessionValue">add session value</a>
+		<a class="button" href="session-removeSessionValue">remove session value</a>
+	</div>
+	<br>
+	<div>
+		<a class="button" href="session-addCookieValue">add cookie value</a>
+		<a class="button" href="session-removeCookieValue">remove cookie value</a>
+	</div>
+</div>

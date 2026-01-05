@@ -80,8 +80,10 @@ class SQL extends BaseController
                     $db = new \F3\DB\SQL('mysql:host=f3-mysql;dbname=fatfree', 'root', 'f3root');
                 }
                 if ($engine == 'sqlsrv') {
-                    $db->exec('DROP DATABASE IF EXISTS '.$db->quotekey('fatfree').';');
-                    $db->exec('CREATE DATABASE '.$db->quotekey('fatfree'));
+                    try {
+                        $db->exec('DROP DATABASE IF EXISTS '.$db->quotekey('fatfree').';');
+                        $db->exec('CREATE DATABASE '.$db->quotekey('fatfree'));
+                    } catch (\PDOException $e) {}
                     //                    $db->exec('CREATE DATABASE '.$db->quotekey('fatfree').' collate Latin1_General_100_CI_AI_SC_UTF8');
                     unset($db);
                     $db = new \F3\DB\SQL(
@@ -562,7 +564,7 @@ class SQL extends BaseController
                     $db->exec(
                         'DROP TABLE IF EXISTS '.$db->quotekey('sessions').';',
                     );
-                    $session = new \F3\DB\SQL\Session($db);
+                    $session = new \F3\DB\SQL\Session($db, forceInstall: true);
                     $test->expect(
                         $session->sid() === null,
                         'Database-managed session instantiated but not started',

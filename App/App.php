@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Controller\SessionTest;
 use F3\Base;
 use F3\Overdrive\AppInterface;
 
@@ -41,7 +42,6 @@ class App implements AppInterface
             '/jig' => 'Jig',
             '/auth' => 'Auth',
             '/log' => 'Log Engine',
-            '/matrix' => 'Matrix',
             '/image' => 'Image',
             '/web' => 'Web',
             '/ws' => 'WebSocket',
@@ -50,10 +50,13 @@ class App implements AppInterface
             '/openid' => 'OpenID',
             '/pingback' => 'Pingback',
             '/subdir' => 'Subdir',
+            '/session-test' => 'Session',
         ]);
 
         $f3->map('/', 'App\Controller\Env');
         $f3->map('/@controller', 'App\Controller\@controller');
+
+        $f3->route('GET /session-{@action}', SessionTest::class.'->@action');
     }
 
     public function run(): void
