@@ -1,6 +1,7 @@
 <?php
 
 use F3\Base;
+use F3\Http\RequestType;
 use F3\Http\Response;
 use F3\Http\ServerRequest;
 use F3\Http\Stream;
@@ -325,13 +326,41 @@ test('HTTP OPTIONS request returns allowed methods', function () {
     expect($found)->toBe('Allow: '.implode(',', Verb::names()));
 });
 
+test('405 returns allowed methods', function () {
+    $this->f3->route('POST|PUT /dummy', function (\F3\Base$f3) {
+        //
+    });
+    $this->f3->HALT = false;
+    expect(function () {
+        $this->f3->mock('GET /dummy', throw: true);
+    })->toThrow(\Exception::class, 'HTTP 405', 'fetch 405 error');
+
+    $headerlist = $this->f3->RESPONSE_HEADERS;
+    expect($headerlist)
+        ->toContain('Allow: POST,PUT')
+        ->toContain('HTTP/1.1 405 Method Not Allowed');
+});
+
+test('405 returns allowed methods - map', function () {
+    $this->f3->map('/dummy-map', TestRouterMap::class);
+    $this->f3->HALT = false;
+
+    expect(function () {
+        $this->f3->mock('GET /dummy-map', throw: true);
+    })->toThrow(\Exception::class, 'HTTP 405', 'fetch 405 error');
+
+    $headerlist = $this->f3->RESPONSE_HEADERS;
+    expect($headerlist)
+        ->toContain('Allow: POST,PUT')
+        ->toContain('HTTP/1.1 405 Method Not Allowed');
+});
+
 test('HTTP OPTIONS request returns user-specified methods', function () {
     $this->f3->route('OPTIONS /dummy', function (\F3\Base$f3) {
-        $f3->header('Allow: GET, POST');
+        $f3->header('X-App: FooBar 3.2');
     });
     $this->f3->mock('OPTIONS /dummy');
-    $found = array_first(preg_grep('/^Allow:/', $this->f3->RESPONSE_HEADERS));
-    expect($found)->toBe('Allow: GET, POST');
+    expect($this->f3->RESPONSE_HEADERS)->toContain('X-App: FooBar 3.2');
 });
 
 it('captures parameters in route', function () {
@@ -504,6 +533,7 @@ describe('CORS', function () {
         $this->f3->CORS['origin'] = '*';
         $this->f3->CORS['credentials'] = true;
         $this->f3->CORS['expose'] = ['X-Version', 'Foo'];
+        $this->f3->CORS['headers'] = ['X-App', 'X-Platform'];
         $this->f3->CORS['ttl'] = 60;
     });
 
@@ -517,6 +547,7 @@ describe('CORS', function () {
         expect($headerlist)
             ->toContain('Access-Control-Allow-Origin: *')
             ->toContain('Access-Control-Allow-Methods: OPTIONS,GET,POST')
+            ->toContain('Access-Control-Allow-Headers: X-App,X-Platform')
             ->toContain('Access-Control-Allow-Credentials: true')
             ->toContain('Access-Control-Max-Age: 60');
     });
@@ -562,18 +593,7 @@ describe('CORS', function () {
 describe('PSR7', function () {
     beforeEach(function () {
         $this->f3->CONTAINER = \F3\Service::instance();
-        $psrAdapter = $this->f3->make(\F3\Http\MessageFactory::class);
-        $psrAdapter->register(
-            requestFactory: \F3\Http\Factory\Psr17Factory::class,
-            responseFactory: \F3\Http\Factory\Psr17Factory::class,
-            serverRequestFactory: \F3\Http\Factory\Psr17Factory::class,
-            uploadedFileFactory: \F3\Http\Factory\Psr17Factory::class,
-            uriFactory: \F3\Http\Factory\Psr17Factory::class,
-            streamFactory: \F3\Http\Factory\Psr17Factory::class,
-        );
-        $psrAdapter->registerRequest(\F3\Http\Request::class);
-        $psrAdapter->registerResponse(\F3\Http\Response::class);
-        $psrAdapter->registerServerRequest(\F3\Http\ServerRequest::class);
+        \F3\Http\MessageFactory::registerDefaults();
     });
 
     test('Route call with Container', function () {
@@ -598,7 +618,7 @@ describe('PSR7', function () {
             ->and($args[2])->toBe([TestRouter::class, 'v3']);
     });
 
-    test('Request & Response created injected', function () {
+    test('Request & Response injected', function () {
         $this->f3->route('GET /psr7-test/@foo', [TestRouter::class, 'injectTest']);
         $this->f3->mock('GET /psr7-test/baz', headers: ['X-Test' => 'testing']);
         $args = $this->f3->get('args');
@@ -675,6 +695,190 @@ describe('PSR7', function () {
 
 });
 
+describe('Middleware', function () {
+
+    it('registers a middleware', function () {
+        expect($this->f3->MIDDLEWARES)->toBeEmpty();
+        $this->f3->middleware('GET /api*', 'Middleware::handle');
+        expect($m=$this->f3->MIDDLEWARES)->not->toBeEmpty('middleware added');
+        expect($this->f3->MIDDLEWARES)->toHaveCount(1);
+        expect($this->f3->MIDDLEWARES)->toHaveKey('/api*');
+        expect(isset($this->f3->MIDDLEWARES['/api*'][0]['GET']))->toBeTrue();
+
+        $this->f3->middleware([
+            'GET /api/user',
+            'GET /api/notes',
+        ], 'Middleware::handle');
+        expect($this->f3->MIDDLEWARES)->toHaveCount(3);
+    });
+
+    test('register respects route type', function () {
+        $this->f3->middleware('GET /migrate* [cli]', 'Middleware::handle');
+        expect($this->f3->MIDDLEWARES)->toHaveCount(1);
+        expect($this->f3->MIDDLEWARES)->toHaveKey('/migrate*');
+        expect(isset($this->f3->MIDDLEWARES['/migrate*'][\F3\HTTP\RequestType::CLI->value]['GET']))->toBeTrue();
+    });
+
+    it('registers as tag', function () {
+        $this->f3->middleware(['auth'], 'Middleware::handle');
+        expect($this->f3->MIDDLEWARES)->toHaveCount(1);
+        expect($this->f3->MIDDLEWARES)->toHaveKey('#auth');
+    });
+
+    it('calls a middleware', function () {
+        expect($this->f3->MIDDLEWARES)->toBeEmpty();
+        $executed = false;
+        $this->f3->middleware([
+            'GET /api*',
+        ], function ($next) use (&$executed) {
+            $executed = true;
+            return $next();
+        });
+        expect($this->f3->MIDDLEWARES)->not->toBeEmpty('middleware added');
+
+        $this->f3->route('GET /api', function () {});
+        $this->f3->mock('GET /api');
+        expect($executed)->toBeTrue('middleware was called');
+    });
+
+    it('respects routing precedence + tags', function () {
+        $_SERVER['REQUEST_URI'] = '';
+        $out = [];
+        $this->f3->middleware('GET /*', function ($next) use (&$out) {
+            $out[]="outer";
+            return $next();
+        });
+        $this->f3->middleware('GET /api*', function ($next) use (&$out) {
+            $out[]="inner";
+            return $next();
+        });
+        $this->f3->middleware('auth', function ($next) use (&$out) {
+            $out[]="auth";
+            return $next();
+        });
+        $this->f3->middleware('api', function ($next) use (&$out) {
+            $out[]="api";
+            return $next();
+        });
+        $this->f3->route('GET /api/user', function () use (&$out) {
+            $out[]="route";
+        }, tags: ['auth', 'api']);
+
+        $this->f3->route('GET /api/cars', function () use (&$out) {
+            $out[]="route";
+        }, tags: ['api', 'auth']);
+
+        $this->f3->mock('GET /api/user');
+        expect($out)->toBe(['auth', 'api', 'outer', 'inner', 'route']);
+
+        $out = [];
+        $this->f3->mock('GET /api/cars');
+        expect($out)->toBe(
+            ['api', 'auth', 'outer', 'inner', 'route'],
+            'it respects route tag order'
+        );
+    });
+
+    it('buffers output across all handlers', function () {
+        $this->f3->middleware('GET /*', function ($next) {
+            echo "outer";
+            return $next();
+        });
+        $this->f3->middleware('GET /api', function ($next) {
+            echo "inner";
+            return $next();
+        });
+        $this->f3->route('GET /api', function () {
+            echo "route";
+            return "api-result";
+        });
+        $out = $this->f3->mock('GET /api');
+
+        expect($out)->toBe('api-result', 'return contains return value');
+        expect($this->f3->RESPONSE)->toBe('outerinnerroute');
+
+        $this->f3->middleware('GET /pre*', function ($next) {
+            return "pre".$next();
+        });
+        $this->f3->route('GET /pre/foo', function () {
+            return "foo";
+        });
+        $out = $this->f3->mock('GET /pre/foo');
+        expect($out)->toBe('prefoo', 'return value adds up');
+    });
+
+    test('pre run headers', function () {
+        $this->f3->CONTAINER = \F3\Service::instance();
+        $this->f3->middleware('GET /*', function (\Closure $next, \F3\Base $f3) {
+            $f3->header('X-App: F3 v4');
+            return $next();
+        });
+        $this->f3->route('GET /foo/bar', function () {
+            echo "foo";
+        });
+        $this->f3->mock('GET /foo/bar');
+        expect($this->f3->RESPONSE_HEADERS)->toContain('X-App: F3 v4');
+    });
+
+    it('respects CORS enabled within middleware', function () {
+        $this->f3->CONTAINER = \F3\Service::instance();
+
+        $this->f3->middleware('OPTIONS /api/*', function (\Closure $next, \F3\Base $f3) {
+            $f3->CORS['origin'] = 'https://fatfreeframework.com';
+            return $next();
+        });
+
+        $this->f3->route('GET /api/foo', function () {
+            echo "foo";
+        });
+        $this->f3->mock('OPTIONS /api/foo', headers: [
+            'Access-Control-Request-Method' => 'GET',
+            'Origin' => 'localhost',
+        ], throw: true);
+        expect($this->f3->RESPONSE_HEADERS)
+            ->toContain('Access-Control-Allow-Origin: https://fatfreeframework.com')
+            ->toContain('Access-Control-Allow-Methods: OPTIONS,GET');
+    });
+
+
+    test('PSR7 request + response', function () {
+        $this->f3->CONTAINER = \F3\Service::instance();
+        \F3\Http\MessageFactory::registerDefaults();
+
+        $this->f3->middleware('GET /*', function (\Closure $next, \F3\Base $f3, ServerRequest $request, Response $response) {
+            expect($request->getHeader('X-Foo-1'))->toBe(['bar']);
+            $response = $response->withHeader('X-Version', $f3->VERSION);
+            // if a PSR7 Response is used, you have to pass it to the $next route executor
+            return $next($response);
+        });
+        $this->f3->middleware('GET /api', function (\Closure $next, \F3\Base $f3, ServerRequest $request, Response $response) {
+            expect($request->getHeader('X-Foo-1'))->toBe(['bar']);
+            $response = $response->withHeader('X-App', 'F3 v4');
+            return $next($response);
+        });
+        $this->f3->route('GET /api', function (\F3\Base $f3, Response $response) {
+            return $response->withBody(new Stream('Hallo World!'));
+        });
+
+        /** @var Response $out */
+        $out = $this->f3->mock('GET /api', headers: ['X-Foo-1' => 'bar']);
+        $body = $out->getBody();
+        $body->rewind();
+
+        expect($out)
+            ->toBeInstanceOf(Response::class)
+            ->and($body->getContents())
+                ->toBe('Hallo World!', 'response contains return value')
+            ->and($out->getHeader('X-App'))->toBe(['F3 v4'])
+            ->and($out->getHeader('X-Version'))->toBe([$this->f3->VERSION])
+            // Response headers unpacked from PSR7
+            ->and($this->f3->RESPONSE_HEADERS)
+                ->toContain('X-App: F3 v4')
+                ->toContain('X-Version: '.$this->f3->VERSION);
+    });
+
+});
+
 class TestRouter {
     public function simple(\F3\Base $f3)
     {
@@ -696,6 +900,11 @@ class TestRouter {
         \F3\Base::instance()->set('args', func_get_args());
     }
 
+}
+
+class TestRouterMap {
+    public function post() {}
+    public function put() {}
 }
 
 function please($f3)

@@ -19,7 +19,7 @@ class Cache extends BaseController {
 
         $test->expect(
             $backend=$f3->get('CACHE'),
-            '>> Cache backend '.$f3->stringify($backend).' detected'
+            '▶️ Cache backend '.$f3->stringify($backend).' detected'
         );
         $repeat=TRUE;
         while ($repeat) {
@@ -85,7 +85,7 @@ class Cache extends BaseController {
                 if (preg_match('/folder=/',$backend=$f3->get('CACHE'))) {
                     $test->expect(
                         $backend,
-                        '>> Cache backend '.$f3->stringify($backend).' specified'
+                        '▶️ Cache backend '.$f3->stringify($backend).' specified'
                     );
                     continue;
                 }
@@ -97,7 +97,7 @@ class Cache extends BaseController {
                 if (preg_match('/memcached=/',$backend=$f3->get('CACHE'))) {
                     $test->expect(
                         $backend,
-                        '>> Cache backend '.$f3->stringify($backend).' specified'
+                        '▶️ Cache backend '.$f3->stringify($backend).' specified'
                     );
                     continue;
                 }
@@ -108,7 +108,7 @@ class Cache extends BaseController {
                 if (preg_match('/redis=/',$backend=$f3->get('CACHE'))) {
                     $test->expect(
                         $backend,
-                        '>> Cache backend '.$f3->stringify($backend).' specified'
+                        '▶️ Cache backend '.$f3->stringify($backend).' specified'
                     );
                     continue;
                 }

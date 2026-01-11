@@ -244,8 +244,16 @@ describe('Encoding', function () {
 });
 
 it('fetches constants from an object', function () {
-    expect($this->f3->constants($this->f3, 'REQ_'))->toBe(
-        ['SYNC' => Base::REQ_SYNC, 'AJAX' => Base::REQ_AJAX, 'CLI' => Base::REQ_CLI],
+    $clazz = new class
+    {
+        const
+            ERROR_A = 1,
+            ERROR_B = 2,
+            ERROR_C = 3;
+    };
+    $obj = new $clazz();
+    expect($this->f3->constants($obj, 'ERROR_'))->toBe(
+        ['A' => 1, 'B' => 2, 'C' => 3],
     );
 });
 

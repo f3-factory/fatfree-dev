@@ -57,6 +57,10 @@ class App implements AppInterface
         $f3->map('/@controller', 'App\Controller\@controller');
 
         $f3->route('GET /session-{@action}', SessionTest::class.'->@action');
+        $f3->route('GET /subdir', function (\F3\Base $f3) {
+            echo 'ERROR: Subdir routing is not possible in worker mode';
+        });
+
     }
 
     public function run(): void
