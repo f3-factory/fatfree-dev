@@ -32,7 +32,6 @@ class App implements AppInterface
             '/globals' => 'Globals',
             '/redir' => 'Router',
             '/cache' => 'Cache Engine',
-            '/config' => 'Config',
             '/view' => 'View',
             '/template' => 'Template',
             '/markdown' => 'Markdown',
