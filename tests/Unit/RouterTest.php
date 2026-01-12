@@ -96,12 +96,34 @@ it('follow reroute in cli mode', function () {
 });
 
 it('reroute trailing slash URIs', function () {
-    $this->f3->route('GET /test', function (\F3\Base $f3) {
+    $this->f3->route('GET @test1: /test', function (\F3\Base $f3) {
         return "ok";
     });
     $this->f3->mock('GET /test/');
     $loc = \preg_grep('/Location: https?:\/\/.*?\/test/', $this->f3->RESPONSE_HEADERS);
-    expect($loc)->not()->toBeEmpty();
+    expect($loc)->not()->toBeEmpty('reroutes trailing slash URIs');
+
+    $this->f3->mock('GET /test');
+    $loc = \preg_grep('/Location: https?:\/\/.*?\/test/', $this->f3->RESPONSE_HEADERS);
+    expect($loc)->toBeEmpty('does not reroute non-trailing slash URIs');
+
+    expect($this->f3->alias('test1'))->toBe('/test');
+});
+
+it('TRAILING_SLASH enabled', function () {
+    $this->f3->route('GET @test1: /test', function (\F3\Base $f3) {
+        return "ok";
+    });
+    $this->f3->TRAILING_SLASH = true;
+    $this->f3->mock('GET /test/');
+    $loc = \preg_grep('/Location: https?:\/\/.*?\/test/', $this->f3->RESPONSE_HEADERS);
+    expect($loc)->toBeEmpty('does not reroute trailing slash URIs');
+
+    $this->f3->mock('GET /test');
+    $loc = \preg_grep('/Location: https?:\/\/.*?\/test/', $this->f3->RESPONSE_HEADERS);
+    expect($loc)->not()->toBeEmpty('does reroute non-trailing slash URIs');
+
+    expect($this->f3->alias('test1'))->toBe('/test/');
 });
 
 test('custom rerouting', function ($route, $p, $e) {

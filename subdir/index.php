@@ -4,6 +4,7 @@ require '../vendor/autoload.php';
 $f3 = \F3\Base::instance();
 $f3->TEMP = '../tmp/';
 $f3->ABSOLUTE_ALIAS = true;
+$f3->TRAILING_SLASH = false;
 $f3->withBaseTag = false;
 
 $f3->route('GET main: /', function(\F3\Base $f3) {
