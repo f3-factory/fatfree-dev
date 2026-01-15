@@ -5,6 +5,7 @@ namespace Tests;
 use F3\Base;
 use F3\Matrix;
 use F3\Registry;
+use Mockery;
 use stdClass;
 
 pest()->extend(CoreTestCase::class);
@@ -65,6 +66,15 @@ test('Alias available', function () {
 });
 
 describe('error handling', function () {
+
+    it('can suppress startup errors', function () {
+        $foo = @$bar; // intentionally undefined
+        error_reporting(0);
+        $fw = Base::instance();
+        $e = error_get_last();
+        expect($e)->toContain('Undefined variable $bar');
+    });
+
     it('provides error information', function () {
         $fw = Base::instance();
         $fw->HALT = false;
