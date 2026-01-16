@@ -179,6 +179,12 @@ describe('dynamic data', function () {
             ->and($this->f3->a->z['qux'])->toBeCallable();
     });
 
+    test('object style value', function () {
+        $this->f3->set('foo', 'bar->baz');
+        expect($this->f3->get('foo'))
+            ->toBe('bar->baz');
+    });
+
     test('Multilevel array', function () {
         $this->f3->set('i.j', 'bar');
         expect($this->f3->get('i'))
