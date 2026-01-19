@@ -61,6 +61,21 @@ test('sandbox variables', function () {
     ))->toBe('a:4:{s:2:"fw";i:1;s:4:"hive";i:2;s:8:"implicit";i:3;s:4:"mime";i:4;}');
 });
 
+test('sandbox variables empty', function () {
+    expect($this->view->render(
+        'view/hive_content.php',
+        null,
+        []
+    ))->toBe('a:0:{}');
+});
+
+test('sandbox $this', function () {
+    expect($this->view->render('view/test4.php', null, []))
+        ->toEqual('1x');
+    $this->f3->foo = 'bar';
+    expect($this->view->render('view/test5.php', null, []))
+        ->toEqual('bar');
+});
 
 test('render cache', function ($val, $ttl, $sleep, $expected) {
     $this->f3->CACHE = 'folder=tmp/cache/';

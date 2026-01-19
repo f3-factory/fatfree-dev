@@ -1,0 +1,9 @@
+<div>
+	{~ foreach (@div as @dkey=>@dval): ~}
+		<p><span>{{ @dkey }}</span>
+			{~ foreach (@dval as @skey => @sval): ~}
+				<span>{{ @skey }}: {{ @sval }}</span>
+			{~ endforeach ~}
+		</p>
+	{~ endforeach ~}
+</div>

@@ -253,7 +253,40 @@ test('escaped values', function () {
         ->and($this->f3->get('ENV.content'))->toBe('<ok>');
 });
 
+test('render custom filter', function () {
+    $this->tmpl->filter('pick', '\FilterHelper::instance()->pick');
+    expect($this->tmpl->render('templates/test15.html'))
+        ->toBe("apple"."\r\n"."cherry"."\r\n");
+});
+
+test('benchmark', function ($engine, $file) {
+    $this->f3->set(
+        'div',
+        array_fill(0, 1000, array_combine(range('a', 'j'), range(0, 9))),
+    );
+    $now = microtime(true);
+    $engine::instance()->render($file);
+    expect(
+        $val = round(1e3 * (microtime(true) - $now), 2).' msecs',
+    )->toBeGreaterThan(0.1, $val);
+})->with([
+    'Raw PHP template' => [\F3\View::class, 'benchmark.htm'],
+    'Use Preview engine' => [\F3\Preview::class, 'templates/benchmark_prev.htm'],
+    'Use Template engine' => [\F3\Template::class, 'templates/benchmark.htm'],
+]);
+
 afterAll(function () {
     foreach (glob('tmp/*.*.php') as $file)
         unlink($file);
 });
+
+
+class FilterHelper
+{
+    use \F3\Prefab;
+
+    public function pick($val, $match)
+    {
+        return preg_grep('/'.$match.'/', $val);
+    }
+}
