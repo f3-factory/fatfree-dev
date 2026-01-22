@@ -1,0 +1,14 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Pest, PHP 8.5" type="PestRunConfigurationType">
+    <CommandLine>
+      <PhpTestInterpreterSettings>
+        <option name="interpreterName" value="php85" />
+      </PhpTestInterpreterSettings>
+      <envs>
+        <env name="XDEBUG_MODE" value="coverage" />
+      </envs>
+    </CommandLine>
+    <PestRunner method="" scope="ConfigurationFile" />
+    <method v="2" />
+  </configuration>
+</component>

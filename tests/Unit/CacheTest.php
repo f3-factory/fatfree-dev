@@ -50,7 +50,7 @@ dataset('backends', function () {
     if (extension_loaded('memcached')) {
         $backends['memcached'] = 'memcached=f3-memcached';
     }
-    if (extension_loaded('memcached')) {
+    if (extension_loaded('redis')) {
         $backends['redis'] = 'redis=f3-redis';
     }
     return $backends;
@@ -296,22 +296,58 @@ describe('Cache-Based Session Handler', function () {
         $this->f3->CACHE = true;
     });
 
-    test('Session handler', function () {
+    test($t1='Session handler', function ($backend) {
+        $this->f3->CACHE = $backend;
         $session = new \F3\Session();
         expect($session->sid())->toBeNull('Cache-based session instantiated but not started');
 
         $this->f3->set('SESSION.foo','hello world');
-        expect($sid=$session->sid())->toBeString('Cache-based session started: '.$sid);
+        expect($sid = $session->sid())
+            ->toBeString('Cache-based session started: '.$sid)
+            ->and(session_status())
+            ->toBe(PHP_SESSION_ACTIVE)
+            ->and($this->f3->get('SESSION.foo'))
+            ->toBe('hello world');
 
-        expect(session_status())->toBe(PHP_SESSION_ACTIVE);
-        expect($this->f3->get('SESSION.foo'))->toBe('hello world');
         session_write_close();
-        expect($session->sid())->toBeNull('Cache-based session written and closed');
-        expect(session_status())->toBe(PHP_SESSION_NONE);
+        expect($session->sid())
+            ->toBeNull('Cache-based session written and closed')
+            ->and(session_status())->toBe(PHP_SESSION_NONE);
+
+        $cache = \F3\Cache::instance();
+        expect($cache->exists($sid.'.@', $val))->toBeTruthy('Session cached');
 
         $_SESSION=[];
         expect($this->f3->get('SESSION.foo'))->toBe('hello world', 'Session variable retrieved from cache');
     })->with('backends');
+
+    test('garbage collection', function ($backend) {
+        $this->f3->JAR->lifetime = 3;
+        $this->f3->CACHE = $backend;
+        $cache = \F3\Cache::instance();
+        $cache->reset();
+        $session = new \F3\Session();
+        $this->f3->set('SESSION.foo','hello world');
+        expect($this->f3->get('SESSION.foo'))->toBe('hello world');
+        $sid = $session->sid();
+        session_write_close();
+
+        sleep(1);
+        $cache = \F3\Cache::instance();
+        expect($cache->exists($sid.'.@', $val))->toBeTruthy('entry exists');
+        $session->gc(3600);
+        // waiting for memcached async storage
+        if (str_starts_with($this->f3->CACHE, 'memcache'))
+            sleep(1);
+        expect($cache->exists($sid.'.@'))->toBeTruthy('still exists, gc ttl bigger');
+        sleep(2);
+        $session->gc(2);
+        // waiting for memcached async storage
+        if (str_starts_with($this->f3->CACHE, 'memcache'))
+            sleep(1);
+        expect($cache->exists($sid.'.@'))->toBeFalse('gc ttl lower than max_lifetime');
+        $cache->reset();
+    })->with('backends')->depends($t1);
 
     test('Session handler fails without cache', function () {
         $this->f3->CACHE = false;
@@ -496,11 +532,12 @@ describe('Cache-Based Session Handler', function () {
 
     it('validates session cookie', function () {
         $this->f3->clear('SESSION');
-        $this->f3->set('COOKIE.PHPSESSID', 'abc<";\x20');
+        $this->f3->set('COOKIE.PHPSESSID', $init='abc<";\x20');
         $session = new \F3\Session();
         expect($this->f3->exists('COOKIE.PHPSESSID'))->toBeFalse();
         $this->f3->session_start();
-        expect($this->f3->exists('COOKIE.PHPSESSID', $val))->not->toBeFalse()
-            ->and(preg_match('/^[a-zA-Z0-9]{24,256}$/', $val))->not->toBeFalse();
+        expect($this->f3->exists('COOKIE.PHPSESSID', $val))->toBeTruthy()
+            ->and($val)->not->toBe($init)
+            ->and(preg_match('/^[a-zA-Z0-9]{24,256}$/', $val))->toBeTruthy();
     });
 });

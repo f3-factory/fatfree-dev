@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Pest Test Suite" type="PestRunConfigurationType" focusToolWindowBeforeRun="true">
+  <configuration default="false" name="Pest, PHP 8.4" type="PestRunConfigurationType" focusToolWindowBeforeRun="true">
     <CommandLine>
       <PhpTestInterpreterSettings>
         <option name="interpreterName" value="php84" />
