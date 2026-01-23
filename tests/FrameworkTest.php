@@ -67,10 +67,21 @@ test('Alias available', function () {
 
 describe('error handling', function () {
 
-    it('can suppress startup errors', function () {
+    it('can suppress startup errors with error_reporting', function () {
         $foo = @$bar; // intentionally undefined
         error_reporting(0);
-        $fw = Base::instance();
+        expect(function () {
+            $fw = Base::instance(true);
+        })->not->toThrow(\Exception::class);
+        $e = error_get_last();
+        expect($e)->toContain('Undefined variable $bar');
+    });
+
+    it('can suppress startup errors with init option', function () {
+        $foo = @$bar; // intentionally undefined
+        expect(function () {
+            $fw = Base::instance(false);
+        })->not->toThrow(\Exception::class);
         $e = error_get_last();
         expect($e)->toContain('Undefined variable $bar');
     });
