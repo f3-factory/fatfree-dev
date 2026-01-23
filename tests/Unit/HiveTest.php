@@ -490,25 +490,28 @@ test('Array flip', function () {
 describe('Cookie JAR', function () {
 
     test('default settings', function () {
-        expect($this->f3->JAR->expire)
-            ->toBe(0)
-            ->and($this->f3->JAR->lifetime)->toBe(0);
+        expect($this->f3->JAR->lifetime)
+            ->toBe(0);
     });
 
-    test('adjustment by property', function () {
-        $this->f3->TIME = $time = time();
-        $this->f3->JAR->updateRequestTime($time);
-        $this->f3->JAR->lifetime = 3600;
-        expect($this->f3->JAR->expire)
-            ->toBeGreaterThanOrEqual($time + 3600 - 1);
+    test('lifetime adjustment by property', function () {
+        $expected = strtotime('2 days') - \time();
+        $this->f3->JAR->lifetime = '2 days';
+        expect($this->f3->JAR->lifetime)
+            ->toBeGreaterThanOrEqual($expected);
     });
 
-    test('adjustment by hive setter', function () {
-        $this->f3->TIME = $time = time();
-        $this->f3->JAR->updateRequestTime($time);
+    test('lifetime adjustment by hive setter', function () {
+        $expected = strtotime('2 days') - \time();
+        $this->f3->JAR->lifetime = '2 days';
+        $this->f3->set('JAR.lifetime', '2 days');
+
+        expect($this->f3->JAR->lifetime)
+            ->toBeGreaterThanOrEqual($expected);
+
         $this->f3->set('JAR.lifetime', 7200);
-        expect($this->f3->JAR->expire)
-            ->toBeGreaterThanOrEqual($time + 7200 - 1);
+        expect($this->f3->JAR->lifetime)
+            ->toBeGreaterThanOrEqual(7200 - 1);
     });
 
 });
