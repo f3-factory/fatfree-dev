@@ -180,7 +180,7 @@ services:
     command: composer install --ignore-platform-reqs
 
   mysql:
-    image: mysql:8.0-debian
+    image: arm64v8/mysql:8.0
     container_name: '${COMPOSE_PROJECT_NAME}-mysql'
     hostname: f3-mysql
     restart: 'always'
@@ -189,6 +189,25 @@ services:
     volumes:
       - ./docker/data/mysql:/var/lib/mysql
       - ./docker/data/logs/mysql:/var/log/mysql
+    command: mysqld --general-log=1 --general-log-file=/var/log/mysql/general-log.log
+    networks:
+      internal:
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+
+  mariadb:
+    image: mariadb:10.11
+    container_name: '${COMPOSE_PROJECT_NAME}-mariadb'
+    hostname: f3-mariadb
+    restart: 'always'
+    ports:
+      - "${HOST_PORT_MARIADB}:${MYSQL_PORT}"
+    volumes:
+      - ./docker/data/mariadb:/var/lib/mysql
+      - ./docker/data/logs/mariadb:/var/log/mysql
     command: mysqld --general-log=1 --general-log-file=/var/log/mysql/general-log.log
     networks:
       internal:
@@ -236,8 +255,8 @@ services:
     ports:
       - "${HOST_PORT_MONGO}:27017"
     environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: fatfree
+      MONGO_INITDB_ROOT_USERNAME: ${MONGODB_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGODB_PASSWORD}
 
   redis:
     container_name: '${COMPOSE_PROJECT_NAME}-redis'

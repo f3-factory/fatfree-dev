@@ -22,6 +22,7 @@ Currently included:
   - Redis
 - Database
   - MySQL 8.0
+  - MariaDB
   - PostgreSQL
   - SQL Server
 - PHP Versions
@@ -63,4 +64,4 @@ Also included is ready to use **XDebug**.
 
 This development environment belongs to the f3-factory community and is not meant for usage on a production system. No warranty for any security issues in case you put this on your public root.
 
-**Copyright (c) 2025 F3::Factory**
+**Copyright (c) 2026 F3::Factory**

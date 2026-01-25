@@ -17,6 +17,7 @@ class SQL extends BaseController
         $dbs = [
             'sqlite' => 'pdo_sqlite',
             'mysql' => 'pdo_mysql',
+            'mariadb' => 'pdo_mysql',
             'pgsql' => 'pdo_pgsql',
             'sqlsrv' => 'pdo_sqlsrv',
         ];
@@ -43,6 +44,9 @@ class SQL extends BaseController
                         break;
                     case 'mysql':
                         $db = new \F3\DB\SQL('mysql:host=f3-mysql', 'root', 'f3root');
+                        break;
+                    case 'mariadb':
+                        $db = new \F3\DB\SQL('mysql:host=f3-mariadb', 'root', 'f3root');
                         break;
                     case 'pgsql':
                         $db = new \F3\DB\SQL(
