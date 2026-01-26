@@ -79,6 +79,9 @@ describe('GLOBALS', function () {
         $ok = true;
         $list = '';
         foreach (explode('|', $this->f3::GLOBALS) as $global) {
+            // Base works on a copy of $_SERVER and doesn't alter it anymore to be less invasive
+            if ($global === 'SERVER')
+                continue;
             if ($GLOBALS['_'.$global] != $this->f3->get($global)) {
                 $ok = false;
                 $list .= ($list ? ',' : '').$global;

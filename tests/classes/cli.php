@@ -19,7 +19,7 @@ $f3->route('GET /log/@cmd', function (\F3\Base $f3, $params) {
 
 $f3->route('GET /debug/@cmd', function (\F3\Base $f3, $params) {
     if ($params['cmd'] == 'uri')
-        echo rawurldecode($_SERVER['REQUEST_URI']);
+        echo rawurldecode($f3->SERVER['REQUEST_URI']);
     if ($params['cmd'] == 'get') {
         $str = '';
         foreach ($f3->get('GET') as $k => $v)

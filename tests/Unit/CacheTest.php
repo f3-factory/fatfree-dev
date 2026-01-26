@@ -334,17 +334,13 @@ describe('Cache-Based Session Handler', function () {
 
         sleep(1);
         $cache = \F3\Cache::instance();
-        expect($cache->exists($sid.'.@', $val))->toBeTruthy('entry exists');
+        expect($cache->exists($sid.'.@'))->toBeTruthy('entry exists');
         $session->gc(3600);
-        // waiting for memcached async storage
-        if (str_starts_with($this->f3->CACHE, 'memcache'))
-            sleep(1);
+
         expect($cache->exists($sid.'.@'))->toBeTruthy('still exists, gc ttl bigger');
         sleep(2);
         $session->gc(2);
-        // waiting for memcached async storage
-        if (str_starts_with($this->f3->CACHE, 'memcache'))
-            sleep(1);
+
         expect($cache->exists($sid.'.@'))->toBeFalse('gc ttl lower than max_lifetime');
         $cache->reset();
     })->with('backends')->depends($t1);

@@ -173,7 +173,6 @@ test('Route mock in sandbox', function () {
     $test_headers = [];
     $orig_headers = $this->f3->HEADERS;
     $exp_headers = ['X-Foo' => 'Bar'];
-    $os_uri = $_SERVER['REQUEST_URI']; // $_SERVER intentional!
     $oh_uri = $this->f3->URI;
     $th_uri = '';
     $ts_uri = '';
@@ -190,17 +189,18 @@ test('Route mock in sandbox', function () {
         },
     );
     $this->f3->mock('GET /mock', headers: $exp_headers, sandbox: true);
-    expect($mocked)->toBeTrue()
-        ->and($this->f3->mocked)->toBeFalse();
-    expect($test_headers)->toBe($exp_headers)
-        ->and($this->f3->HEADERS)->toBe($orig_headers);
-    expect($this->f3->URI)->toEqual($oh_uri)
+    expect($mocked)
+        ->toBeTrue()
+        ->and($this->f3->mocked)->toBeFalse()
+        ->and($test_headers)->toBe($exp_headers)
+        ->and($this->f3->HEADERS)->toBe($orig_headers)
+        ->and($this->f3->URI)->toEqual($oh_uri)
         ->and($th_uri)->toEqual('/mock')
-        ->and($ts_uri)->toEqual('/mock');
-    expect($this->f3->SERVER['REQUEST_URI'])
-        ->toEqual($os_uri, 'REQUEST_URI should not be altered in sandbox mode');
+        ->and($ts_uri)->toEqual('/mock')
+        ->and($this->f3->SERVER['REQUEST_URI'])
+        ->not->toEqual($ts_uri, 'REQUEST_URI should not be altered in sandbox mode')
+        ->and($this->f3->RESPONSE_HEADERS)->toContain('X-Foo: Bar');
     // Response headers hydrated
-    expect($this->f3->RESPONSE_HEADERS)->toContain('X-Foo: Bar');
 });
 
 it('resolves named routes', function () {

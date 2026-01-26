@@ -15,7 +15,7 @@ test('REALM (Full canonical URI)', function () {
 
 test('VERB (request method)', function () {
     expect($this->f3->get('VERB'))
-        ->toBe($_SERVER['REQUEST_METHOD']);
+        ->toBe($this->f3->SERVER['REQUEST_METHOD']);
 });
 
 test('SCHEME (Web protocol)', function () {
