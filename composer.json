@@ -1,24 +1,24 @@
 {
     "name": "f3-factory/fatfree-dev",
     "license": "MIT",
-    "minimum-stability": "dev",
+    "minimum-stability": "stable",
     "type": "project",
     "description": "Dockerized development environment for the PHP Fat-Free Framework",
     "keywords": ["F3","fatfree","micro-framework","php"],
     "homepage": "https://github.com/f3-factory/fatfree-dev",
     "require": {
         "php": ">=8.4",
-        "bcosca/fatfree-core": "*",
+        "bcosca/fatfree-core": "v4.x-dev as 4.0.0",
         "f3-factory/fatfree-psr7": "^2.0",
         "f3-factory/fatfree-psr7-factory": "^1.0",
-        "f3-factory/f3-overdrive": "dev-main",
+        "f3-factory/f3-overdrive": "dev-main as 1.0.0",
         "imefisto/psr-swoole-native": "^v1.0",
-        "spiral/roadrunner-cli": "^2.6.0",
+        "spiral/roadrunner-cli": "2.x-dev",
         "spiral/roadrunner-http": "^3.3.0",
-        "openswoole/core": "dev-master",
+        "openswoole/core": "^22.2.0",
         "openswoole/ide-helper": "^22.1.5",
-        "psr/http-message": "1.1",
-        "mongodb/mongodb": "v2.x-dev"
+        "psr/http-message": "^1.1 || ^2.0",
+        "mongodb/mongodb": "^2.1.2"
     },
     "repositories": [
         {
@@ -30,9 +30,8 @@
     ],
     "require-dev": {
         "swoole/ide-helper": "~5.0.0",
-        "pestphp/pest": "4.x-dev",
-        "pestphp/pest-plugin-type-coverage": "4.x-dev",
-        "phpunit/phpunit": "^12.0"
+        "pestphp/pest": "^4.3.2",
+        "pestphp/pest-plugin-type-coverage": "^4.0"
     },
     "autoload-dev": {
         "psr-4": {

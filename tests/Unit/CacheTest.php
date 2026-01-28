@@ -74,18 +74,21 @@ test('Cache backend loaded via CACHE var', function ($backend) {
 })->with('backends');
 
 test('Retrieve previously cached entry', function ($backend) {
-    $this->f3->clear('CACHE');
     $this->f3->CACHE = $backend;
+    $this->f3->clear('CACHE');
     $cache=\F3\Cache::instance();
 
-    $cache->set($this->f3->hash('foo').'.var','bar',1);
+    $cache->set($this->f3->hash('foo').'.var','bar',3);
+    // waiting for memcached async storage
+    if (str_starts_with($this->f3->CACHE, 'memcache'))
+        sleep(1);
     expect($this->f3->get('foo'))
         ->toBe('bar');
 })->with('backends');
 
 test('Retrieve cache entry details', function ($backend) {
-    $this->f3->clear('CACHE');
     $this->f3->CACHE = $backend;
+    $this->f3->clear('CACHE');
     $cache=\F3\Cache::instance();
 
     $cache->set($this->f3->hash('foo').'.var','bar',1);
@@ -98,8 +101,8 @@ test('Retrieve cache entry details', function ($backend) {
 })->with('backends');
 
 test('cache entry datatypes', function ($backend, $value) {
-    $this->f3->clear('CACHE');
     $this->f3->CACHE = $backend;
+    $this->f3->clear('CACHE');
     $cache=\F3\Cache::instance();
     $ttl = 1;
     $cache->set('value',$value, $ttl);
@@ -120,8 +123,8 @@ test('cache entry datatypes', function ($backend, $value) {
 ]);
 
 test('cache entry updated', function ($backend) {
-    $this->f3->clear('CACHE');
     $this->f3->CACHE = $backend;
+    $this->f3->clear('CACHE');
     $cache=\F3\Cache::instance();
     $ttl = 1;
     $cache->set('foo','bar', $ttl);
@@ -132,8 +135,8 @@ test('cache entry updated', function ($backend) {
 })->with('backends');
 
 test('cache entry cleaned', function ($backend) {
-    $this->f3->clear('CACHE');
     $this->f3->CACHE = $backend;
+    $this->f3->clear('CACHE');
     $cache=\F3\Cache::instance();
     $ttl = 1;
     $cache->set('foo','bar', $ttl);
@@ -144,8 +147,8 @@ test('cache entry cleaned', function ($backend) {
 })->with('backends');
 
 test('cache key expired', function ($backend) {
-    $this->f3->clear('CACHE');
     $this->f3->CACHE = $backend;
+    $this->f3->clear('CACHE');
     $cache=\F3\Cache::instance();
     $ttl = 1;
     $cache->set('foo','bar', $ttl);
@@ -201,6 +204,7 @@ test('reset with key suffix', function ($backend) {
     $this->f3->SEED = 'test';
     $this->f3->CACHE = $backend;
     $cache = \F3\Cache::instance();
+    $cache->reset();
     $ttl = 30;
     $cache->set('value1.42.user',1, $ttl);
     $cache->set('value2.42.user',2.54, $ttl);
@@ -265,7 +269,8 @@ test('cache tags', function () {
 it('caches a route', function ($backend) {
     $this->f3->CACHE = $backend;
     $cache=\F3\Cache::instance();
-    $ttl = 1;
+    $cache->reset();
+    $ttl = 2;
     $this->f3->route('GET /dummy', function (\F3\Base $f3) {
         echo "Message of the day at: ".$f3->format('{0, time, full}', time());
     }, $ttl);
@@ -273,19 +278,27 @@ it('caches a route', function ($backend) {
 
     $this->f3->mock('GET /dummy', sandbox: TRUE);
     $response1 = $this->f3->RESPONSE;
-    expect($cache->exists($hash))->not->toBeFalse();
+
+    // waiting for memcached async storage
+    if (str_starts_with($this->f3->CACHE, 'memcache'))
+        sleep(1);
+    expect($cache->exists($hash))->toBeTruthy();
     $this->f3->mock('GET /dummy', sandbox: TRUE);
     $response2 = $this->f3->RESPONSE;
 
     expect($response1)->toBe($response2);
-    expect($cache->exists($hash))->not->toBeFalse('Cached route still fresh');
+    expect($cache->exists($hash))->toBeTruthy('Cached route still fresh');
     usleep(1.1e6*$ttl);
 
     expect($cache->exists($hash))->toBeFalse('Cached route expired');
 
     $this->f3->mock('GET /dummy', sandbox: TRUE);
     $response3 = $this->f3->RESPONSE;
-    expect($cache->exists($hash))->not->toBeFalse('cache refreshed');
+
+    // waiting for memcached async storage
+    if (str_starts_with($this->f3->CACHE, 'memcache'))
+        sleep(1);
+    expect($cache->exists($hash))->toBeTruthy('cache refreshed');
     expect($response3)->not->toBe($response2);
 
 })->with('backends');
