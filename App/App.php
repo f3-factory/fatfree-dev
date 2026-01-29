@@ -46,7 +46,6 @@ class App implements AppInterface
             '/mongo' => 'MongoDB',
             '/jig' => 'Jig',
             '/auth' => 'Auth',
-            '/log' => 'Log Engine',
             '/image' => 'Image',
             '/web' => 'Web',
             '/ws' => 'WebSocket',
