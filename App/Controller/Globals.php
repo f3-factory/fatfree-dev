@@ -31,7 +31,7 @@ class Globals extends BaseController
             'ROOT (document root): '.$f3->stringify($root),
         );
         $test->expect(
-            $ip = $f3->get('IP'),
+            $ip = $f3->IP,
             'IP (Remote IP address): '.$f3->stringify($ip),
         );
         $test->expect(

@@ -14,8 +14,17 @@ class App implements AppInterface
         $f3 = Base::instance();
 
         ini_set('display_errors', 1);
-        error_reporting(-1);
+//        error_reporting(-1);
 
+//        $f3->ONERROR = function (Base $f3, $error) {
+//            if ($f3->EXCEPTION) {
+//                Debugger::exceptionHandler($f3->EXCEPTION);
+//            }
+//            if ($f3->ERROR['code'] >= 400) {
+//                throw new \Exception($f3->ERROR['text'], $f3->ERROR['code']);
+//            }
+//            return false;
+//        };
         $f3->DEBUG = 2;
         $f3->LOGGABLE = '500';
         $f3->UI = 'ui/';
@@ -32,7 +41,6 @@ class App implements AppInterface
             '/globals' => 'Globals',
             '/redir' => 'Router',
             '/cache' => 'Cache Engine',
-            '/markdown' => 'Markdown',
             '/basket' => 'Basket',
             '/sql' => 'SQL',
             '/mongo' => 'MongoDB',

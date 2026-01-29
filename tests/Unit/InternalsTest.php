@@ -262,3 +262,34 @@ it('fetches constants from a class-string', function () {
         ISO::instance()->countries(),
     );
 });
+
+it('get client IP address', function ($key) {
+    $this->f3->set($key, $ip='192.168.127.12');
+    expect($this->f3->ip())->toBe($ip);
+})->with([
+    'HEADERS.Client-IP',
+    'HEADERS.X-Forwarded-For',
+    'SERVER.REMOTE_ADDR',
+]);
+
+test('until true', function () {
+    $i = 0;
+    $func = function () use (&$i) {
+        sleep($i);
+        $i += 1;
+        return $i === 3;
+    };
+    expect($this->f3->until($func))->toBeTruthy();
+});
+
+test('until abort', function () {
+    $func = function () {
+        usleep(100*1e3);
+        return null;
+    };
+    $start = \time();
+    expect($this->f3->until($func, timeout: 5))
+        ->toBeNull()
+        ->and(\time() - $start)
+        ->toBeBetween(4,6);
+});
