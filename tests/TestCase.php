@@ -14,7 +14,13 @@ abstract class TestCase extends BaseTestCase
     {
         $this->f3 = \F3\Base::instance();
         $this->f3->ONERROR = function(Base $fw) {
-            throw new \Exception($fw->ERROR['text'], $fw->ERROR['code']);
+            if ($fw->EXCEPTION) {
+                throw $fw->EXCEPTION;
+            }
+            if ($fw->ERROR) {
+                throw new \Exception($fw->ERROR['text'], $fw->ERROR['code']);
+            }
+            throw new \Exception('unknow error');
         };
     }
 

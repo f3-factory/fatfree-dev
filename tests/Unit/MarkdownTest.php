@@ -2,6 +2,7 @@
 
 beforeEach(function () {
     $this->md = new \F3\Markdown();
+    $this->f3->HIGHLIGHT = true;
 });
 
 test('markdown', function ($case) {
@@ -13,6 +14,7 @@ test('markdown', function ($case) {
     );
 })->with([
     'Code Blocks',
+    'Code Fence',
     'Blockquotes with code blocks',
     'Nested blockquotes',
     'Horizontal rules',

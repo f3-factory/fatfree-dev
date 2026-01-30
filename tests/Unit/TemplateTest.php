@@ -242,7 +242,7 @@ test('<include> with extended hive', function () {
 
 test('escaped values', function () {
     $this->f3->set('string', '<test>');
-    $obj = new \stdclass;
+    $obj = new \stdClass();
     $obj->content = '<ok>';
     $this->f3->set('object', $obj);
     $this->f3->set('ENV.content', $obj->content);

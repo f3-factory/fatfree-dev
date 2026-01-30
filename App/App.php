@@ -47,7 +47,6 @@ class App implements AppInterface
             '/jig' => 'Jig',
             '/auth' => 'Auth',
             '/image' => 'Image',
-            '/web' => 'Web',
             '/ws' => 'WebSocket',
             '/geo' => 'Geo',
             '/google' => 'Google',

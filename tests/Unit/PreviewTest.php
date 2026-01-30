@@ -17,11 +17,15 @@ test('Auto-escaping disabled for non-html/xml documents', function () {
 });
 
 describe('resolve strings', function () {
-
     test('resolve sandbox', function () {
-        expect($this->tmpl->resolve($node='<p>{{ json_encode(array_keys(get_defined_vars())) }}</p>', []))
+        expect(
+            $this->tmpl->resolve(
+                $node = '<p>{{ json_encode(array_keys(get_defined_vars())) }}</p>',
+                [],
+            ),
+        )
             ->toBe('<p>[]</p>');
-        expect($this->tmpl->resolve($node, ['foo'=>'bar']))
+        expect($this->tmpl->resolve($node, ['foo' => 'bar']))
             ->toBe('<p>["foo"]</p>');
     });
 
@@ -45,7 +49,7 @@ describe('resolve strings', function () {
             ->toBe('');
     });
 
-    it($d1='persists results', function () {
+    it($d1 = 'persists results', function () {
         $this->f3->SEED = 'testing';
         $this->f3->set('string', '<test>');
         expect($this->tmpl->resolve('<p>{{ @string }}</p>', persist: true))
@@ -68,8 +72,8 @@ describe('resolve strings', function () {
                 $this->tmpl->resolve(
                     node: $node,
                     ttl: 10,
-                    persist: $persist
-                )
+                    persist: $persist,
+                ),
             )->toBe('<p>&lt;test&gt;</p>')
             ->and($cache->exists($hash))->toBeTruthy('cached');
         $mockedCache = new class() extends \F3\Cache {
@@ -92,14 +96,16 @@ describe('resolve strings', function () {
         'persist' => [true],
     ])->depends('it '.$d1);
 
-    it('escapes resolve hive', function(bool $escape, bool $hive, string $expected) {
+    it('escapes resolve hive', function (bool $escape, bool $hive, string $expected) {
         if ($hive)
             $this->f3->set('string', '<foo>');
-        expect($this->tmpl->resolve(
-            node: '<p>{{ @string }}</p>',
-            hive: $hive ? null : ['string' => '<foo>'],
-            escape: $escape
-        ))
+        expect(
+            $this->tmpl->resolve(
+                node: '<p>{{ @string }}</p>',
+                hive: $hive ? null : ['string' => '<foo>'],
+                escape: $escape,
+            ),
+        )
             ->toBe($expected);
     })->with([
         'escape' => [true, false, '<p>&lt;foo&gt;</p>'],
@@ -126,11 +132,11 @@ test('Tokenize expression', function ($expr, $eval) {
     ['@foo->@baz', '$foo->$baz'],
     ['@foo::bar.baz', '$foo::bar[\'baz\']'],
     ['@foo::bar[baz]', '$foo::bar[baz]'],
-    ['@foo::bar.@baz','$foo::bar.$baz'],
-    ['@foo::@baz','$foo::$baz'],
-    ['@foo::bar[@baz]','$foo::bar[$baz]'],
-    ['@foo.bar->baz','$foo[\'bar\']->baz'],
-    ['@foo.bar->@baz','$foo[\'bar\']->$baz'],
+    ['@foo::bar.@baz', '$foo::bar.$baz'],
+    ['@foo::@baz', '$foo::$baz'],
+    ['@foo::bar[@baz]', '$foo::bar[$baz]'],
+    ['@foo.bar->baz', '$foo[\'bar\']->baz'],
+    ['@foo.bar->@baz', '$foo[\'bar\']->$baz'],
     ['@foo->bar[@qux.baz]', '$foo->bar[$qux[\'baz\']]'],
     ['@foo->bar[@qux.@baz]', '$foo->bar[$qux.$baz]'],
     ['@foo()', '$foo()'],
@@ -141,17 +147,22 @@ test('Tokenize expression', function ($expr, $eval) {
     ['@foo.zip(@bar,@baz)', '$foo[\'zip\']($bar,$baz)'],
     ['@foo.zip(@bar,\'qux\')', '$foo[\'zip\']($bar,\'qux\')'],
     ['@foo.substr(@bar,3)', '$foo.substr($bar,3)'],
-    ['@foo->zip(@bar,\'qux\',123,[\'a\'=>\'hello\'])', '$foo->zip($bar,\'qux\',123,[\'a\'=>\'hello\'])'],
+    [
+        '@foo->zip(@bar,\'qux\',123,[\'a\'=>\'hello\'])',
+        '$foo->zip($bar,\'qux\',123,[\'a\'=>\'hello\'])',
+    ],
     ['@foo[@bar+1].baz', '$foo[$bar+1][\'baz\']'],
     ['@foo.baz[@bar+1]', '$foo[\'baz\'][$bar+1]'],
     ['@foo.\'hello, world\'', '$foo.\'hello, world\''],
-    ['@foo.bar.baz->qux.corge[@gra::@ult()](@arp)', '$foo[\'bar\'][\'baz\']->qux[\'corge\'][$gra::$ult()]($arp)'],
+    [
+        '@foo.bar.baz->qux.corge[@gra::@ult()](@arp)',
+        '$foo[\'bar\'][\'baz\']->qux[\'corge\'][$gra::$ult()]($arp)',
+    ],
     ['@foo | esc', '$this->esc($foo)'],
 ]);
 
 
 describe('Template filters', function () {
-
     it('lists all filters', function () {
         expect($this->tmpl->filter())
             ->toContain('esc')
@@ -160,7 +171,7 @@ describe('Template filters', function () {
             ->toContain('esc');
     });
 
-    it($t1='registers a new filter', function () {
+    it($t1 = 'registers a new filter', function () {
         $this->tmpl->filter('pick', [Helper::class, 'pick']);
         expect($this->tmpl->filter('pick'))
             ->toBe([Helper::class, 'pick'])
@@ -168,13 +179,16 @@ describe('Template filters', function () {
             ->toContain('pick');
     });
 
-    it($d2='resolves custom filter', function ($func, $expected) {
+    it($d2 = 'resolves custom filter', function ($func, $expected) {
         $this->tmpl->filter('pick', $func);
         expect($this->tmpl->token('@foo | pick'))
             ->toBe($expected);
     })->with([
         'string' => ['\Helper2::instance()->pick', '\Helper2::instance()->pick($foo)'],
-        'callable' => [[Helper::class, 'pick'], 'F3\Base::instance()->call($this->filter(\'pick\'),[$foo])']
+        'callable' => [
+            [Helper::class, 'pick'],
+            'F3\Base::instance()->call($this->filter(\'pick\'),[$foo])',
+        ],
     ])->depends('it '.$t1);
 
     it('resolves custom filter with arguments', function ($token, $expected) {
@@ -193,27 +207,27 @@ describe('Template filters', function () {
     })->with([
         'Double pipe OR condition' => [
             "@foo || @bar",
-            '$foo || $bar'
+            '$foo || $bar',
         ],
         'Ternary condition with filter' => [
             "(@foo && @bar)? @baz: @qux | esc",
-            '$this->esc(($foo && $bar)? $baz: $qux)'
+            '$this->esc(($foo && $bar)? $baz: $qux)',
         ],
         'Double pipe OR condition with filter' => [
             "(@foo || @bar) ? @baz : @qux | esc",
-            '$this->esc(($foo || $bar) ? $baz : $qux)'
+            '$this->esc(($foo || $bar) ? $baz : $qux)',
         ],
         'Multiple filter' => [
             "@foo | pick, esc",
-            '$this->esc(\Helper2::instance()->pick($foo))'
+            '$this->esc(\Helper2::instance()->pick($foo))',
         ],
         'Multiple filter, multiple arguments' => [
             "@foo, @bar | pick, esc",
-            '$this->esc(\Helper2::instance()->pick($foo, $bar))'
+            '$this->esc(\Helper2::instance()->pick($foo, $bar))',
         ],
         'Existing php function' => [
             "@foo | json_encode",
-            'json_encode($foo)'
+            'json_encode($foo)',
         ],
     ]);
 
@@ -222,18 +236,46 @@ describe('Template filters', function () {
         expect($this->tmpl->filter('json_encode'))
             ->toBe('\Helper::instance()->json');
     });
+});
 
+test('whitespace interpolation', function () {
+    $tmpl = <<<HTML
+title1: {{@myvar}}
+#
+title2: {{@myvar}}
+#
+HTML;
+    $withInterpolation = <<<HTML
+title1: foo
+#
+title2: foo
+#
+HTML;
+    $this->f3->set('myvar', 'foo');
+    $this->tmpl->interpolation(true); // default
+    expect($this->tmpl->resolve($tmpl))
+        ->toBe($withInterpolation, 'with interpolation');
+
+    $this->tmpl->interpolation(false);
+    $noInterpolation = <<<HTML
+title1: foo#
+title2: foo#
+HTML;
+    expect($this->tmpl->resolve($tmpl))
+        ->toBe($noInterpolation, 'no interpolation');
 });
 
 test('render cache', function ($val, $ttl, $sleep, $expected) {
     $this->f3->CACHE = 'folder=tmp/cache/';
     $file = 'templates/cache.htm';
     sleep($sleep);
-    expect($this->tmpl->render(
-        file: $file,
-        hive: ['value' => $val],
-        ttl: $ttl
-    ))->toBe($expected);
+    expect(
+        $this->tmpl->render(
+            file: $file,
+            hive: ['value' => $val],
+            ttl: $ttl,
+        ),
+    )->toBe($expected);
 })->with([
     'don\'t cache' => ['nope', 0, 0, 'nope'],
     'check no cache' => ['yes', 0, 0, 'yes'],
@@ -246,7 +288,6 @@ afterAll(function () {
     foreach (glob('tmp/cache/*') as $file)
         unlink($file);
 });
-
 
 
 class Helper

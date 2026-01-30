@@ -1,0 +1,37 @@
+<pre><code>code block
+</code></pre>
+
+<p>with hint</p>
+
+<pre><code><span class="open_tag">&lt;?php
+</span><span class="variable">$msg</span><span class="whitespace"> </span><span>=</span><span class="whitespace"> </span><span class="constant_encapsed_string">'hello world'</span><span>;</span><span class="whitespace">
+</span><span class="echo">echo</span><span class="whitespace"> </span><span class="variable">$msg</span><span>;</span><span class="whitespace">
+</span><span class="close_tag">?&gt;</span></code></pre>
+
+<pre><code><span class="ini_key">FOO</span>=<span class="ini_value">BAR</span>
+<span class="ini_key">USER</span>=<span class="ini_value">johndoe</span>
+<span class="ini_key">DEV</span>=<span class="ini_value">1</span>
+<span class="ini_key">BAR</span>=
+<span class="ini_section">[section]</span>
+<span class="ini_key">ENABLED</span>=<span class="ini_value">true</span>
+</code></pre>
+
+<pre><code><span class="xml_tag">&lt;div</span> <span class="xml_attr">class</span>=<span class="xml_data">"container"</span><span class="xml_tag">&gt;</span>
+	<span class="xml_tag">&lt;p</span><span class="xml_tag">&gt;</span>hello world<span class="xml_tag">&lt;/p</span><span class="xml_tag">&gt;</span>
+<span class="xml_tag">&lt;/div</span><span class="xml_tag">&gt;</span>
+</code></pre>
+
+<pre><code><span class="section">&lt;VirtualHost</span><span class="data"> *:8084</span><span class="section">&gt;</span>
+    <span class="directive">ServerAdmin</span><span class="data"> webmaster@localhost</span>
+    <span class="directive">DocumentRoot</span><span class="data"> &quot;/var/www/html&quot;</span>
+    <span class="directive">ServerName</span><span class="data"> localhost</span>
+    <span class="directive">SetEnvIf</span><span class="data"> Authorization &quot;(.*)&quot; HTTP_AUTHORIZATION=$1</span>
+    <span class="directive">ProxyPassMatch</span><span class="data"> ^/(.*\.php)$ &quot;fcgi://php:9000/var/www/html&quot; timeout=300 enablereuse=on</span>
+    <span class="section">&lt;Directory</span><span class="data"> &quot;/var/www/html/&quot;</span><span class="section">&gt;</span>
+        <span class="directive">AllowOverride</span><span class="data"> all</span>
+        <span class="directive">DirectoryIndex</span><span class="data"> index.html index.php</span>
+        <span class="directive">Options</span><span class="data"> Indexes FollowSymlinks MultiViews</span>
+        <span class="directive">Require</span><span class="data"> all granted</span>
+    <span class="section">&lt;/Directory</span><span class="section">&gt;</span>
+<span class="section">&lt;/VirtualHost</span><span class="section">&gt;</span>
+</code></pre>

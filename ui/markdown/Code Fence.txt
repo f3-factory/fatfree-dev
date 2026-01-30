@@ -1,0 +1,44 @@
+```
+code block
+```
+
+with hint
+
+``` php
+<?php
+$msg = 'hello world';
+echo $msg;
+?>
+```
+
+
+```ini
+FOO=BAR
+USER=johndoe
+DEV=1
+BAR=
+[section]
+ENABLED=true
+```
+
+```html
+<div class="container">
+	<p>hello world</p>
+</div>
+```
+
+```apache
+<VirtualHost *:8084>
+    ServerAdmin webmaster@localhost
+    DocumentRoot "/var/www/html"
+    ServerName localhost
+    SetEnvIf Authorization "(.*)" HTTP_AUTHORIZATION=$1
+    ProxyPassMatch ^/(.*\.php)$ "fcgi://php:9000/var/www/html" timeout=300 enablereuse=on
+    <Directory "/var/www/html/">
+        AllowOverride all
+        DirectoryIndex index.html index.php
+        Options Indexes FollowSymlinks MultiViews
+        Require all granted
+    </Directory>
+</VirtualHost>
+```
