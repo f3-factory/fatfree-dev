@@ -68,7 +68,8 @@ class Image extends BaseController
                 'Identicon<br />'.
                 '<img src="'.$src.'" title="Identicon" />',
             );
-            $f3->set('file', 'images/south-park.jpg');
+            $file = 'images/south-park.jpg';
+            $f3->set('file', $f3->UI.$file);
             $img = new \F3\Image($f3->get('file'), true);
             $test->expect(
                 $orig = \F3\View::instance()->render('image.htm'),
@@ -138,6 +139,32 @@ class Image extends BaseController
                 'title="'.$img->width().'x'.$img->height().'" />',
             );
             $test->expect(
+                $src = $f3->base64($img->undo()->brightness(150)->dump(), 'image/png'),
+                'Brightness<br />'.
+                '<img src="'.$src.'" '.
+                'title="'.$img->width().'x'.$img->height().'" />',
+            );
+            $test->expect(
+                $src = $f3->base64($img->undo()->contrast(-65)->dump(), 'image/png'),
+                'Contrast<br />'.
+                '<img src="'.$src.'" '.
+                'title="'.$img->width().'x'.$img->height().'" />',
+            );
+            $test->expect(
+                $src = $f3->base64($img->undo()->smooth(20)->dump(), 'image/png'),
+                'Smooth<br />'.
+                '<img src="'.$src.'" '.
+                'title="'.$img->width().'x'.$img->height().'" />',
+            );
+            $test->expect(
+                $src = $f3->base64($img->undo()
+                    ->scatter(6, 10)
+                    ->dump(), 'image/png'),
+                'Scatter<br />'.
+                '<img src="'.$src.'" '.
+                'title="'.$img->width().'x'.$img->height().'" />',
+            );
+            $test->expect(
                 $src = $f3->base64($img->undo()->blur(false,15)->dump(), 'image/png'),
                 'Blur<br />'.
                 '<img src="'.$src.'" '.
@@ -157,7 +184,7 @@ class Image extends BaseController
             );
             $test->expect(
                 $src = $f3->base64(
-                    $img->restore()->resize(120, 90, false)->dump(),
+                    $img->restore()->resize(120, 190, false)->dump(),
                     'image/png',
                 ),
                 'Resize (smaller)<br />'.
@@ -166,7 +193,7 @@ class Image extends BaseController
             );
             $test->expect(
                 $src = $f3->base64(
-                    $img->restore()->resize(200, 150, false)->dump(),
+                    $img->restore()->resize(200, 250, false)->dump(),
                     'image/png',
                 ),
                 'Resize (larger)<br />'.
@@ -201,7 +228,7 @@ class Image extends BaseController
             $ovr->resize(100, 38)->rotate(90);
             $test->expect(
                 $src = $f3->base64(
-                    $img->restore()->overlay($ovr, \F3\Image::POS_Right | \F3\Image::POS_Middle)
+                    $img->restore()->overlayImage($ovr, \F3\Image::POS_Right | \F3\Image::POS_Middle)
                         ->dump(),
                     'image/png',
                 ),
@@ -213,10 +240,50 @@ class Image extends BaseController
             $ovr->resize(100, 38)->rotate(45);
             $test->expect(
                 $src = $f3->base64(
-                    $img->restore()->overlay($ovr, [65, 25], 50)->dump(),
+                    $img->restore()->overlayImage($ovr, [65, 25], 50)->dump(),
                     'image/png',
                 ),
                 'Overlay, 50% transparency, manually aligned<br />'.
+                '<img src="'.$src.'" '.
+                'title="'.$img->width().'x'.$img->height().'" />',
+            );
+
+            $test->expect(
+                $src = $f3->base64($img->restore()->overlayText(
+                    string: 'FatFree',
+                    font: 'fonts/thunder.ttf',
+                )->dump(), 'image/png'),
+                'Overlay text<br />'.
+                '<img src="'.$src.'" '.
+                'title="'.$img->width().'x'.$img->height().'" />',
+            );
+
+            $test->expect(
+                $src = $f3->base64($img->restore()->blur(false, 10)->overlayText(
+                    string: 'FatFree'."\n".'is awesome!',
+                    font: 'fonts/thunder.ttf',
+                    fontSize: 12,
+                    lineHeightRatio: 1.25,
+                    align: [20, 20],
+                    color: 'fff',
+                    shadow: '000',
+                    shadowArgs: [2,2],
+                )->dump(), 'image/png'),
+                'Overlay text, multiline<br />'.
+                '<img src="'.$src.'" '.
+                'title="'.$img->width().'x'.$img->height().'" />',
+            );
+            $test->expect(
+                $src = $f3->base64($img->restore()->overlayText(
+                    string: 'FatFree',
+                    font: 'fonts/thunder.ttf',
+                    fontSize: 38,
+                    align: \F3\Image::POS_Left | \F3\Image::POS_Bottom,
+                    color: '250,250,250',
+                    shadow: 'FF0000',
+                    shadowArgs: [5, 5],
+                )->dump(), 'image/png'),
+                'Overlay text with shadow<br />'.
                 '<img src="'.$src.'" '.
                 'title="'.$img->width().'x'.$img->height().'" />',
             );
