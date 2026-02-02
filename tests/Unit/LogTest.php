@@ -36,6 +36,30 @@ describe('Log', function () {
             ->toContain('123.123.123.123');
     });
 
+    it('splits multiline logs entries', function () {
+        $this->log->write('foo'."\n".'bar'."\n".'baz', 'Y');
+        $contents = file($this->file);
+        expect(count($contents))
+            ->toBe(3)
+            ->and($contents[0])->toBe("2026 foo\n")
+            ->and($contents[1])->toBe("2026 bar\n")
+            ->and($contents[2])->toBe("2026 baz\n");
+    });
+
+    it('preserves multiline logs entries', function () {
+        $name = 'test_2.log';
+        $file = $this->f3->LOGS.$name;
+        $log = new \F3\Log(file: $name, splitMultiline: false);
+        $log->write('foo'."\n".'bar'."\n".'baz', 'Y');
+        $contents = file($file);
+        expect(count($contents))
+            ->toBe(3)
+            ->and($contents[0])->toBe("2026 foo\n")
+            ->and($contents[1])->toBe("bar\n")
+            ->and($contents[2])->toBe("baz\n");
+        $log->erase();
+    });
+
     afterEach(function () {
         $this->log->erase();
         expect(is_file($this->file))->toBeFalse();
