@@ -74,10 +74,6 @@ services:
       - traefik.http.routers.php73.rule=Host(`f3.php73.localhost`)
       - traefik.http.routers.php73.service=php73
       - traefik.http.services.php73.loadbalancer.server.port=8073
-#     php 7.2
-      - traefik.http.routers.php72.rule=Host(`f3.php72.localhost`)
-      - traefik.http.routers.php72.service=php72
-      - traefik.http.services.php72.loadbalancer.server.port=8072
   nginx:
     image: nginx:latest
     container_name: '${COMPOSE_PROJECT_NAME}-nginx'
@@ -118,10 +114,6 @@ services:
       - traefik.http.routers.ngx-php74.rule=Host(`f3.nginx.php74.localhost`)
       - traefik.http.routers.ngx-php74.service=php74
       - traefik.http.services.ngx-php74.loadbalancer.server.port=8074
-#     php 7.2
-      - traefik.http.routers.ngx-php72.rule=Host(`f3.nginx.php72.localhost`)
-      - traefik.http.routers.ngx-php72.service=php72
-      - traefik.http.services.ngx-php72.loadbalancer.server.port=8072
   php85:
     <<: *php
     build:
@@ -188,17 +180,8 @@ services:
     environment:
       <<: *php_env
       PHP_IDE_CONFIG: serverName=f3.php73.localhost
-  php72:
-    <<: *php
-    platform: linux/x86_64
-    build:
-      context: ./docker/bin/php72
-    container_name: '${COMPOSE_PROJECT_NAME}-php72'
-    environment:
-      <<: *php_env
-      PHP_IDE_CONFIG: serverName=f3.php72.localhost
   mysql:
-    image: mysql:5.7
+    image: mysql
     container_name: '${COMPOSE_PROJECT_NAME}-mysql'
     restart: 'always'
     ports:

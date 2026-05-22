@@ -12,7 +12,7 @@ Currently included:
 - Nginx
 - Memcached
 - Redis
-- MySQL 5.7
+- MySQL
 - PostgreSQL
 - SQL Server
 - PHP-FPM 8.5
@@ -23,7 +23,6 @@ Currently included:
 - PHP-FPM 8.0
 - PHP-FPM 7.4
 - PHP-FPM 7.3
-- PHP-FPM 7.2
 
 The services are bind to your local machine network using [Traefik](https://doc.traefik.io/traefik/). That way you'll have nice domain names for each php version with zero further configuration. 
 Open localhost:8080 for reviewing the current traefik configuration.
