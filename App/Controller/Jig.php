@@ -126,6 +126,16 @@ class Jig extends BaseController
             $movie->get('year') == 2011,
             'Parameterized query (alternative named)',
         );
+        $movie->load(
+            [
+                'isset(@title) && in_array(@title, :titles)',
+                ':titles' => ['The River Murders', 'Donnie Brasco',],
+            ],
+        );
+        $test->expect(
+            $movie->loaded() == 2,
+            'array IN search',
+        );
         $movie->load();
         $test->expect(
             $movie->count() == 2,

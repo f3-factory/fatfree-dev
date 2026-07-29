@@ -27,7 +27,7 @@ Currently included:
   - SQL Server
 - PHP Versions
   - PHP-FPM 8.4
-  - PHP-FPM 8.5.beta-2
+  - PHP-FPM 8.5
 
 The services are bind to your local machine network using [Traefik](https://doc.traefik.io/traefik/). That way you'll have nice domain names for each php version with zero further configuration. 
 Open http://localhost:8080 for reviewing the current traefik configuration.
