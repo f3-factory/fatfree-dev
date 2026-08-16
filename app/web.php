@@ -133,6 +133,18 @@ class Web extends Controller {
 			$filler=nl2br(wordwrap($web->filler(5,20,FALSE))),
 			'Filler (random):<br />'.$filler
 		);
+		// Header replacement is case-insensitive
+		$headers=['content-type: text/html'];
+		$web->subst($headers,'Content-Type: application/json');
+		$test->expect(
+			count($headers)==1 && $headers[0]=='Content-Type: application/json',
+			'subst() replaces headers case-insensitively'
+		);
+		// URL scheme validation prevents SSRF
+		$test->expect(
+			$web->request('httpx://evil.com')===FALSE,
+			'Invalid URL scheme rejected'
+		);
 		$f3->clear('CACHE');
 		$f3->set('ESCAPE',FALSE);
 		header_remove();

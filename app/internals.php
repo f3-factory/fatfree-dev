@@ -173,6 +173,19 @@ class Internals extends Controller {
 				'['.$locale.']: Format time full: '.$date
 			);
 		}
+		// IP spoofing prevention
+		$_SERVER['REMOTE_ADDR']='192.168.1.1';
+		$f3->set('HEADERS',['X-Forwarded-For'=>'10.0.0.1']);
+		$f3->set('TRUSTED',[]);
+		$test->expect(
+			$f3->ip()=='192.168.1.1',
+			'IP ignores X-Forwarded-For without trusted proxies'
+		);
+		$f3->set('TRUSTED',['192.168.1.1']);
+		$test->expect(
+			$f3->ip()=='10.0.0.1',
+			'IP honors X-Forwarded-For from trusted proxies'
+		);
 		$f3->set('results',$test->results());
 	}
 
