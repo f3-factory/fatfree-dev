@@ -32,6 +32,10 @@ class Internals extends Controller {
 			'Split comma-, semi-colon, or pipe-separated string'
 		);
 		$test->expect(
+			$f3->split('0')==['0'],
+			'Split preserves falsy string "0"'
+		);
+		$test->expect(
 			$f3->stringify(9)==='9' &&
 			$f3->stringify(1.5)==='1.5' &&
 			$f3->stringify(-7)==='-7' &&
