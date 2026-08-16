@@ -598,6 +598,13 @@ class SQL extends Controller {
 					$ticket->count()==0,
 					'All records erased'
 				);
+				// Nested begin() returns FALSE without error
+				$db->begin();
+				$test->expect(
+					$db->begin()===FALSE,
+					'Nested begin() returns FALSE ('.$db_key.')'
+				);
+				$db->rollback();
 			}
 		}
 
