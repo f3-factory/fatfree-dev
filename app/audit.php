@@ -166,6 +166,14 @@ class Audit extends Controller {
             !$audit->mac('52:74:F2.B1:A8:7F'),
             'MAC address'
         );
+		$test->expect(
+			$audit->isai('GPTBot/1.0') &&
+			$audit->isai('ClaudeBot/1.0') &&
+			$audit->isai('Mozilla/5.0 (compatible; ai-crawler/1.0)') &&
+			!$audit->isai('Mozilla/5.0 (safari-ai-enabled)') &&
+			!$audit->isai('MyApp/1.0 ai-enhanced'),
+			'AI detection without false positives'
+		);
 		$f3->set('results',$test->results());
 	}
 
